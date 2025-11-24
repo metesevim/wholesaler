@@ -10,8 +10,7 @@ datasource db {
 model User {
   id           Int      @id @default(autoincrement())
   name         String
-  username     String   @unique
-  passwordHash String
+  password String
   role         String   // "admin" | "employee"
   createdAt    DateTime @default(now())
 }
