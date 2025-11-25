@@ -10,17 +10,17 @@ export const register = async (req, res) => {
         const { username, password, role } = req.body;
 
         if (!username  || !password || !role)
-            return res.status(400).json({ error: "Please enter all required fields" });
+            return res.status(400).json({ error: "Please enter all required fields." });
 
         // Checking userName
         const existing = await prisma.user.findUnique({ where: { username } });
         if (existing) {
-            return res.status(400).json({ error: "User already exists" });
+            return res.status(400).json({ error: "User already exists." });
         }
 
         // Checking role
         if (!["Admin", "Employee"].includes(role)) {
-            return res.status(400).json({ error: "Role must be Admin or Employee" });
+            return res.status(400).json({ error: "Role must be Admin or Employee." });
         }
 
         // Password hashing
@@ -36,7 +36,7 @@ export const register = async (req, res) => {
         });
 
         // 3) Output
-        res.json({ message: "User created", user });
+        res.json({ message: "User created.", user });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -52,17 +52,18 @@ export const login = async (req, res) => {
             where: { username },
         });
 
-        if (!user) return res.status(400).json({ error: "User not found" });
+        if (!user) return res.status(400).json({ error: "User not found." });
 
         // 2) Checking if pass is true
         const isMatch = await bcrypt.compare(password, user.password);
 
-        if (!isMatch) return res.status(400).json({ error: "Wrong password" });
+        if (!isMatch) return res.status(400).json({ error: "Wrong password." });
 
         // 3) Creating admin token
         const token = jwt.sign(
             { userId: user.id, role: user.role },
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" } // Expires after 1 week.
         );
 
         res.json({ message: "Login successful", token });
