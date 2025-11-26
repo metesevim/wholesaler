@@ -28,4 +28,9 @@ app.get("/db-test", async (req, res) => {
     }
 });
 
+import customerRoutes from "./routes/customerRoutes.js";
+
+app.use("/customers", customerRoutes);
+
+
 module.exports = app;

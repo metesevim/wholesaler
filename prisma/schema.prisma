@@ -14,3 +14,8 @@ model User {
   role String // "admin" | "employee"
   createdAt DateTime @default(now())
 }
+
+enum Role {
+Admin
+Employee
+}
