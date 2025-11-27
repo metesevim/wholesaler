@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, requireRole } from "../middleware/authMiddleware.js";
+import { authJWT, requireRole } from "../middleware/authMiddleware.js";
 // import { createCustomer, getCustomers } vs...
 
 const router = express.Router();
