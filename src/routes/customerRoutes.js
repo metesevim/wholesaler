@@ -5,14 +5,14 @@ import { authJWT, requireRole } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // Get customer from DB (All roles)
-router.get("/", authenticate, (req, res) => {
+router.get("/", authJWT, (req, res) => {
     res.json({ message: "Bütün müşterileri burada döndüreceğiz" });
 });
 
 // Adding customer (Only Admin)
 router.post(
     "/",
-    authenticate,
+    authJWT,
     requireRole("Admin"),
     (req, res) => {
         res.json({ message: "Yeni müşteri eklendi (dummy şimdilik)" });
