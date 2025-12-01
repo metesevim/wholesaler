@@ -1,7 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
-
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+export default prisma;
 
-module.exports = prisma;
-
-//const prisma = require("../prisma/client"); ile DB'ye erişmeyi sağlıyor.
+//import prisma = require("../prisma/client"); ile DB'ye erişmeyi sağlıyor.

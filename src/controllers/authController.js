@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-const prisma = new PrismaClient();
+// use shared prisma client
+import prisma from "../prisma/client.js";
+import { PERMISSIONS } from "../constants/permissions.js";
 
 // REGISTER
 export const register = async (req, res) => {
@@ -26,12 +26,16 @@ export const register = async (req, res) => {
         // Password hashing
         const hashedPass = await bcrypt.hash(password, 10);
 
+        // By default: Admin gets all permissions, Employee gets none.
+        const defaultPermissions = role === "Admin" ? PERMISSIONS : [];
+
         // 2) Saving user to Prisma (DB)
         const user = await prisma.user.create({
             data: {
                 username,
                 password: hashedPass,
                 role,
+                permissions: defaultPermissions, // assumes user model has a string[] field 'permissions'
             },
         });
 
@@ -67,6 +71,34 @@ export const login = async (req, res) => {
         );
 
         res.json({ message: "Login successful", token });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// ADMIN: set permissions for a given user (Admin-only route)
+export const setPermissions = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const { permissions } = req.body; // expect array of permission keys
+
+        if (!Array.isArray(permissions)) {
+            return res.status(400).json({ error: "permissions must be an array." });
+        }
+
+        // Validate provided permissions
+        const invalid = permissions.filter((p) => !PERMISSIONS.includes(p));
+        if (invalid.length) {
+            return res.status(400).json({ error: `Invalid permissions: ${invalid.join(", ")}` });
+        }
+
+        // Update user
+        const updated = await prisma.user.update({
+            where: { id: targetUserId },
+            data: { permissions },
+        });
+
+        res.json({ message: "Permissions updated.", user: updated });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

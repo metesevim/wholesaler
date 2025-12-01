@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../prisma/client.js";
 
 // JWT CHECKER
 // Valid: respond user info.
@@ -30,11 +28,12 @@ export const authJWT = async (req, res, next) => {
             return res.status(401).json({ error: "Kullanıcı bulunamadı" });
         }
 
-        // 4) İsteğe user bilgisini ekle
+        // 4) İsteğe user bilgisini ekle (include permissions if present)
         req.user = {
             id: user.id,
             name: user.name,
             role: user.role,
+            permissions: user.permissions || [], // expects a string[] field in DB
         };
 
         // 5) Bir sonraki middleware'e/geçişe devam et
@@ -58,6 +57,26 @@ export const requireRole = (...allowedRoles) => {
 
         if (!allowedRoles.includes(userRole)) {
             return res.status(403).json({ error: "You don't have the permission." });
+        }
+
+        next();
+    };
+};
+
+// NEW: Permission checker
+export const requirePermission = (permission) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({ error: "Needs authentication." });
+        }
+
+        // Admin bypasses permission checks
+        if (req.user.role === "Admin") return next();
+
+        const userPermissions = req.user.permissions || [];
+
+        if (!userPermissions.includes(permission)) {
+            return res.status(403).json({ error: "You don't have the required permission." });
         }
 
         next();

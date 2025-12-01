@@ -1,8 +1,10 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-const prisma = require("./prisma/client");
+import express from "express";
+import cors from "cors";
+import customerRoutes from "./routes/customerRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 const app = express();
 
@@ -10,27 +12,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Basit test endpoint
-app.get("/health", (req, res) => {
-    res.json({ status: "ok", message: "Wholesaler API is running 🚀" });
-});
-
-app.get("/db-test", async (req, res) => {
-    try {
-        const users = await prisma.user.findMany(); // tablo boşsa bile çalışır
-        res.json({
-            status: "ok",
-            userCount: users.length,
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ status: "error", message: "DB error" });
-    }
-});
-
-import customerRoutes from "./routes/customerRoutes.js";
-
+// Routes
 app.use("/customers", customerRoutes);
+app.use("/admin", adminRoutes);
 
+// TEST route
+app.get("/health", (req, res) => {
+    res.json({
+        status: "ok",
+        message: "Wholesaler API is running.",
+    });
+});
 
-module.exports = app;
+// Export app for server or tests
+export default app;
