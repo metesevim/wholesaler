@@ -46,6 +46,53 @@ export const register = async (req, res) => {
     }
 };
 
+// NEW: Admin creates an Employee account
+export const createEmployee = async (req, res) => {
+    try {
+        const { username, password, permissions } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({ error: "username and password are required." });
+        }
+
+        // Check username uniqueness
+        const existing = await prisma.user.findUnique({ where: { username } });
+        if (existing) {
+            return res.status(400).json({ error: "User already exists." });
+        }
+
+        // Validate optional permissions array if provided
+        let finalPermissions = [];
+        if (permissions !== undefined) {
+            if (!Array.isArray(permissions)) {
+                return res.status(400).json({ error: "permissions must be an array if provided." });
+            }
+            const invalid = permissions.filter((p) => !PERMISSIONS.includes(p));
+            if (invalid.length) {
+                return res.status(400).json({ error: `Invalid permissions: ${invalid.join(", ")}` });
+            }
+            finalPermissions = permissions;
+        }
+
+        // Hash password
+        const hashedPass = await bcrypt.hash(password, 10);
+
+        // Create employee with role fixed to 'Employee'
+        const user = await prisma.user.create({
+            data: {
+                username,
+                password: hashedPass,
+                role: "Employee",
+                permissions: finalPermissions,
+            },
+        });
+
+        res.status(201).json({ message: "Employee created.", user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 // LOGIN
 export const login = async (req, res) => {
     try {

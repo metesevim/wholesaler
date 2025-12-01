@@ -31,7 +31,7 @@ export const authJWT = async (req, res, next) => {
         // 4) İsteğe user bilgisini ekle (include permissions if present)
         req.user = {
             id: user.id,
-            name: user.name,
+            username: user.username,
             role: user.role,
             permissions: user.permissions || [], // expects a string[] field in DB
         };
