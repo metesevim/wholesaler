@@ -14,6 +14,7 @@ export const PERMISSIONS = [
     "VIEW_ORDERS",
     "EDIT_ORDERS",
     "CREATE_ORDER",
+    //0-1-2 şeklinde kodla
 ];
 
 export default PERMISSIONS;

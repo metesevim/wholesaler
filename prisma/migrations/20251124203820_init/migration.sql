@@ -5,7 +5,7 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "role" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Istanbul'),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

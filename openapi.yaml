@@ -1,0 +1,446 @@
+openapi: 3.0.0
+info:
+  title: Wholesaler API
+  version: 1.0.0
+  description: API for managing wholesaler operations including authentication, customer management, and admin functions
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.wholesaler.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Authentication
+    description: User registration and login
+  - name: Customers
+    description: Customer management operations
+  - name: Admin
+    description: Administrative operations (Admin only)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User ID
+          example: 1
+        username:
+          type: string
+          description: Username
+          example: john_doe
+        password:
+          type: string
+          description: Hashed password (not returned in responses)
+          format: password
+        role:
+          type: string
+          enum: [Admin, Employee]
+          description: User role
+          example: Employee
+        permissions:
+          type: array
+          items:
+            type: string
+          description: Array of permission strings
+          example: ["VIEW_CUSTOMERS", "EDIT_CUSTOMERS"]
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+
+    Permission:
+      type: string
+      enum:
+        - VIEW_CUSTOMERS
+        - EDIT_CUSTOMERS
+        - CREATE_CUSTOMER
+        - VIEW_SUPPLIERS
+        - EDIT_SUPPLIERS
+        - CREATE_SUPPLIER
+        - VIEW_PRODUCTS
+        - EDIT_PRODUCTS
+        - CREATE_PRODUCT
+        - VIEW_ORDERS
+        - EDIT_ORDERS
+        - CREATE_ORDER
+      description: Available permissions
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: john_doe
+        password:
+          type: string
+          format: password
+          example: password123
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+        - role
+      properties:
+        username:
+          type: string
+          example: john_doe
+        password:
+          type: string
+          format: password
+          example: password123
+        role:
+          type: string
+          enum: [Admin, Employee]
+          example: Employee
+
+    CreateEmployeeRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: jane_smith
+        password:
+          type: string
+          format: password
+          example: password123
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+          description: Optional array of permissions to assign
+          example: ["VIEW_CUSTOMERS", "CREATE_CUSTOMER"]
+
+    SetPermissionsRequest:
+      type: object
+      required:
+        - permissions
+      properties:
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+          description: Array of permissions to set
+          example: ["VIEW_CUSTOMERS", "EDIT_CUSTOMERS", "VIEW_SUPPLIERS"]
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login successful
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          description: JWT token for authentication
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: User not found.
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: gayet iyi
+        message:
+          type: string
+          example: Wholesaler API is running.
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the API is running
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new user account with username, password, and role. Admin users get all permissions by default, Employee users start with no permissions.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User created.
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - missing fields or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Login with username and password
+      description: Authenticate user and receive a JWT token. Token is valid for 1 day.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: User not found or wrong password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /customers:
+    get:
+      summary: Get all customers
+      description: Retrieve all customers from the database. Requires VIEW_CUSTOMERS permission. Admin users bypass permission check.
+      tags:
+        - Customers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all customers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bütün müşterileri burada döndüreceğiz
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - requires VIEW_CUSTOMERS permission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Add a new customer
+      description: Create a new customer in the database. Requires EDIT_CUSTOMERS permission. Admin users bypass permission check.
+      tags:
+        - Customers
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Customer data (schema to be implemented)
+      responses:
+        '200':
+          description: Customer added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Yeni müşteri eklendi (dummy şimdilik)
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - requires EDIT_CUSTOMERS permission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/users:
+    post:
+      summary: Create a new employee (Admin only)
+      description: Admin endpoint to create a new employee account with optional permissions. Employee role is assigned automatically.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmployeeRequest'
+      responses:
+        '201':
+          description: Employee created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Employee created.
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - missing fields, user exists, or invalid permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - requires Admin role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/users/{id}/permissions:
+    put:
+      summary: Update user permissions (Admin only)
+      description: Admin endpoint to set or update permissions for a specific user.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPermissionsRequest'
+      responses:
+        '200':
+          description: Permissions updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Permissions updated.
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - invalid permissions format or invalid permission values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - requires Admin role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+

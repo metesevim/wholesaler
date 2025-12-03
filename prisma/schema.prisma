@@ -13,10 +13,166 @@ model User {
   password String
   role Role
   permissions String[] @default([])
+
+  // Relationships
+  adminInventory AdminInventory?
   createdAt DateTime @default(now())
 }
 
 enum Role {
-Admin
-Employee
+  Admin
+  Employee
 }
+
+// ============= CUSTOMERS =============
+model Customer {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  phone String?
+  address String?
+  city String?
+  country String?
+
+  // Relationship to customer inventory
+  inventory CustomerInventory?
+
+  // Orders from this customer
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============= ADMIN INVENTORY (Warehouse) =============
+model AdminInventory {
+  id Int @id @default(autoincrement())
+
+  // Link to user (only one admin can have main inventory, but employees can manage it)
+  userId Int @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Items in admin inventory
+  items AdminInventoryItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminInventoryItem {
+  id Int @id @default(autoincrement())
+
+  // Link to admin inventory
+  adminInventoryId Int
+  adminInventory AdminInventory @relation(fields: [adminInventoryId], references: [id], onDelete: Cascade)
+
+  // Item details
+  name String
+  description String?
+
+  // Mass information (quantity, weight, volume)
+  quantity Int @default(0)        // Count of items
+  unit String @default("piece")   // "piece", "kg", "liter", etc.
+
+  // Image URL/path
+  imageUrl String?
+
+  // Price info
+  pricePerUnit Float? // Price per unit for ordering
+
+  // Reference to items in customer inventory (for tracking)
+  customerItems CustomerInventoryItem[] @relation("AdminItemToCustomerItem")
+
+  // Reference to order items (to reduce stock)
+  orderItems OrderItem[] @relation("AdminItemToOrderItem")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============= CUSTOMER INVENTORY =============
+model CustomerInventory {
+  id Int @id @default(autoincrement())
+
+  // Link to customer
+  customerId Int @unique
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Items assigned to this customer (from admin inventory, without mass info initially)
+  items CustomerInventoryItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomerInventoryItem {
+  id Int @id @default(autoincrement())
+
+  // Link to customer inventory
+  customerInventoryId Int
+  customerInventory CustomerInventory @relation(fields: [customerInventoryId], references: [id], onDelete: Cascade)
+
+  // Link to admin inventory item (the source)
+  adminItemId Int
+  adminItem AdminInventoryItem @relation("AdminItemToCustomerItem", fields: [adminItemId], references: [id], onDelete: Cascade)
+
+  // No mass info stored here - items are just "available"
+  // Mass info is provided when creating an order
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============= ORDERS =============
+model Order {
+  id Int @id @default(autoincrement())
+
+  // Link to customer
+  customerId Int
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  // Order status
+  status OrderStatus @default(PENDING)
+
+  // Order items (what was ordered)
+  items OrderItem[]
+
+  // Order totals
+  totalAmount Float @default(0)
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  // Link to order
+  orderId Int
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Link to admin inventory item (to track and reduce stock)
+  adminItemId Int
+  adminItem AdminInventoryItem @relation("AdminItemToOrderItem", fields: [adminItemId], references: [id])
+
+  // Item details at time of order
+  itemName String
+  unit String  // "piece", "kg", "liter", etc.
+  quantity Float  // Amount ordered in the specified unit
+  pricePerUnit Float?
+  totalPrice Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
