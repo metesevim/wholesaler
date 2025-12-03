@@ -64,6 +64,9 @@ router.get("/", authJWT, requirePermission("VIEW_CUSTOMERS"), getAllCustomers);
  *                 type: string
  *               country:
  *                 type: string
+ *               iban:
+ *                 type: string
+ *                 description: International Bank Account Number
  *               itemIds:
  *                 type: array
  *                 items:
@@ -140,6 +143,9 @@ router.get("/:id", authJWT, requirePermission("VIEW_CUSTOMERS"), getCustomerById
  *                 type: string
  *               country:
  *                 type: string
+ *               iban:
+ *                 type: string
+ *                 description: International Bank Account Number
  *     responses:
  *       200:
  *         description: Customer updated

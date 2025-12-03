@@ -13,6 +13,7 @@ model User {
   password String
   role Role
   permissions String[] @default([])
+  iban String?  // IBAN for employee/user payments
 
   // Relationships
   adminInventory AdminInventory?
@@ -33,6 +34,7 @@ model Customer {
   address String?
   city String?
   country String?
+  iban String?  // IBAN for customer payments
 
   // Relationship to customer inventory
   inventory CustomerInventory?

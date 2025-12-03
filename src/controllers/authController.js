@@ -49,7 +49,7 @@ export const register = async (req, res) => {
 // NEW: Admin creates an Employee account
 export const createEmployee = async (req, res) => {
     try {
-        const { username, password, permissions } = req.body;
+        const { username, password, permissions, iban } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ error: "username and password are required." });
@@ -84,6 +84,7 @@ export const createEmployee = async (req, res) => {
                 password: hashedPass,
                 role: "Employee",
                 permissions: finalPermissions,
+                iban,
             },
         });
 
@@ -146,6 +147,46 @@ export const setPermissions = async (req, res) => {
         });
 
         res.json({ message: "Permissions updated.", user: updated });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// ============= UPDATE USER INFORMATION =============
+/**
+ * Update user information (Admin only)
+ * Can update IBAN and other user details
+ */
+export const updateUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { iban } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required." });
+        }
+
+        // Find user
+        const user = await prisma.user.findUnique({
+            where: { id: parseInt(userId) },
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        // Update user information
+        const updatedUser = await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: {
+                ...(iban && { iban }),
+            },
+        });
+
+        res.json({
+            message: "User information updated successfully.",
+            user: updatedUser,
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

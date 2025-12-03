@@ -6,5 +6,5 @@ coverage/
 npm-debug.log
 .DS_Store
 .prisma/
-
 /src/generated/prisma
+mds/

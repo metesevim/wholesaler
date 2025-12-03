@@ -1,6 +1,6 @@
 import express from "express";
 import { authJWT, requireRole } from "../middleware/authMiddleware.js";
-import { setPermissions, createEmployee } from "../controllers/authController.js";
+import { setPermissions, createEmployee, updateUser } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -122,5 +122,79 @@ router.post("/users", authJWT, requireRole("Admin"), createEmployee);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.put("/users/:id/permissions", authJWT, requireRole("Admin"), setPermissions);
+
+/**
+ * @swagger
+ * /admin/users/{userId}:
+ *   put:
+ *     summary: Update user information (Admin only)
+ *     description: Admin endpoint to update user information such as IBAN for employees.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               iban:
+ *                 type: string
+ *                 example: DE89370400440532013000
+ *                 description: International Bank Account Number
+ *     responses:
+ *       200:
+ *         description: User information updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User information updated successfully.
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Forbidden - requires Admin role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.put("/users/:userId", authJWT, requireRole("Admin"), updateUser);
 
 export default router;

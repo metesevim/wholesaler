@@ -7,7 +7,7 @@ import prisma from "../prisma/client.js";
  */
 export const createCustomer = async (req, res) => {
     try {
-        const { name, email, phone, address, city, country, itemIds } = req.body;
+        const { name, email, phone, address, city, country, iban, itemIds } = req.body;
 
         if (!name || !email) {
             return res.status(400).json({ error: "Name and email are required." });
@@ -38,6 +38,7 @@ export const createCustomer = async (req, res) => {
                 address,
                 city,
                 country,
+                iban,
                 inventory: {
                     create: {
                         // Assign items to customer inventory (from admin inventory)
@@ -138,7 +139,7 @@ export const getCustomerById = async (req, res) => {
 export const updateCustomer = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, email, phone, address, city, country } = req.body;
+        const { name, email, phone, address, city, country, iban } = req.body;
 
         const customer = await prisma.customer.update({
             where: { id: parseInt(id) },
@@ -149,6 +150,7 @@ export const updateCustomer = async (req, res) => {
                 ...(address && { address }),
                 ...(city && { city }),
                 ...(country && { country }),
+                ...(iban && { iban }),
             },
             include: {
                 inventory: {
