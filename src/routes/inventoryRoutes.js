@@ -1,18 +1,12 @@
 import express from "express";
 import { authJWT, requireRole, requirePermission } from "../middleware/authMiddleware.js";
-import {
-    createAdminInventoryItem,
-    getAllAdminInventoryItems,
-    getAdminInventoryItemById,
-    updateAdminInventoryItem,
-    deleteAdminInventoryItem,
-    adjustInventoryQuantity,
-    getInventorySummary,
-} from "../controllers/inventoryController.js";
+import {createAdminInventoryItem, getAllAdminInventoryItems, getAdminInventoryItemById,
+    updateAdminInventoryItem, deleteAdminInventoryItem, adjustInventoryQuantity,
+    getInventorySummary} from "../controllers/inventoryController.js";
 
 const router = express.Router();
 
-// ============= ADMIN INVENTORY MANAGEMENT =============
+//Admin Inventory Management
 
 /**
  * @swagger

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import prisma from "../prisma/client.js";
 
-// JWT CHECKER
+// JWT checker middleware
 // Valid: respond user info.
 // Invalid: 401.
 export const authJWT = async (req, res, next) => {
@@ -19,16 +19,17 @@ export const authJWT = async (req, res, next) => {
         // 3) Verify token
         const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-        // payload userId taşıyor
+        // 4) Find user by id from payload
         const user = await prisma.user.findUnique({
             where: { id: payload.userId },
         });
 
+        // 5) If user not found
         if (!user) {
             return res.status(401).json({ error: "Kullanıcı bulunamadı" });
         }
 
-        // 4) İsteğe user bilgisini ekle (include permissions if present)
+        // 6) Attach user info to req object
         req.user = {
             id: user.id,
             username: user.username,
@@ -36,7 +37,7 @@ export const authJWT = async (req, res, next) => {
             permissions: user.permissions || [], // expects a string[] field in DB
         };
 
-        // 5) Bir sonraki middleware'e/geçişe devam et
+        // 7) Proceed to next middleware
         next();
     } catch (err) {
         console.error("Auth error:", err);
@@ -44,8 +45,8 @@ export const authJWT = async (req, res, next) => {
     }
 };
 
-//ROLE CHECKER
-//requireRole("Admin") or requireRole("Admin", "Employee")
+//Role checker middleware
+//requireRole("Admin"). This is used in adminRoutes.js
 export const requireRole = (...allowedRoles) => {
     return (req, res, next) => {
         // Checking if authJWT worked.
@@ -63,7 +64,7 @@ export const requireRole = (...allowedRoles) => {
     };
 };
 
-// NEW: Permission checker
+//Permission checker middleware
 export const requirePermission = (permission) => {
     return (req, res, next) => {
         if (!req.user) {

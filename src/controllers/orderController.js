@@ -1,30 +1,30 @@
 import prisma from "../prisma/client.js";
 
-// ============= CREATE ORDER =============
-/**
- * Create an order from customer inventory items
- * Automatically reduces quantities from admin inventory
- */
+//Create an order from customer inventory items
+//Automatically reduces quantities from admin inventory
+
 export const createOrder = async (req, res) => {
     try {
         const { customerId, items, notes } = req.body;
 
+        // 1) Validate input
         if (!customerId || !items || items.length === 0) {
             return res.status(400).json({
                 error: "customerId and items array are required.",
             });
         }
 
-        // Verify customer exists
+        // 2) Check if customer exists
         const customer = await prisma.customer.findUnique({
             where: { id: parseInt(customerId) },
         });
 
+        // 3) If customer not found
         if (!customer) {
             return res.status(404).json({ error: "Customer not found." });
         }
 
-        // Verify all items exist and are in customer inventory
+        // 4) Verify all items exist and are in customer inventory
         const customerInventory = await prisma.customerInventory.findUnique({
             where: { customerId: parseInt(customerId) },
             include: {
@@ -32,24 +32,26 @@ export const createOrder = async (req, res) => {
             },
         });
 
+        // 5) If customer inventory not found
         if (!customerInventory) {
             return res.status(400).json({ error: "Customer inventory not found." });
         }
 
-        // Validate each item
+        // 6) Validate each item
         const validatedItems = [];
         let totalAmount = 0;
 
         for (const orderItem of items) {
             const { adminItemId, quantity, unit } = orderItem;
 
+            // 1) Check required fields
             if (!adminItemId || !quantity || !unit) {
                 return res.status(400).json({
                     error: "Each item must have adminItemId, quantity, and unit.",
                 });
             }
 
-            // Check if item is in customer inventory
+            // 2) Check if item is in customer inventory
             const customerItem = customerInventory.items.find((ci) => ci.adminItemId === parseInt(adminItemId));
             if (!customerItem) {
                 return res.status(400).json({
@@ -57,7 +59,7 @@ export const createOrder = async (req, res) => {
                 });
             }
 
-            // Get admin inventory item
+            // 3) Get admin inventory item
             const adminItem = await prisma.adminInventoryItem.findUnique({
                 where: { id: parseInt(adminItemId) },
             });
@@ -66,7 +68,7 @@ export const createOrder = async (req, res) => {
                 return res.status(404).json({ error: `Item ${adminItemId} not found in inventory.` });
             }
 
-            // Check if enough stock (compare units)
+            // 4) Check if enough stock (compare units)
             if (adminItem.quantity < quantity) {
                 return res.status(400).json({
                     error: `Insufficient stock for ${adminItem.name}. Available: ${adminItem.quantity} ${adminItem.unit}, Requested: ${quantity} ${unit}`,
@@ -130,7 +132,7 @@ export const createOrder = async (req, res) => {
     }
 };
 
-// ============= GET ALL ORDERS =============
+//Get all orders with optional filters
 export const getAllOrders = async (req, res) => {
     try {
         const { status, customerId } = req.query;
@@ -268,7 +270,7 @@ export const cancelOrder = async (req, res) => {
             }
         }
 
-        // Update order status to CANCELLED
+        // Update order status into CANCELLED
         const updatedOrder = await prisma.order.update({
             where: { id: parseInt(id) },
             data: { status: "CANCELLED" },
@@ -363,10 +365,8 @@ export const getOrderSummary = async (req, res) => {
     }
 };
 
-// ============= ADD ITEM TO ORDER (For updating incomplete orders) =============
-/**
- * Add another item to an order before it's confirmed
- */
+//Add item to existing order before confirmation
+
 export const addItemToOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
@@ -392,6 +392,25 @@ export const addItemToOrder = async (req, res) => {
         if (order.status !== "PENDING") {
             return res.status(400).json({
                 error: `Cannot add items to an order with status ${order.status}.`,
+            });
+        }
+
+        // Verify item is in customer inventory
+        const customerInventory = await prisma.customerInventory.findUnique({
+            where: { customerId: order.customerId },
+            include: {
+                items: true,
+            },
+        });
+
+        if (!customerInventory) {
+            return res.status(400).json({ error: "Customer inventory not found." });
+        }
+
+        const customerItem = customerInventory.items.find((ci) => ci.adminItemId === parseInt(adminItemId));
+        if (!customerItem) {
+            return res.status(400).json({
+                error: `Item ${adminItemId} is not in customer inventory.`,
             });
         }
 
@@ -451,3 +470,71 @@ export const addItemToOrder = async (req, res) => {
     }
 };
 
+//Get all items available in a customer's inventory for creating orders
+//Shows only items the customer has access to, with admin inventory details
+
+export const getCustomerAvailableItems = async (req, res) => {
+    try {
+        const { customerId } = req.params;
+
+        // 1) Verify customer exists
+        const customer = await prisma.customer.findUnique({
+            where: { id: parseInt(customerId) },
+        });
+
+        if (!customer) {
+            return res.status(404).json({ error: "Customer not found." });
+        }
+
+        // 2) Get customer's inventory with all assigned items and their details
+        const customerInventory = await prisma.customerInventory.findUnique({
+            where: { customerId: parseInt(customerId) },
+            include: {
+                items: {
+                    include: {
+                        adminItem: {
+                            select: {
+                                id: true,
+                                name: true,
+                                description: true,
+                                quantity: true,
+                                unit: true,
+                                imageUrl: true,
+                                pricePerUnit: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!customerInventory) {
+            return res.status(400).json({ error: "Customer inventory not found." });
+        }
+
+        // 3) Format response with available items
+        const availableItems = customerInventory.items.map((item) => ({
+            id: item.adminItem.id,
+            name: item.adminItem.name,
+            description: item.adminItem.description,
+            currentStock: item.adminItem.quantity,
+            unit: item.adminItem.unit,
+            imageUrl: item.adminItem.imageUrl,
+            pricePerUnit: item.adminItem.pricePerUnit,
+            inStock: item.adminItem.quantity > 0,
+        }));
+
+        res.json({
+            message: `Available items for customer ${customer.name}`,
+            customer: {
+                id: customer.id,
+                name: customer.name,
+                email: customer.email,
+            },
+            itemCount: availableItems.length,
+            items: availableItems,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};

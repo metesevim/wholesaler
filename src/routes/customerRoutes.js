@@ -1,18 +1,11 @@
 import express from "express";
 import { authJWT, requireRole, requirePermission } from "../middleware/authMiddleware.js";
-import {
-    createCustomer,
-    getAllCustomers,
-    getCustomerById,
-    updateCustomer,
-    addItemsToCustomerInventory,
-    removeItemsFromCustomerInventory,
-    getCustomerInventory,
-} from "../controllers/customerController.js";
+import {createCustomer, getAllCustomers, getCustomerById, updateCustomer, addItemsToCustomerInventory,
+    removeItemsFromCustomerInventory, getCustomerInventory} from "../controllers/customerController.js";
 
 const router = express.Router();
 
-// ============= CUSTOMER MANAGEMENT =============
+//Customer Management
 
 /**
  * @swagger
@@ -154,7 +147,7 @@ router.get("/:id", authJWT, requirePermission("VIEW_CUSTOMERS"), getCustomerById
  */
 router.put("/:id", authJWT, requirePermission("EDIT_CUSTOMERS"), updateCustomer);
 
-// ============= CUSTOMER INVENTORY MANAGEMENT =============
+//Customer Inventory Management
 
 /**
  * @swagger

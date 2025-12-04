@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../prisma/client.js";
 import { PERMISSIONS } from "../constants/permissions.js";
 
-// REGISTER
+//Register
 export const register = async (req, res) => {
     try {
         const { username, password, role } = req.body;
@@ -46,7 +46,7 @@ export const register = async (req, res) => {
     }
 };
 
-// NEW: Admin creates an Employee account
+//Admin creates an Employee account
 export const createEmployee = async (req, res) => {
     try {
         const { username, password, permissions, iban } = req.body;
@@ -94,7 +94,7 @@ export const createEmployee = async (req, res) => {
     }
 };
 
-// LOGIN
+//Login
 export const login = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -124,7 +124,7 @@ export const login = async (req, res) => {
     }
 };
 
-// ADMIN: set permissions for a given user (Admin-only route)
+//Set permissions for a given user (Admin-only route)
 export const setPermissions = async (req, res) => {
     try {
         const targetUserId = req.params.id;
@@ -152,18 +152,23 @@ export const setPermissions = async (req, res) => {
     }
 };
 
-// ============= UPDATE USER INFORMATION =============
+//Update user information (Admin-only route)
 /**
- * Update user information (Admin only)
- * Can update IBAN and other user details
+ * Update user information - supports username, password, and iban
+ * Admin only
  */
 export const updateUser = async (req, res) => {
     try {
         const { userId } = req.params;
-        const { iban } = req.body;
+        const { username, password, iban } = req.body;
 
         if (!userId) {
             return res.status(400).json({ error: "User ID is required." });
+        }
+
+        // At least one field must be provided
+        if (!username && !password && !iban) {
+            return res.status(400).json({ error: "At least one field (username, password, or iban) must be provided." });
         }
 
         // Find user
@@ -175,17 +180,47 @@ export const updateUser = async (req, res) => {
             return res.status(404).json({ error: "User not found." });
         }
 
+        // If username is being updated, check for uniqueness
+        if (username && username !== user.username) {
+            const existingUser = await prisma.user.findUnique({
+                where: { username },
+            });
+            if (existingUser) {
+                return res.status(400).json({ error: "Username already exists." });
+            }
+        }
+
+        // Prepare update data
+        const updateData = {};
+
+        if (username) {
+            updateData.username = username;
+        }
+
+        if (password) {
+            // Hash the new password
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+
+        if (iban) {
+            updateData.iban = iban;
+        }
+
         // Update user information
         const updatedUser = await prisma.user.update({
             where: { id: parseInt(userId) },
-            data: {
-                ...(iban && { iban }),
-            },
+            data: updateData,
         });
 
         res.json({
             message: "User information updated successfully.",
-            user: updatedUser,
+            user: {
+                id: updatedUser.id,
+                username: updatedUser.username,
+                role: updatedUser.role,
+                iban: updatedUser.iban,
+                createdAt: updatedUser.createdAt,
+            },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

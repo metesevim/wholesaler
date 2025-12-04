@@ -128,7 +128,7 @@ router.put("/users/:id/permissions", authJWT, requireRole("Admin"), setPermissio
  * /admin/users/{userId}:
  *   put:
  *     summary: Update user information (Admin only)
- *     description: Admin endpoint to update user information such as IBAN for employees.
+ *     description: Admin endpoint to update user information including username, password, and IBAN for employees. At least one field must be provided.
  *     tags:
  *       - Admin
  *     security:
@@ -147,10 +147,20 @@ router.put("/users/:id/permissions", authJWT, requireRole("Admin"), setPermissio
  *           schema:
  *             type: object
  *             properties:
+ *               username:
+ *                 type: string
+ *                 example: john_doe_new
+ *                 description: New username (must be unique)
+ *               password:
+ *                 type: string
+ *                 example: newSecurePassword123
+ *                 description: New password (will be hashed)
  *               iban:
  *                 type: string
  *                 example: DE89370400440532013000
  *                 description: International Bank Account Number
+ *             required: false
+ *             description: At least one field must be provided for update
  *     responses:
  *       200:
  *         description: User information updated successfully

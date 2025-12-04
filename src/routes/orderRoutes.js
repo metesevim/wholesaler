@@ -1,19 +1,11 @@
 import express from "express";
 import { authJWT, requireRole, requirePermission } from "../middleware/authMiddleware.js";
-import {
-    createOrder,
-    getAllOrders,
-    getOrderById,
-    updateOrderStatus,
-    cancelOrder,
-    getCustomerOrders,
-    getOrderSummary,
-    addItemToOrder,
-} from "../controllers/orderController.js";
+import {createOrder, getAllOrders, getOrderById, updateOrderStatus, cancelOrder,
+    getCustomerOrders, getOrderSummary, addItemToOrder, getCustomerAvailableItems} from "../controllers/orderController.js";
 
 const router = express.Router();
 
-// ============= ORDER MANAGEMENT =============
+//Order Management
 
 /**
  * @swagger
@@ -268,6 +260,72 @@ router.post("/:id/items", authJWT, requirePermission("EDIT_ORDERS"), addItemToOr
  *         description: Customer not found
  */
 router.get("/customer/:customerId", authJWT, requirePermission("VIEW_ORDERS"), getCustomerOrders);
+
+/**
+ * @swagger
+ * /orders/customer/{customerId}/available-items:
+ *   get:
+ *     summary: Get available items for customer order
+ *     description: Retrieve all items available in a customer's inventory for creating a new order. Shows item details including current stock and prices.
+ *     tags:
+ *       - Orders
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: customerId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Customer ID
+ *     responses:
+ *       200:
+ *         description: Available items for customer
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 customer:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                 itemCount:
+ *                   type: integer
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       currentStock:
+ *                         type: integer
+ *                       unit:
+ *                         type: string
+ *                       imageUrl:
+ *                         type: string
+ *                       pricePerUnit:
+ *                         type: number
+ *                       inStock:
+ *                         type: boolean
+ *       404:
+ *         description: Customer not found
+ *       400:
+ *         description: Customer inventory not found
+ */
+router.get("/customer/:customerId/available-items", authJWT, requirePermission("VIEW_ORDERS"), getCustomerAvailableItems);
 
 export default router;
 
