@@ -1,35 +1,16 @@
 # Wholesaler Assistant Application
 
-## 🏗️ Architecture
+## Features
 
-```
-Frontend (React)           Backend (Node.js/Express)         Database
-└── wholesaler-login/      └── src/                          └── PostgreSQL
-    ├── features/              ├── controllers/                  (via Prisma)
-    ├── components/            ├── routes/
-    ├── contexts/              ├── middleware/
-    └── data/                  └── prisma/
-        └── repositories/      
-            (API Layer)        
+-  **JWT Authentication** - Secure token-based auth
+-  **Role-Based Access** - Admin & Employee roles
+-  **Permission System** - 12 granular permissions
+-  **Customer Management** - Full customer lifecycle
+-  **Inventory Management** - Track stock and pricing
+-  **Order Management** - Create, track, and fulfill orders
+-  **Pure JavaScript**
 
-        REST API (30 Endpoints)
-        ↕ HTTP/JSON + JWT
-```
-
-## 🔑 Key Features
-
-- ✅ **30 REST API Endpoints** - Complete CRUD operations
-- ✅ **JWT Authentication** - Secure token-based auth
-- ✅ **Role-Based Access** - Admin & Employee roles
-- ✅ **Permission System** - 12 granular permissions
-- ✅ **Customer Management** - Full customer lifecycle
-- ✅ **Inventory Management** - Track stock and pricing
-- ✅ **Order Management** - Create, track, and fulfill orders
-- ✅ **Swagger Documentation** - Interactive API docs
-- ✅ **Clean Architecture** - Layered, maintainable code
-- ✅ **TypeScript-Free** - Pure JavaScript only
-
-## 📊 API Endpoints
+## Endpoints
 
 ### Authentication (2)
 - `POST /auth/register` - Register new user
