@@ -19,6 +19,11 @@ app.use(express.json());
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, { swaggerOptions: { persistAuthorization: true } }));
 
+// Swagger JSON endpoint
+app.get("/api-docs.json", (req, res) => {
+    res.json(specs);
+});
+
 // Routes
 app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);

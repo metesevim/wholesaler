@@ -39,8 +39,9 @@ export const register = async (req, res) => {
             },
         });
 
-        // 3) Output
-        res.json({ message: "User created.", user });
+        // 3) Output (exclude password from response)
+        const { password: _, ...userWithoutPassword } = user;
+        res.json({ message: "User created.", user: userWithoutPassword });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -88,7 +89,9 @@ export const createEmployee = async (req, res) => {
             },
         });
 
-        res.status(201).json({ message: "Employee created.", user });
+        // Exclude password from response
+        const { password: _, ...userWithoutPassword } = user;
+        res.status(201).json({ message: "Employee created.", user: userWithoutPassword });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
