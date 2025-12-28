@@ -27,9 +27,6 @@ const DashboardPage = () => {
             <h1 className="text-3xl font-bold text-white mb-2">
               Welcome, {user?.name || user?.username}!
             </h1>
-            <p className="text-[#92adc9]">
-              Role: {user?.role}
-            </p>
           </div>
           <Button onClick={handleLogout} variant="secondary">
             Logout
@@ -37,20 +34,88 @@ const DashboardPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Placeholder cards */}
-          <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
-            <h3 className="text-xl font-bold text-white mb-2">Orders</h3>
-            <p className="text-[#92adc9]">Manage your orders</p>
+          {/* Orders Card */}
+          <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer group"
+               onClick={() => navigate(ROUTES.ORDERS)}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">Orders</h3>
+                <p className="text-[#92adc9]">Manage your orders</p>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(ROUTES.ORDERS);
+                }}
+                className="w-10 h-10 rounded-full bg-[#137fec] hover:bg-[#1a8fff] text-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
+                title="Create New Order"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-4 pt-4 border-t border-[#324d67]">
+              <p className="text-sm text-[#92adc9] group-hover:text-[#137fec] transition-colors">
+                Click to view all orders →
+              </p>
+            </div>
           </div>
 
-          <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
-            <h3 className="text-xl font-bold text-white mb-2">Inventory</h3>
-            <p className="text-[#92adc9]">Track your inventory</p>
+          {/* Inventory Card */}
+          <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer group"
+               onClick={() => navigate(ROUTES.INVENTORY)}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">Inventory</h3>
+                <p className="text-[#92adc9]">Track your inventory</p>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(ROUTES.INVENTORY);
+                }}
+                className="w-10 h-10 rounded-full bg-[#137fec] hover:bg-[#1a8fff] text-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
+                title="Add New Inventory Item"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-4 pt-4 border-t border-[#324d67]">
+              <p className="text-sm text-[#92adc9] group-hover:text-[#137fec] transition-colors">
+                Click to view all inventory →
+              </p>
+            </div>
           </div>
 
-          <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
-            <h3 className="text-xl font-bold text-white mb-2">Customers</h3>
-            <p className="text-[#92adc9]">Manage customers</p>
+          {/* Customers Card */}
+          <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer group"
+               onClick={() => navigate(ROUTES.CUSTOMERS)}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">Customers</h3>
+                <p className="text-[#92adc9]">Manage customers</p>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(ROUTES.CUSTOMERS);
+                }}
+                className="w-10 h-10 rounded-full bg-[#137fec] hover:bg-[#1a8fff] text-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
+                title="Add New Customer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-4 pt-4 border-t border-[#324d67]">
+              <p className="text-sm text-[#92adc9] group-hover:text-[#137fec] transition-colors">
+                Click to view all customers →
+              </p>
+            </div>
           </div>
         </div>
       </div>
