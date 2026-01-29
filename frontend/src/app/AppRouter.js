@@ -11,7 +11,9 @@ import RegisterPage from '../features/auth/pages/RegisterPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import OrdersPage from '../features/orders/pages/OrdersPage';
 import AddOrderPage from '../features/orders/pages/AddOrderPage';
+import InventoryPage from '../features/inventory/pages/InventoryPage';
 import AddInventoryPage from '../features/inventory/pages/AddInventoryPage';
+import CustomersPage from '../features/customers/pages/CustomersPage';
 import AddCustomerPage from '../features/customers/pages/AddCustomerPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
@@ -54,6 +56,14 @@ const AppRouter = () => {
 
         {/* Inventory Routes */}
         <Route
+          path={ROUTES.INVENTORY}
+          element={
+            <ProtectedRoute>
+              <InventoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path={ROUTES.ADD_INVENTORY}
           element={
             <ProtectedRoute>
@@ -63,6 +73,14 @@ const AppRouter = () => {
         />
 
         {/* Customer Routes */}
+        <Route
+          path={ROUTES.CUSTOMERS}
+          element={
+            <ProtectedRoute>
+              <CustomersPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path={ROUTES.ADD_CUSTOMER}
           element={
