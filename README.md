@@ -8,6 +8,7 @@
 -  **Customer Management** - Full customer lifecycle
 -  **Inventory Management** - Track stock and pricing
 -  **Order Management** - Create, track, and fulfill orders
+-  **Flexible Password Policy** - Custom password requirements (no strict length limits)
 
 ## Endpoints
 
