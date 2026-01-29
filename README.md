@@ -67,5 +67,4 @@
 - `EDIT_ORDERS` - Modify orders
 - `CREATE_ORDER` - Create new orders
 
-**Built with ❤️ using React, Node.js, Express, and Prisma**
-
+**Built with React, Node.js, Express, and Prisma**
