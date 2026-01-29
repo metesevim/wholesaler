@@ -101,7 +101,7 @@ const DashboardPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(ROUTES.CUSTOMERS);
+                  navigate(ROUTES.ADD_CUSTOMER);
                 }}
                 className="w-10 h-10 rounded-full bg-[#137fec] hover:bg-[#1a8fff] text-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
                 title="Add New Customer"

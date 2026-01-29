@@ -13,7 +13,9 @@ export const ROUTES = {
   ORDERS: '/orders',
   ADD_ORDER: '/orders/add',
   INVENTORY: '/inventory',
+  ADD_INVENTORY: '/inventory/add',
   CUSTOMERS: '/customers',
+  ADD_CUSTOMER: '/customers/add',
   PROFILE: '/profile'
 };
 

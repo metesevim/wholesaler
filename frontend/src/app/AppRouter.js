@@ -11,6 +11,8 @@ import RegisterPage from '../features/auth/pages/RegisterPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import OrdersPage from '../features/orders/pages/OrdersPage';
 import AddOrderPage from '../features/orders/pages/AddOrderPage';
+import AddInventoryPage from '../features/inventory/pages/AddInventoryPage';
+import AddCustomerPage from '../features/customers/pages/AddCustomerPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
 
@@ -46,6 +48,26 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <AddOrderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Inventory Routes */}
+        <Route
+          path={ROUTES.ADD_INVENTORY}
+          element={
+            <ProtectedRoute>
+              <AddInventoryPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Customer Routes */}
+        <Route
+          path={ROUTES.ADD_CUSTOMER}
+          element={
+            <ProtectedRoute>
+              <AddCustomerPage />
             </ProtectedRoute>
           }
         />
