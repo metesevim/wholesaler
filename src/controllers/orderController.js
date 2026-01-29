@@ -1,4 +1,4 @@
-import prisma from "../prisma/client.js";
+import prisma from "../../prisma/client.js";
 
 //Create an order from customer inventory items
 //Automatically reduces quantities from admin inventory

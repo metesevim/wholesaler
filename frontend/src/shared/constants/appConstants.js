@@ -11,6 +11,7 @@ export const ROUTES = {
   REGISTER: '/register',
   DASHBOARD: '/dashboard',
   ORDERS: '/orders',
+  ADD_ORDER: '/orders/add',
   INVENTORY: '/inventory',
   CUSTOMERS: '/customers',
   PROFILE: '/profile'

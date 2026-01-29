@@ -9,6 +9,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { specs, swaggerUi } from "./swagger.js";
+import prisma from "../prisma/client.js";
 
 const app = express();
 
@@ -52,7 +53,21 @@ app.get("/health", (req, res) => {
     res.json({
         status: "gayet iyi",
         message: "Wholesaler API is running.",
+        prisma: prisma ? "connected" : "disconnected",
     });
+});
+
+// Test Prisma connection
+app.get("/test-db", async (req, res) => {
+    try {
+        if (!prisma) {
+            return res.status(500).json({ error: "Prisma not initialized" });
+        }
+        const result = await prisma.$queryRaw`SELECT 1 as test`;
+        res.json({ message: "Database connected", result });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Export app for server or tests

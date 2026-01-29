@@ -9,6 +9,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
+import OrdersPage from '../features/orders/pages/OrdersPage';
+import AddOrderPage from '../features/orders/pages/AddOrderPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
 
@@ -26,6 +28,24 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Orders Routes */}
+        <Route
+          path={ROUTES.ORDERS}
+          element={
+            <ProtectedRoute>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.ADD_ORDER}
+          element={
+            <ProtectedRoute>
+              <AddOrderPage />
             </ProtectedRoute>
           }
         />

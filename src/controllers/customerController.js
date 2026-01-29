@@ -1,4 +1,4 @@
-import prisma from "../prisma/client.js";
+import prisma from "../../prisma/client.js";
 
 // ============= CREATE CUSTOMER =============
 /**
@@ -79,6 +79,11 @@ export const createCustomer = async (req, res) => {
 // ============= GET ALL CUSTOMERS =============
 export const getAllCustomers = async (req, res) => {
     try {
+        if (!prisma || !prisma.customer) {
+            console.error("Prisma client not initialized properly");
+            return res.status(500).json({ error: "Database connection error" });
+        }
+
         const customers = await prisma.customer.findMany({
             include: {
                 inventory: {
@@ -95,10 +100,11 @@ export const getAllCustomers = async (req, res) => {
 
         res.json({
             message: "Customers retrieved successfully.",
-            customers,
+            customers: customers || [],
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Error fetching customers:", err);
+        res.status(500).json({ error: err.message || "Failed to fetch customers" });
     }
 };
 

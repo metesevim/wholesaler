@@ -8,6 +8,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
 import Button from '../../../components/forms/Button';
+import PageHeader from '../../../components/layout/PageHeader';
 import { ROUTES } from '../../../shared/constants/appConstants';
 
 const DashboardPage = () => {
@@ -22,16 +23,15 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-[#101922] p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Welcome, {user?.name || user?.username}!
-            </h1>
-          </div>
-          <Button onClick={handleLogout} variant="secondary">
-            Logout
-          </Button>
-        </div>
+        <PageHeader
+          title={`Welcome, ${user?.name || user?.username}!`}
+          showDashboardButton={false}
+          rightContent={
+            <Button onClick={handleLogout} variant="secondary">
+              Logout
+            </Button>
+          }
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Orders Card */}
@@ -45,7 +45,7 @@ const DashboardPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(ROUTES.ORDERS);
+                  navigate(ROUTES.ADD_ORDER);
                 }}
                 className="w-10 h-10 rounded-full bg-[#137fec] hover:bg-[#1a8fff] text-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
                 title="Create New Order"
