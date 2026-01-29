@@ -6,6 +6,7 @@
  */
 
 import prisma from './client.js';
+import bcrypt from 'bcrypt';
 
 async function main() {
   console.log('Seeding database...');
@@ -22,10 +23,11 @@ async function main() {
 
   // Create Admin User
   console.log('Creating admin user...');
+  const hashedPassword = await bcrypt.hash('admin1', 10);
   const adminUser = await prisma.user.create({
     data: {
       username: 'admin',
-      password: 'hashedpassword123', // In real scenario, this would be hashed
+      password: hashedPassword,
       role: 'Admin',
       permissions: ['MANAGE_INVENTORY', 'MANAGE_ORDERS', 'VIEW_CUSTOMERS'],
     },

@@ -25,8 +25,6 @@ export const validateLoginCredentials = (credentials) => {
   // Password validation
   if (!credentials.password) {
     errors.password = VALIDATION_ERRORS.PASSWORD_REQUIRED;
-  } else if (credentials.password.length < 6) {
-    errors.password = VALIDATION_ERRORS.PASSWORD_MIN_LENGTH;
   }
 
   return {
@@ -55,7 +53,6 @@ export const validatePasswordStrength = (password) => {
     return { isValid: false, strength: 'none' };
   }
 
-  const hasMinLength = password.length >= 6;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumbers = /\d/.test(password);
@@ -64,21 +61,19 @@ export const validatePasswordStrength = (password) => {
   let strength = 'weak';
   let score = 0;
 
-  if (hasMinLength) score++;
   if (hasUpperCase) score++;
   if (hasLowerCase) score++;
   if (hasNumbers) score++;
   if (hasSpecialChar) score++;
 
-  if (score >= 4) strength = 'strong';
+  if (score >= 3) strength = 'strong';
   else if (score >= 2) strength = 'medium';
 
   return {
-    isValid: hasMinLength,
+    isValid: true,
     strength,
     score,
     requirements: {
-      hasMinLength,
       hasUpperCase,
       hasLowerCase,
       hasNumbers,
