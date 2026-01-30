@@ -27,7 +27,15 @@ const DashboardPage = () => {
           title={`Welcome, ${user?.name || user?.username}!`}
           showDashboardButton={false}
           rightContent={
-            <div className="flex gap-3">
+            <div className="flex gap-4">
+                <Button onClick={() => {navigator.clipboard.writeText(user.iban);
+                    alert('IBAN copied to clipboard!');
+                  }}
+                  variant="primary"
+                  size="md"
+                >
+                  Copy IBAN
+                </Button>
               <Button
                 onClick={() => navigate(ROUTES.ADMIN_SETTINGS)}
                 variant="secondary"
@@ -46,7 +54,7 @@ const DashboardPage = () => {
           }
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/*Dashboard cloumn settings.*/}
           {/* Orders Card */}
           <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer group"
                onClick={() => navigate(ROUTES.ORDERS)}>
@@ -86,7 +94,7 @@ const DashboardPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(ROUTES.INVENTORY);
+                  navigate(ROUTES.ADD_INVENTORY);
                 }}
                 className="w-10 h-10 rounded-full bg-[#137fec] hover:bg-[#1a8fff] text-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
                 title="Add New Inventory Item"
@@ -127,6 +135,34 @@ const DashboardPage = () => {
             <div className="mt-4 pt-4 border-t border-[#324d67]">
               <p className="text-sm text-[#92adc9] group-hover:text-[#137fec] transition-colors">
                 Click to view all customers →
+              </p>
+            </div>
+          </div>
+
+          {/* Providers Card */}
+          <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer group"
+               onClick={() => navigate(ROUTES.PROVIDERS)}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">Providers</h3>
+                <p className="text-[#92adc9]">Manage providers</p>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(ROUTES.ADD_PROVIDER);
+                }}
+                className="w-10 h-10 rounded-full bg-[#137fec] hover:bg-[#1a8fff] text-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
+                title="Add New Provider"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-4 pt-4 border-t border-[#324d67]">
+              <p className="text-sm text-[#92adc9] group-hover:text-[#137fec] transition-colors">
+                Click to view all providers →
               </p>
             </div>
           </div>

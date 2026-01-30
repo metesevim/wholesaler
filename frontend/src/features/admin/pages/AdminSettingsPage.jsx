@@ -23,6 +23,7 @@ const AdminSettingsPage = () => {
     username: '',
     email: '',
     fullName: '',
+    iban: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -36,7 +37,8 @@ const AdminSettingsPage = () => {
         ...prev,
         username: user.username || '',
         email: user.email || '',
-        fullName: user.name || ''
+        fullName: user.name || '',
+        iban: user.iban || ''
       }));
     }
   }, [user]);
@@ -109,7 +111,8 @@ const AdminSettingsPage = () => {
       const updateData = {
         username: formData.username,
         email: formData.email,
-        fullName: formData.fullName
+        fullName: formData.fullName,
+        iban: formData.iban
       };
 
       // Only include password fields if user is changing password
@@ -213,6 +216,21 @@ const AdminSettingsPage = () => {
                   onChange={handleChange}
                   placeholder="Enter your email"
                   error={errors.email}
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  IBAN
+                </label>
+                <Input
+                  type="text"
+                  name="iban"
+                  value={formData.iban}
+                  onChange={handleChange}
+                  placeholder="Enter your IBAN"
+                  error={errors.iban}
                   disabled={loading}
                 />
               </div>

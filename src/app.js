@@ -6,6 +6,7 @@ import cors from "cors";
 import customerRoutes from "./routes/customerRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import providerRoutes from "./routes/providerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { specs, swaggerUi } from "./swagger.js";
@@ -30,6 +31,7 @@ app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);
 app.use("/inventory", inventoryRoutes);
 app.use("/orders", orderRoutes);
+app.use("/providers", providerRoutes);
 app.use("/admin", adminRoutes);
 
 // TEST route

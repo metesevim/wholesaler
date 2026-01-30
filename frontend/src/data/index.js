@@ -5,6 +5,7 @@
 export { default as httpClient } from './client/httpClient';
 export { default as authRepository } from './repositories/authRepository';
 export { default as customerRepository } from './repositories/customerRepository';
+export { default as providerRepository } from './repositories/providerRepository';
 export { default as inventoryRepository } from './repositories/inventoryRepository';
 export { default as orderRepository } from './repositories/orderRepository';
 export { default as adminRepository } from './repositories/adminRepository';

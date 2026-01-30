@@ -18,6 +18,9 @@ import EditInventoryPage from '../features/inventory/pages/EditInventoryPage';
 import CustomersPage from '../features/customers/pages/CustomersPage';
 import AddCustomerPage from '../features/customers/pages/AddCustomerPage';
 import EditCustomerPage from '../features/customers/pages/EditCustomerPage';
+import ProvidersPage from '../features/providers/pages/ProvidersPage';
+import AddProviderPage from '../features/providers/pages/AddProviderPage';
+import EditProviderPage from '../features/providers/pages/EditProviderPage';
 import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
@@ -114,6 +117,32 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <EditCustomerPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Provider Routes */}
+        <Route
+          path={ROUTES.PROVIDERS}
+          element={
+            <ProtectedRoute>
+              <ProvidersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.ADD_PROVIDER}
+          element={
+            <ProtectedRoute>
+              <AddProviderPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/providers/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditProviderPage />
             </ProtectedRoute>
           }
         />

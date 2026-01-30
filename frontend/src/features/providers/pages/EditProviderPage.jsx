@@ -1,7 +1,7 @@
 /**
- * EditCustomerPage Component
+ * EditProviderPage Component
  *
- * Page for editing an existing customer
+ * Page for editing an existing provider
  */
 
 import React, { useState, useEffect } from 'react';
@@ -9,18 +9,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
-import { customerRepository, inventoryRepository } from '../../../data';
+import { providerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
 
-const EditCustomerPage = () => {
+const EditProviderPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [availableItems, setAvailableItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState(new Set());
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,56 +30,30 @@ const EditCustomerPage = () => {
   });
 
   useEffect(() => {
-    loadData();
+    loadProvider();
   }, [id]);
 
-  const loadData = async () => {
+  const loadProvider = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Load customer data
-      const customerResult = await customerRepository.getCustomerById(parseInt(id));
-      if (customerResult.success) {
+      const result = await providerRepository.getProviderById(parseInt(id));
+      if (result.success) {
         setFormData({
-          name: customerResult.data.name || '',
-          email: customerResult.data.email || '',
-          phone: customerResult.data.phone || '',
-          address: customerResult.data.address || '',
-          city: customerResult.data.city || '',
-          country: customerResult.data.country || '',
-          iban: customerResult.data.iban || '',
+          name: result.data.name || '',
+          email: result.data.email || '',
+          phone: result.data.phone || '',
+          address: result.data.address || '',
+          city: result.data.city || '',
+          country: result.data.country || '',
+          iban: result.data.iban || '',
         });
       } else {
-        setError('Failed to load customer');
-        setLoading(false);
-        return;
+        setError('Failed to load provider');
       }
-
-      // Load available items
-      const itemsResult = await inventoryRepository.getAllItems();
-      if (itemsResult.success) {
-        setAvailableItems(itemsResult.data || []);
-      }
-
-      // DEACTIVATED: Load customer's inventory items and match with available items
-      // try {
-      //   const inventoryResult = await customerRepository.getCustomerInventory(parseInt(id));
-      //   if (inventoryResult.success && inventoryResult.data && inventoryResult.data.length > 0) {
-      //     const itemIds = new Set();
-      //     inventoryResult.data.forEach(customerItem => {
-      //       const itemId = customerItem.adminItemId || customerItem.id;
-      //       if (itemId) {
-      //         itemIds.add(itemId);
-      //       }
-      //     });
-      //     setSelectedItems(itemIds);
-      //   }
-      // } catch (err) {
-      //   logger.warn('Failed to load customer inventory items:', err);
-      // }
     } catch (err) {
-      logger.error('Failed to load data:', err);
-      setError('Failed to load customer. Please try again.');
+      logger.error('Failed to load provider:', err);
+      setError('Failed to load provider. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -95,16 +67,6 @@ const EditCustomerPage = () => {
     }));
   };
 
-  const toggleItemSelection = (itemId) => {
-    const newSelected = new Set(selectedItems);
-    if (newSelected.has(itemId)) {
-      newSelected.delete(itemId);
-    } else {
-      newSelected.add(itemId);
-    }
-    setSelectedItems(newSelected);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -116,28 +78,18 @@ const EditCustomerPage = () => {
     }
 
     try {
-      const result = await customerRepository.updateCustomer(parseInt(id), formData);
+      const result = await providerRepository.updateProvider(parseInt(id), formData);
       if (result.success) {
-        // Save selected items to customer inventory
-        const selectedItemIds = Array.from(selectedItems);
-        if (selectedItemIds.length > 0) {
-          try {
-            await customerRepository.addItemsToInventory(parseInt(id), selectedItemIds);
-          } catch (err) {
-            logger.warn('Failed to save inventory items:', err);
-          }
-        }
-
-        setSuccess('Customer updated successfully!');
+        setSuccess('Provider updated successfully!');
         setTimeout(() => {
-          navigate(ROUTES.CUSTOMERS);
+          navigate(ROUTES.PROVIDERS);
         }, 1500);
       } else {
-        setError(result.error || 'Failed to update customer');
+        setError(result.error || 'Failed to update provider');
       }
     } catch (err) {
-      logger.error('Failed to update customer:', err);
-      setError('Failed to update customer. Please try again.');
+      logger.error('Failed to update provider:', err);
+      setError('Failed to update provider. Please try again.');
     }
   };
 
@@ -149,18 +101,18 @@ const EditCustomerPage = () => {
     if (!confirmed) return;
 
     try {
-      const result = await customerRepository.deleteCustomer(parseInt(id));
+      const result = await providerRepository.deleteProvider(parseInt(id));
       if (result.success) {
-        setSuccess('Customer deleted successfully!');
+        setSuccess('Provider deleted successfully!');
         setTimeout(() => {
-          navigate(ROUTES.CUSTOMERS);
+          navigate(ROUTES.PROVIDERS);
         }, 1500);
       } else {
-        setError(result.error || 'Failed to delete customer');
+        setError(result.error || 'Failed to delete provider');
       }
     } catch (err) {
-      logger.error('Failed to delete customer:', err);
-      setError('Failed to delete customer. Please try again.');
+      logger.error('Failed to delete provider:', err);
+      setError('Failed to delete provider. Please try again.');
     }
   };
 
@@ -174,7 +126,7 @@ const EditCustomerPage = () => {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
           </div>
-          <p className="ml-4 text-white">Loading customer...</p>
+          <p className="ml-4 text-white">Loading provider...</p>
         </div>
       </div>
     );
@@ -182,12 +134,12 @@ const EditCustomerPage = () => {
 
   return (
     <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <PageHeader
-            title={`Edit Customer - ${formData.name}`}
-          subtitle="Update customer information"
+          title={`Edit Provider - ${formData.name}`}
+          subtitle="Update provider information"
           backButton
-          onBack={() => navigate(ROUTES.CUSTOMERS)}
+          onBack={() => navigate(ROUTES.PROVIDERS)}
         />
 
         {error && (
@@ -203,21 +155,21 @@ const EditCustomerPage = () => {
         )}
 
         <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
-          <h2 className="text-2xl font-bold text-white mb-6">Customer Information</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Provider Information</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name and Email */}
             <div className="grid grid-cols-2 gap-4">
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-white mb-2">
-                  Customer Name <span className="text-red-500">*</span>
+                  Provider Name <span className="text-red-500">*</span>
                 </label>
                 <Input
                   name="name"
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter customer name"
+                  placeholder="Enter provider name"
                   required
                 />
               </div>
@@ -314,24 +266,24 @@ const EditCustomerPage = () => {
               />
             </div>
 
-              {/* Form Actions */}
-              <div className="flex gap-4 mt-8 pt-6">
-                <Button type="submit" variant="primary" className="flex-1">
-                  Update Customer
-                </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  onClick={handleDelete}
-                >
-                  Delete Customer
-                </Button>
-              </div>
-            </form>
-          </div>
+            {/* Form Actions */}
+            <div className="flex gap-4 mt-8 pt-6">
+              <Button type="submit" variant="primary" className="flex-1">
+                Update Provider
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={handleDelete}
+              >
+                Delete Provider
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
+    </div>
   );
 };
 
-export default EditCustomerPage;
+export default EditProviderPage;

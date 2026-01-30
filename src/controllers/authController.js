@@ -240,7 +240,7 @@ export const updateUser = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id; // From JWT middleware
-        const { username, email, fullName, currentPassword, newPassword } = req.body;
+        const { username, email, fullName, iban, currentPassword, newPassword } = req.body;
 
         // Validate required fields
         if (!username || !email || !fullName) {
@@ -269,6 +269,7 @@ export const updateProfile = async (req, res) => {
             username,
             email,
             name: fullName,
+            ...(iban !== undefined && { iban }),
         };
 
         if (newPassword) {

@@ -17,6 +17,8 @@ export const ROUTES = {
   EDIT_INVENTORY: '/inventory/:id/edit',
   CUSTOMERS: '/customers',
   ADD_CUSTOMER: '/customers/add',
+  PROVIDERS: '/providers',
+  ADD_PROVIDER: '/providers/add',
   ADMIN_SETTINGS: '/admin/settings',
   PROFILE: '/profile'
 };
