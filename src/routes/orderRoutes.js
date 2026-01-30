@@ -1,6 +1,6 @@
 import express from "express";
 import { authJWT, requireRole, requirePermission } from "../middleware/authMiddleware.js";
-import {createOrder, getAllOrders, getOrderById, updateOrderStatus, cancelOrder,
+import {createOrder, getAllOrders, getOrderById, updateOrderStatus, cancelOrder, deleteOrder,
     getCustomerOrders, getOrderSummary, addItemToOrder, getCustomerAvailableItems} from "../controllers/orderController.js";
 
 const router = express.Router();
@@ -190,6 +190,32 @@ router.put("/:id/status", authJWT, requirePermission("EDIT_ORDERS"), updateOrder
  *         description: Order not found
  */
 router.post("/:id/cancel", authJWT, requirePermission("EDIT_ORDERS"), cancelOrder);
+
+/**
+ * @swagger
+ * /orders/{id}:
+ *   delete:
+ *     summary: Delete an order
+ *     description: Delete an order. Can only delete PENDING, CONFIRMED, CANCELLED, or DELIVERED orders. Restores inventory for PENDING and CONFIRMED orders.
+ *     tags:
+ *       - Orders
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Order deleted
+ *       400:
+ *         description: Cannot delete order in PROCESSING or SHIPPED status
+ *       404:
+ *         description: Order not found
+ */
+router.delete("/:id", authJWT, requirePermission("EDIT_ORDERS"), deleteOrder);
 
 /**
  * @swagger

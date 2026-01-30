@@ -92,9 +92,27 @@ const CustomersPage = () => {
                 key={customer.id}
                 className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"
               >
-                <h3 className="text-lg font-bold text-white mb-2">
-                  {customer.name}
-                </h3>
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-lg font-bold text-white flex-1">
+                    {customer.name}
+                  </h3>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => navigate(`${ROUTES.CUSTOMERS}/${customer.id}/edit`)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteCustomer(customer.id, customer.name)}
+                      variant="danger"
+                      size="sm"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                </div>
                 <div className="space-y-2 text-sm">
                   <p className="text-[#92adc9]">
                     <span className="font-semibold">Email:</span> {customer.email}
@@ -120,6 +138,27 @@ const CustomersPage = () => {
       </div>
     </div>
   );
+
+  async function handleDeleteCustomer(customerId, customerName) {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${customerName}" and all their related data? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const result = await customerRepository.deleteCustomer(customerId);
+      if (result.success) {
+        setCustomers(prev => prev.filter(c => c.id !== customerId));
+        setError(null);
+      } else {
+        setError(result.error || 'Failed to delete customer');
+      }
+    } catch (err) {
+      logger.error('Failed to delete customer:', err);
+      setError('Failed to delete customer. Please try again.');
+    }
+  }
 };
 
 export default CustomersPage;

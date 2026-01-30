@@ -12,12 +12,21 @@ const Button = ({
   onClick,
   type = 'button',
   variant = 'primary',
+  size = 'md',
   disabled = false,
   loading = false,
   fullWidth = false,
   className = ''
 }) => {
-  const baseStyles = 'h-12 rounded-lg text-base font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const baseStyles = 'rounded-lg font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+
+  const sizeStyles = {
+    xs: 'h-8 px-3 text-xs',
+    sm: 'h-10 px-4 text-sm',
+    md: 'h-12 px-6 text-base',
+    lg: 'h-14 px-8 text-lg',
+    xl: 'h-16 px-10 text-xl'
+  };
 
   const variants = {
     primary: 'bg-[#137fec] text-white hover:bg-[#1a8fff] focus:ring-[#137fec]',
@@ -33,8 +42,9 @@ const Button = ({
       disabled={disabled || loading}
       className={`
         ${baseStyles}
+        ${sizeStyles[size]}
         ${variants[variant]}
-        ${fullWidth ? 'w-full' : 'px-6'}
+        ${fullWidth ? 'w-full' : ''}
         ${disabled || loading ? 'opacity-50 cursor-not-allowed' : ''}
         ${className}
       `}
@@ -71,6 +81,7 @@ Button.propTypes = {
   onClick: PropTypes.func,
   type: PropTypes.oneOf(['button', 'submit', 'reset']),
   variant: PropTypes.oneOf(['primary', 'secondary', 'danger', 'ghost']),
+  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
   disabled: PropTypes.bool,
   loading: PropTypes.bool,
   fullWidth: PropTypes.bool,

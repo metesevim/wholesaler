@@ -124,11 +124,28 @@ const removeItemsFromInventory = async (id, itemIds) => {
   }
 };
 
+/**
+ * Delete a customer
+ * @param {number} id - Customer ID
+ * @returns {Promise<Object>} Result
+ */
+const deleteCustomer = async (id) => {
+  try {
+    logger.info('Deleting customer:', id);
+    const response = await httpClient.delete(`${BASE_PATH}/${id}`);
+    return Result.success(response.data);
+  } catch (error) {
+    logger.error('Failed to delete customer:', error);
+    return Result.failure(error.message || 'Failed to delete customer');
+  }
+};
+
 const customerRepository = {
   getAllCustomers,
   getCustomerById,
   createCustomer,
   updateCustomer,
+  deleteCustomer,
   getCustomerInventory,
   addItemsToInventory,
   removeItemsFromInventory

@@ -11,10 +11,12 @@ import RegisterPage from '../features/auth/pages/RegisterPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import OrdersPage from '../features/orders/pages/OrdersPage';
 import AddOrderPage from '../features/orders/pages/AddOrderPage';
+import EditOrderPage from '../features/orders/pages/EditOrderPage';
 import InventoryPage from '../features/inventory/pages/InventoryPage';
 import AddInventoryPage from '../features/inventory/pages/AddInventoryPage';
 import CustomersPage from '../features/customers/pages/CustomersPage';
 import AddCustomerPage from '../features/customers/pages/AddCustomerPage';
+import EditCustomerPage from '../features/customers/pages/EditCustomerPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
 
@@ -53,6 +55,14 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/orders/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditOrderPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Inventory Routes */}
         <Route
@@ -86,6 +96,14 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <AddCustomerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditCustomerPage />
             </ProtectedRoute>
           }
         />

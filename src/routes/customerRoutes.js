@@ -1,6 +1,6 @@
 import express from "express";
 import { authJWT, requireRole, requirePermission } from "../middleware/authMiddleware.js";
-import {createCustomer, getAllCustomers, getCustomerById, updateCustomer, addItemsToCustomerInventory,
+import {createCustomer, getAllCustomers, getCustomerById, updateCustomer, deleteCustomer, addItemsToCustomerInventory,
     removeItemsFromCustomerInventory, getCustomerInventory} from "../controllers/customerController.js";
 
 const router = express.Router();
@@ -146,6 +146,32 @@ router.get("/:id", authJWT, requirePermission("VIEW_CUSTOMERS"), getCustomerById
  *         description: Customer not found
  */
 router.put("/:id", authJWT, requirePermission("EDIT_CUSTOMERS"), updateCustomer);
+
+/**
+ * @swagger
+ * /customers/{id}:
+ *   delete:
+ *     summary: Delete customer
+ *     description: Delete a customer and all their related data. Cannot delete customers with active orders.
+ *     tags:
+ *       - Customers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Customer deleted
+ *       400:
+ *         description: Cannot delete customer with active orders
+ *       404:
+ *         description: Customer not found
+ */
+router.delete("/:id", authJWT, requirePermission("EDIT_CUSTOMERS"), deleteCustomer);
 
 //Customer Inventory Management
 

@@ -538,3 +538,69 @@ export const getCustomerAvailableItems = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+// ============= DELETE ORDER =============
+/**
+ * Delete an order and restore inventory if it's not yet confirmed
+ */
+export const deleteOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const order = await prisma.order.findUnique({
+            where: { id: parseInt(id) },
+            include: { items: true },
+        });
+
+        if (!order) {
+            return res.status(404).json({ error: "Order not found." });
+        }
+
+        // Can only delete orders that are PENDING, CANCELLED, or DELIVERED
+        // PROCESSING and SHIPPED orders cannot be deleted
+        if (order.status === "PROCESSING" || order.status === "SHIPPED") {
+            return res.status(400).json({
+                error: `Cannot delete an order with status ${order.status}. Only PENDING, CONFIRMED, CANCELLED, or DELIVERED orders can be deleted.`,
+            });
+        }
+
+        // If order is PENDING or CONFIRMED, restore inventory
+        if (order.status === "PENDING" || order.status === "CONFIRMED") {
+            for (const item of order.items) {
+                const adminItem = await prisma.adminInventoryItem.findUnique({
+                    where: { id: item.adminItemId },
+                });
+
+                if (adminItem) {
+                    await prisma.adminInventoryItem.update({
+                        where: { id: item.adminItemId },
+                        data: {
+                            quantity: adminItem.quantity + item.quantity,
+                        },
+                    });
+                }
+            }
+        }
+
+        // Delete order items first
+        await prisma.orderItem.deleteMany({
+            where: { orderId: parseInt(id) },
+        });
+
+        // Delete order
+        const deletedOrder = await prisma.order.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.json({
+            message: "Order deleted successfully." +
+                (order.status === "PENDING" || order.status === "CONFIRMED"
+                    ? " Inventory restored."
+                    : ""),
+            order: deletedOrder,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+

@@ -164,12 +164,29 @@ const getOrderSummary = async () => {
   }
 };
 
+/**
+ * Delete an order
+ * @param {number} id - Order ID
+ * @returns {Promise<Object>} Result
+ */
+const deleteOrder = async (id) => {
+  try {
+    logger.info('Deleting order:', id);
+    const response = await httpClient.delete(`${BASE_PATH}/${id}`);
+    return Result.success(response.data);
+  } catch (error) {
+    logger.error('Failed to delete order:', error);
+    return Result.failure(error.message || 'Failed to delete order');
+  }
+};
+
 const orderRepository = {
   getAllOrders,
   getOrderById,
   createOrder,
   updateOrderStatus,
   cancelOrder,
+  deleteOrder,
   addItemToOrder,
   getCustomerOrders,
   getAvailableItemsForCustomer,

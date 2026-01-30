@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+ import jwt from "jsonwebtoken";
 import prisma from "../prisma/client.js";
 
 // JWT checker middleware

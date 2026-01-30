@@ -329,3 +329,61 @@ export const getCustomerInventory = async (req, res) => {
     }
 };
 
+// ============= DELETE CUSTOMER =============
+/**
+ * Delete a customer and all their related data
+ */
+export const deleteCustomer = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const customer = await prisma.customer.findUnique({
+            where: { id: parseInt(id) },
+            include: { orders: true, inventory: true },
+        });
+
+        if (!customer) {
+            return res.status(404).json({ error: "Customer not found." });
+        }
+
+        // Check if customer has active orders (not cancelled or delivered)
+        const activeOrders = customer.orders.filter(
+            (order) => order.status !== "CANCELLED" && order.status !== "DELIVERED"
+        );
+
+        if (activeOrders.length > 0) {
+            return res.status(400).json({
+                error: `Cannot delete customer with ${activeOrders.length} active order(s). Please cancel or complete them first.`,
+            });
+        }
+
+        // Delete customer inventory items (cascade)
+        if (customer.inventory) {
+            await prisma.customerInventoryItem.deleteMany({
+                where: { customerInventoryId: customer.inventory.id },
+            });
+
+            // Delete customer inventory
+            await prisma.customerInventory.delete({
+                where: { id: customer.inventory.id },
+            });
+        }
+
+        // Delete all orders
+        await prisma.order.deleteMany({
+            where: { customerId: parseInt(id) },
+        });
+
+        // Delete customer
+        const deletedCustomer = await prisma.customer.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.json({
+            message: "Customer deleted successfully.",
+            customer: deletedCustomer,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};

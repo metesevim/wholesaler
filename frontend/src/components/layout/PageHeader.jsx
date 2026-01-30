@@ -13,9 +13,19 @@ const PageHeader = ({
   title,
   subtitle = null,
   showDashboardButton = true,
-  rightContent = null
+  rightContent = null,
+  backButton = false,
+  onBack = null
 }) => {
   const navigate = useNavigate();
+
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(-1); // Navigate to previous page
+    }
+  };
 
   return (
     <div className="flex items-center justify-between mb-8">
@@ -27,10 +37,21 @@ const PageHeader = ({
       </div>
       <div className="flex items-center gap-4">
         {rightContent}
-        {showDashboardButton && (
+        {backButton && (
+          <Button
+            onClick={handleBackClick}
+            variant="secondary"
+            size="md"
+            title="Go back"
+          >
+            ← Back
+          </Button>
+        )}
+        {!backButton && showDashboardButton && (
           <Button
             onClick={() => navigate(ROUTES.DASHBOARD)}
             variant="secondary"
+            size="md"
             title="Back to Dashboard"
           >
             ← Dashboard
@@ -42,3 +63,5 @@ const PageHeader = ({
 };
 
 export default PageHeader;
+
+
