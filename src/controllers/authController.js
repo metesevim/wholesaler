@@ -121,7 +121,13 @@ export const login = async (req, res) => {
             { expiresIn: "1d" } // Expires after 1 day.
         );
 
-        res.json({ message: "Login successful", token });
+        // Return token and user data (exclude password)
+        const { password: _, ...userWithoutPassword } = user;
+        res.json({
+            message: "Login successful",
+            token,
+            user: userWithoutPassword
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -224,6 +230,73 @@ export const updateUser = async (req, res) => {
                 iban: updatedUser.iban,
                 createdAt: updatedUser.createdAt,
             },
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Update user profile (authenticated users can update their own profile)
+export const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // From JWT middleware
+        const { username, email, fullName, currentPassword, newPassword } = req.body;
+
+        // Validate required fields
+        if (!username || !email || !fullName) {
+            return res.status(400).json({ error: "Username, email, and full name are required." });
+        }
+
+        // Check if username already exists (if changing username)
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            return res.status(400).json({ error: "User not found." });
+        }
+
+        // If changing username, check uniqueness
+        if (username !== user.username) {
+            const existing = await prisma.user.findUnique({ where: { username } });
+            if (existing) {
+                return res.status(400).json({ error: "Username already exists." });
+            }
+        }
+
+        // If password change requested, validate current password
+        let updateData = {
+            username,
+            email,
+            name: fullName,
+        };
+
+        if (newPassword) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: "Current password is required to set a new password." });
+            }
+
+            // Verify current password
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ error: "Current password is incorrect." });
+            }
+
+            // Hash new password and update data
+            updateData.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        // Update user
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+        });
+
+        // Return updated user (exclude password)
+        const { password: _, ...userWithoutPassword } = updatedUser;
+        res.json({
+            message: "Profile updated successfully.",
+            user: userWithoutPassword
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -41,7 +41,7 @@ const register = async (userData) => {
  * @param {Object} credentials - Login credentials
  * @param {string} credentials.username - Username
  * @param {string} credentials.password - Password
- * @returns {Promise<Object>} Result with token
+ * @returns {Promise<Object>} Result with token and user data
  */
 const login = async (credentials) => {
   try {
@@ -49,10 +49,11 @@ const login = async (credentials) => {
 
     const response = await httpClient.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
 
-    const { token } = response.data;
+    const { token, user } = response.data;
 
     return Result.success({
-      token
+      token,
+      user: user ? userMapper.fromApi(user) : null
     });
   } catch (error) {
     logger.error('Login failed:', error);
@@ -78,10 +79,33 @@ const logout = async () => {
   }
 };
 
+/**
+ * Update user profile
+ * @param {Object} profileData - Profile data to update
+ * @returns {Promise<Object>} Result with updated user data
+ */
+const updateProfile = async (profileData) => {
+  try {
+    logger.info('Updating user profile');
+
+    const response = await httpClient.put(API_ENDPOINTS.AUTH.PROFILE, profileData);
+
+    const { user } = response.data;
+
+    return Result.success({
+      user: userMapper.fromApi(user)
+    });
+  } catch (error) {
+    logger.error('Profile update failed:', error);
+    return Result.failure(error.message || 'Failed to update profile. Please try again.');
+  }
+};
+
 const authRepository = {
   register,
   login,
-  logout
+  logout,
+  updateProfile
 };
 
 export default authRepository;

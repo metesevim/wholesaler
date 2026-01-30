@@ -59,14 +59,12 @@ function App() {
           </div>
           <div className="relative z-10 flex flex-col gap-4 text-white">
             <div className="flex items-center gap-3">
-              <svg className="w-9 h-9" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18 18.5a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v9zm1.5-9a2 2 0 0 0-2-2h-13a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-9z"/>
-                <path d="M3 7.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5z"/>
-              </svg>
+
               <p className="text-2xl font-bold">Wholesale Hub - Horecaline</p>
             </div>
             <h1 className="text-4xl font-black leading-tight">Your Partner in Wholesale Efficiency</h1>
-            <p className="text-base text-white/80">Log in to access your dashboard and manage your operations seamlessly.</p>
+            <p className="text-base text-white/80">Log in to access your dashboard and manage your operations
+              seamlessly.</p>
           </div>
         </div>
 

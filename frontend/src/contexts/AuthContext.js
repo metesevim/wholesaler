@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
       const result = await authRepository.login(credentials);
 
       if (result.success) {
-        const { token } = result.data;
+        const { token, user } = result.data;
 
         // Store token
         storage.setToken(token);
@@ -67,16 +67,12 @@ export const AuthProvider = ({ children }) => {
         // Set authenticated state
         setIsAuthenticated(true);
 
-        // For now, set basic user data from credentials
-        // In a real app, you'd fetch full user data from a /me endpoint
-        const userData = {
-          username: credentials.username
-        };
-        setUser(userData);
+        // Set user data from API response
+        setUser(user);
 
         logger.info('Login successful');
 
-        return { success: true, user: userData };
+        return { success: true, user };
       } else {
         setError(result.error);
         logger.error('Login failed:', result.error);
@@ -127,6 +123,44 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
+   * Update user profile
+   * @param {Object} profileData - Profile data to update
+   * @returns {Promise<Object>} Result object
+   */
+  const updateProfile = useCallback(async (profileData) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      logger.info('Updating user profile');
+
+      const result = await authRepository.updateProfile(profileData);
+
+      if (result.success) {
+        // Update user data in context
+        setUser(prevUser => ({
+          ...prevUser,
+          ...result.data
+        }));
+
+        logger.info('Profile updated successfully');
+        return { success: true, data: result.data };
+      } else {
+        setError(result.error);
+        logger.error('Profile update failed:', result.error);
+        return { success: false, message: result.error };
+      }
+    } catch (err) {
+      const errorMessage = 'An unexpected error occurred while updating profile';
+      setError(errorMessage);
+      logger.error('Profile update error:', err);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
    * Clear error
    */
   const clearError = useCallback(() => {
@@ -141,6 +175,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateUser,
+    updateProfile,
     clearError
   };
 

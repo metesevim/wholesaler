@@ -50,6 +50,7 @@ const CustomersPage = () => {
             <Button
               onClick={() => navigate(ROUTES.ADD_CUSTOMER)}
               variant="primary"
+              size="md"
             >
               + Add Customer
             </Button>

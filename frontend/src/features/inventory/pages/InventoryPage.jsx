@@ -48,8 +48,10 @@ const InventoryPage = () => {
           subtitle="Manage your inventory items"
           rightContent={
             <Button
+
               onClick={() => navigate(ROUTES.ADD_INVENTORY)}
               variant="primary"
+              size="md"
             >
               + Add Item
             </Button>
@@ -92,11 +94,20 @@ const InventoryPage = () => {
                 key={item.id}
                 className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"
               >
-                <h3 className="text-lg font-bold text-white mb-2">
-                  {item.name}
-                </h3>
+                <div className="flex items-start justify-between mb-1">
+                  <h3 className="text-lg font-bold text-white">
+                    {item.name}
+                  </h3>
+                  <Button
+                    onClick={() => navigate(`/inventory/${item.id}/edit`)}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Edit
+                  </Button>
+                </div>
                 {item.description && (
-                  <p className="text-sm text-[#92adc9] mb-4">
+                  <p className="text-sm text-[#92adc9] mb-2">
                     {item.description}
                   </p>
                 )}
@@ -105,7 +116,7 @@ const InventoryPage = () => {
                     <span className="font-semibold">Quantity:</span> {item.quantity} {item.unit}
                   </p>
                   <p className="text-[#92adc9]">
-                    <span className="font-semibold">Price:</span> ${item.price?.toFixed(2) || '0.00'}
+                    <span className="font-semibold">Price:</span> ${item.pricePerUnit?.toFixed(2) || '0.00'}
                   </p>
                 </div>
               </div>

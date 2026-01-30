@@ -1,5 +1,6 @@
 import express from "express";
-import { register, login } from "../controllers/authController.js";
+import { register, login, updateProfile } from "../controllers/authController.js";
+import { authJWT } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -81,6 +82,77 @@ router.post("/register", register);
  */
 router.post("/login", login);
 
+/**
+ * @swagger
+ * /auth/profile:
+ *   put:
+ *     summary: Update authenticated user profile
+ *     description: Update the authenticated user's profile information including username, email, and full name. Optionally change password.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - fullName
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "admin"
+ *               email:
+ *                 type: string
+ *                 example: "admin@example.com"
+ *               fullName:
+ *                 type: string
+ *                 example: "Administrator"
+ *               currentPassword:
+ *                 type: string
+ *                 description: Required only if changing password
+ *                 example: "oldpassword"
+ *               newPassword:
+ *                 type: string
+ *                 description: New password (min 6 characters)
+ *                 example: "newpassword"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Profile updated successfully."
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.put("/profile", authJWT, updateProfile);
 
 export default router;
 

@@ -18,7 +18,8 @@ export const API_ENDPOINTS = {
   // Authentication endpoints
   AUTH: {
     REGISTER: '/auth/register',
-    LOGIN: '/auth/login'
+    LOGIN: '/auth/login',
+    PROFILE: '/auth/profile'
   },
 
   // Admin endpoints

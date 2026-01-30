@@ -13,6 +13,7 @@
 const createUser = (data = {}) => ({
   id: data.id || null,
   username: data.username || '',
+  email: data.email || null,
   name: data.name || '',
   role: data.role || 'user',
   permissions: data.permissions || [],

@@ -14,9 +14,11 @@ import AddOrderPage from '../features/orders/pages/AddOrderPage';
 import EditOrderPage from '../features/orders/pages/EditOrderPage';
 import InventoryPage from '../features/inventory/pages/InventoryPage';
 import AddInventoryPage from '../features/inventory/pages/AddInventoryPage';
+import EditInventoryPage from '../features/inventory/pages/EditInventoryPage';
 import CustomersPage from '../features/customers/pages/CustomersPage';
 import AddCustomerPage from '../features/customers/pages/AddCustomerPage';
 import EditCustomerPage from '../features/customers/pages/EditCustomerPage';
+import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
 
@@ -81,6 +83,14 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/inventory/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditInventoryPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Customer Routes */}
         <Route
@@ -104,6 +114,16 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <EditCustomerPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path={ROUTES.ADMIN_SETTINGS}
+          element={
+            <ProtectedRoute>
+              <AdminSettingsPage />
             </ProtectedRoute>
           }
         />

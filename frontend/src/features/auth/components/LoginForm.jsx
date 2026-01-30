@@ -26,7 +26,7 @@ const LoginForm = ({
   const [validationErrors, setValidationErrors] = useState({});
 
   const UserIcon = () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-5 h-5" fill="none" stroke="#92adc9" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
     </svg>
   );
@@ -88,14 +88,14 @@ const LoginForm = ({
         )}
 
         {/* Username Field */}
-        <FormField label="Username or Email" required>
+        <FormField label="Username" required>
           <Input
+              icon={UserIcon}
             type="text"
             value={credentials.username}
             onChange={handleChange('username')}
             onKeyPress={handleKeyPress}
-            placeholder="Enter your username or email"
-            icon={UserIcon}
+            placeholder="Enter your username"
             error={validationErrors.username}
             disabled={loading}
           />

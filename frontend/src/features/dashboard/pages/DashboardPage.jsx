@@ -27,9 +27,22 @@ const DashboardPage = () => {
           title={`Welcome, ${user?.name || user?.username}!`}
           showDashboardButton={false}
           rightContent={
-            <Button onClick={handleLogout} variant="secondary">
-              Logout
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => navigate(ROUTES.ADMIN_SETTINGS)}
+                variant="secondary"
+                size="md"
+              >
+                Settings
+              </Button>
+              <Button
+                  onClick={handleLogout}
+                  variant="secondary"
+                  size="md">
+
+                Logout
+              </Button>
+            </div>
           }
         />
 

@@ -16,16 +16,20 @@ const Input = ({
   icon: Icon,
   error,
   disabled = false,
-  className = ''
+  className = '',
+  name = ''
 }) => {
   return (
     <div className="flex flex-col w-full">
       <div className="relative flex w-full items-center">
         {Icon && (
-          <Icon className="absolute left-3 w-6 h-6 text-[#92adc9]" />
+          <div className="absolute left-3 flex items-center justify-center pointer-events-none">
+            <Icon className="w-5 h-5 text-[#92adc9]" />
+          </div>
         )}
         <input
           type={type}
+          name={name}
           value={value}
           onChange={onChange}
           onKeyPress={onKeyPress}
@@ -33,7 +37,7 @@ const Input = ({
           className={`
             h-12 w-full rounded-lg border bg-[#192633] text-base text-white 
             placeholder-[#92adc9] focus:outline-none
-            ${Icon ? 'pl-10' : 'pl-4'} pr-4
+            ${Icon ? 'pl-11' : 'pl-4'} pr-4
             ${error ? 'border-red-500' : 'border-[#324d67] focus:border-[#137fec]'}
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
             ${className}
@@ -57,7 +61,8 @@ Input.propTypes = {
   icon: PropTypes.elementType,
   error: PropTypes.string,
   disabled: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
+  name: PropTypes.string
 };
 
 export default Input;

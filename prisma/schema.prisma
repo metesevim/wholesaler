@@ -11,6 +11,8 @@ model User {
   id Int @id @default(autoincrement())
   username String   @unique
   password String
+  email String? @unique
+  name String?
   role Role
   permissions String[] @default([])
   iban String?  // IBAN for employee/user payments

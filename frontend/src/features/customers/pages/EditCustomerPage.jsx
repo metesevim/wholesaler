@@ -246,8 +246,8 @@ const EditCustomerPage = () => {
 
           {/* Delete Section */}
           <div className="mt-8 pt-8 border-t border-[#324d67]">
-            <h3 className="text-lg font-bold text-red-400 mb-4">Caution!</h3>
-            <p className="text-[#92adc9] text-sm mb-4">
+            <h3 className="text-lg font-bold text-red-400 mb-1">Caution!</h3>
+            <p className="text-[#92adc9] text-sm mb-6">
               Once you delete a customer, there is no going back. Please be certain.
             </p>
             <Button

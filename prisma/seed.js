@@ -28,6 +28,8 @@ async function main() {
     data: {
       username: 'admin',
       password: hashedPassword,
+      email: 'admin@wholesaler.com',
+      name: 'Administrator',
       role: 'Admin',
       permissions: ['MANAGE_INVENTORY', 'MANAGE_ORDERS', 'VIEW_CUSTOMERS'],
     },

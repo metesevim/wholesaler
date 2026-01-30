@@ -18,6 +18,7 @@ export const fromApi = (apiUser) => {
   return User.create({
     id: apiUser.id,
     username: apiUser.username,
+    email: apiUser.email || null,
     name: apiUser.name,
     role: apiUser.role,
     permissions: apiUser.permissions || [],
@@ -35,6 +36,7 @@ export const toApi = (user) => {
   return {
     id: user.id,
     username: user.username,
+    email: user.email,
     name: user.name,
     role: user.role,
     permissions: user.permissions,

@@ -17,8 +17,7 @@ const ORDER_STATUSES = [
   'CONFIRMED',
   'PROCESSING',
   'SHIPPED',
-  'DELIVERED',
-  'CANCELLED'
+  'DELIVERED'
 ];
 
 const STATUS_COLORS = {
@@ -26,8 +25,7 @@ const STATUS_COLORS = {
   'CONFIRMED': 'bg-blue-900 text-blue-200',
   'PROCESSING': 'bg-blue-800 text-blue-100',
   'SHIPPED': 'bg-purple-900 text-purple-200',
-  'DELIVERED': 'bg-green-900 text-green-200',
-  'CANCELLED': 'bg-red-900 text-red-200'
+  'DELIVERED': 'bg-green-900 text-green-200'
 };
 
 const EditOrderPage = () => {
@@ -208,6 +206,16 @@ const EditOrderPage = () => {
               <h2 className="text-xl font-bold text-white mb-6">Order Information</h2>
 
               <div className="space-y-4">
+                <div>
+                  <p className="text-[#92adc9] text-sm font-semibold mb-1">Customer Name</p>
+                  <p className="text-white text-lg">{order.customer?.name || 'Unknown Customer'}</p>
+                </div>
+
+                <div>
+                  <p className="text-[#92adc9] text-sm font-semibold mb-1">Customer Email</p>
+                  <p className="text-white text-lg">{order.customer?.email || 'N/A'}</p>
+                </div>
+
                 <div>
                   <p className="text-[#92adc9] text-sm font-semibold mb-1">Customer ID</p>
                   <p className="text-white text-lg">{order.customerId}</p>
