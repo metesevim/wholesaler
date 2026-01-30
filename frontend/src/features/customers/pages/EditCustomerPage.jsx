@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
-import { customerRepository } from '../../../data';
+import { customerRepository, inventoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
 
@@ -19,6 +19,8 @@ const EditCustomerPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [availableItems, setAvailableItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,29 +32,55 @@ const EditCustomerPage = () => {
   });
 
   useEffect(() => {
-    loadCustomer();
+    loadData();
   }, [id]);
 
-  const loadCustomer = async () => {
+  const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await customerRepository.getCustomerById(parseInt(id));
-      if (result.success) {
+      // Load customer data
+      const customerResult = await customerRepository.getCustomerById(parseInt(id));
+      if (customerResult.success) {
         setFormData({
-          name: result.data.name || '',
-          email: result.data.email || '',
-          phone: result.data.phone || '',
-          address: result.data.address || '',
-          city: result.data.city || '',
-          country: result.data.country || '',
-          iban: result.data.iban || '',
+          name: customerResult.data.name || '',
+          email: customerResult.data.email || '',
+          phone: customerResult.data.phone || '',
+          address: customerResult.data.address || '',
+          city: customerResult.data.city || '',
+          country: customerResult.data.country || '',
+          iban: customerResult.data.iban || '',
         });
       } else {
         setError('Failed to load customer');
+        setLoading(false);
+        return;
       }
+
+      // Load available items
+      const itemsResult = await inventoryRepository.getAllItems();
+      if (itemsResult.success) {
+        setAvailableItems(itemsResult.data || []);
+      }
+
+      // DEACTIVATED: Load customer's inventory items and match with available items
+      // try {
+      //   const inventoryResult = await customerRepository.getCustomerInventory(parseInt(id));
+      //   if (inventoryResult.success && inventoryResult.data && inventoryResult.data.length > 0) {
+      //     const itemIds = new Set();
+      //     inventoryResult.data.forEach(customerItem => {
+      //       const itemId = customerItem.adminItemId || customerItem.id;
+      //       if (itemId) {
+      //         itemIds.add(itemId);
+      //       }
+      //     });
+      //     setSelectedItems(itemIds);
+      //   }
+      // } catch (err) {
+      //   logger.warn('Failed to load customer inventory items:', err);
+      // }
     } catch (err) {
-      logger.error('Failed to load customer:', err);
+      logger.error('Failed to load data:', err);
       setError('Failed to load customer. Please try again.');
     } finally {
       setLoading(false);
@@ -65,6 +93,16 @@ const EditCustomerPage = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const toggleItemSelection = (itemId) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(itemId)) {
+      newSelected.delete(itemId);
+    } else {
+      newSelected.add(itemId);
+    }
+    setSelectedItems(newSelected);
   };
 
   const handleSubmit = async (e) => {
@@ -80,6 +118,16 @@ const EditCustomerPage = () => {
     try {
       const result = await customerRepository.updateCustomer(parseInt(id), formData);
       if (result.success) {
+        // Save selected items to customer inventory
+        const selectedItemIds = Array.from(selectedItems);
+        if (selectedItemIds.length > 0) {
+          try {
+            await customerRepository.addItemsToInventory(parseInt(id), selectedItemIds);
+          } catch (err) {
+            logger.warn('Failed to save inventory items:', err);
+          }
+        }
+
         setSuccess('Customer updated successfully!');
         setTimeout(() => {
           navigate(ROUTES.CUSTOMERS);
@@ -134,7 +182,7 @@ const EditCustomerPage = () => {
 
   return (
     <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <PageHeader
           title="Edit Customer"
           subtitle="Update customer information"
@@ -155,112 +203,134 @@ const EditCustomerPage = () => {
         )}
 
         <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
+          <h2 className="text-2xl font-bold text-white mb-6">Customer Information</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
-            <Input
-              label="Customer Name *"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter customer name"
-              required
-            />
+            {/* Name and Email */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Customer Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter customer name"
+                  required
+                />
+              </div>
 
-            {/* Email */}
-            <Input
-              label="Email *"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email address"
-              required
-            />
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+            </div>
 
-            {/* Phone */}
-            <Input
-              label="Phone"
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter phone number"
-            />
+            {/* Phone and Address */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Phone
+                </label>
+                <Input
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="Enter phone number"
+                />
+              </div>
 
-            {/* Address */}
-            <Input
-              label="Address"
-              name="address"
-              type="text"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Enter address"
-            />
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Address
+                </label>
+                <Input
+                  name="address"
+                  type="text"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Enter address"
+                />
+              </div>
+            </div>
 
-            {/* City */}
-            <Input
-              label="City"
-              name="city"
-              type="text"
-              value={formData.city}
-              onChange={handleChange}
-              placeholder="Enter city"
-            />
+            {/* City and Country */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* City */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  City
+                </label>
+                <Input
+                  name="city"
+                  type="text"
+                  value={formData.city}
+                  onChange={handleChange}
+                  placeholder="Enter city"
+                />
+              </div>
 
-            {/* Country */}
-            <Input
-              label="Country"
-              name="country"
-              type="text"
-              value={formData.country}
-              onChange={handleChange}
-              placeholder="Enter country"
-            />
+              {/* Country */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Country
+                </label>
+                <Input
+                  name="country"
+                  type="text"
+                  value={formData.country}
+                  onChange={handleChange}
+                  placeholder="Enter country"
+                />
+              </div>
+            </div>
 
             {/* IBAN */}
-            <Input
-              label="IBAN"
-              name="iban"
-              type="text"
-              value={formData.iban}
-              onChange={handleChange}
-              placeholder="Enter IBAN"
-            />
-
-            {/* Form Actions */}
-            <div className="flex gap-4 mt-8">
-              <Button type="submit" variant="primary" className="flex-1">
-                Update Customer
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate(ROUTES.CUSTOMERS)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                IBAN
+              </label>
+              <Input
+                name="iban"
+                type="text"
+                value={formData.iban}
+                onChange={handleChange}
+                placeholder="Enter IBAN"
+              />
             </div>
-          </form>
 
-          {/* Delete Section */}
-          <div className="mt-8 pt-8 border-t border-[#324d67]">
-            <h3 className="text-lg font-bold text-red-400 mb-1">Caution!</h3>
-            <p className="text-[#92adc9] text-sm mb-6">
-              Once you delete a customer, there is no going back. Please be certain.
-            </p>
-            <Button
-              type="button"
-              variant="danger"
-              onClick={handleDelete}
-            >
-              Delete Customer
-            </Button>
+              {/* Form Actions */}
+              <div className="flex gap-4 mt-8 pt-6">
+                <Button type="submit" variant="primary" className="flex-1">
+                  Update Customer
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={handleDelete}
+                >
+                  Delete Customer
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

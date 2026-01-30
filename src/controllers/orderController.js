@@ -51,15 +51,7 @@ export const createOrder = async (req, res) => {
                 });
             }
 
-            // 2) Check if item is in customer inventory
-            const customerItem = customerInventory.items.find((ci) => ci.adminItemId === parseInt(adminItemId));
-            if (!customerItem) {
-                return res.status(400).json({
-                    error: `Item ${adminItemId} is not in customer inventory.`,
-                });
-            }
-
-            // 3) Get admin inventory item
+            // 2) Get admin inventory item (no need to check customer inventory constraint)
             const adminItem = await prisma.adminInventoryItem.findUnique({
                 where: { id: parseInt(adminItemId) },
             });
@@ -68,11 +60,13 @@ export const createOrder = async (req, res) => {
                 return res.status(404).json({ error: `Item ${adminItemId} not found in inventory.` });
             }
 
-            // 4) Check if enough stock (compare units)
+            // 3) Check if enough stock (compare units)
+            // Note: We allow creating orders even if stock is insufficient
+            // The frontend warns the user but allows override
             if (adminItem.quantity < quantity) {
-                return res.status(400).json({
-                    error: `Insufficient stock for ${adminItem.name}. Available: ${adminItem.quantity} ${adminItem.unit}, Requested: ${quantity} ${unit}`,
-                });
+                console.warn(
+                    `Order created with insufficient stock: ${adminItem.name}. Available: ${adminItem.quantity}, Requested: ${quantity}`
+                );
             }
 
             const itemTotal = quantity * (adminItem.pricePerUnit || 0);

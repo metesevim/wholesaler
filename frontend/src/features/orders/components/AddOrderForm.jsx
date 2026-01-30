@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Input from '../../../components/forms/Input';
 import Button from '../../../components/forms/Button';
-import { orderRepository, customerRepository } from '../../../data';
+import { orderRepository, customerRepository, inventoryRepository } from '../../../data';
 import logger from '../../../shared/utils/logger';
 
 const AddOrderForm = ({ onSuccess, onError }) => {
@@ -21,6 +21,8 @@ const AddOrderForm = ({ onSuccess, onError }) => {
   const [selectedItemId, setSelectedItemId] = useState('');
   const [selectedQuantity, setSelectedQuantity] = useState('');
   const [selectedUnit, setSelectedUnit] = useState('piece');
+  const [insufficientStockWarning, setInsufficientStockWarning] = useState(null);
+  const [pendingItemToAdd, setPendingItemToAdd] = useState(null);
 
   // Load customers on component mount
   const loadCustomers = useCallback(async () => {
@@ -41,11 +43,11 @@ const AddOrderForm = ({ onSuccess, onError }) => {
     loadCustomers();
   }, [loadCustomers]);
 
-  const loadAvailableItems = async (customerId) => {
+  const loadAvailableItems = async () => {
     try {
-      const result = await orderRepository.getAvailableItemsForCustomer(customerId);
+      const result = await inventoryRepository.getAllItems();
       if (result.success) {
-        setAvailableItems(result.data.items || []);
+        setAvailableItems(result.data || []);
       } else {
         logger.error('Failed to load available items:', result.error);
       }
@@ -54,12 +56,14 @@ const AddOrderForm = ({ onSuccess, onError }) => {
     }
   };
 
-  // Load available items when customer is selected
+  // Load all available items on component mount
   useEffect(() => {
-    if (selectedCustomerId) {
-      loadAvailableItems(selectedCustomerId);
-    } else {
-      setAvailableItems([]);
+    loadAvailableItems();
+  }, []);
+
+  // Clear order items when customer is deselected
+  useEffect(() => {
+    if (!selectedCustomerId) {
       setOrderItems([]);
     }
   }, [selectedCustomerId]);
@@ -102,6 +106,28 @@ const AddOrderForm = ({ onSuccess, onError }) => {
       return;
     }
 
+    // Check if quantity exceeds available stock
+    const requestedQuantity = parseFloat(selectedQuantity);
+    if (requestedQuantity > item.quantity) {
+      // Show warning with override button instead of blocking
+      setInsufficientStockWarning({
+        itemName: item.name,
+        available: item.quantity,
+        unit: item.unit,
+        requested: requestedQuantity,
+        requestedUnit: selectedUnit,
+      });
+      setPendingItemToAdd({
+        adminItemId: parseInt(selectedItemId),
+        itemName: item.name,
+        quantity: requestedQuantity,
+        unit: selectedUnit,
+        availableQuantity: item.quantity,
+        price: item.pricePerUnit || 0
+      });
+      return;
+    }
+
     // Check for duplicate items
     const isDuplicate = orderItems.some(oi => oi.adminItemId === parseInt(selectedItemId));
     if (isDuplicate) {
@@ -109,20 +135,44 @@ const AddOrderForm = ({ onSuccess, onError }) => {
       return;
     }
 
-    const newItem = {
+    addItemToOrder({
       adminItemId: parseInt(selectedItemId),
       itemName: item.name,
-      quantity: parseFloat(selectedQuantity),
+      quantity: requestedQuantity,
       unit: selectedUnit,
       availableQuantity: item.quantity,
-      price: item.price || 0
-    };
+      price: item.pricePerUnit || 0
+    });
+  };
 
+  const addItemToOrder = (newItem) => {
     setOrderItems([...orderItems, newItem]);
     setSelectedItemId('');
     setSelectedQuantity('');
     setSelectedUnit('piece');
     setErrors({});
+    setInsufficientStockWarning(null);
+    setPendingItemToAdd(null);
+  };
+
+  const handleOverrideStockWarning = () => {
+    if (pendingItemToAdd) {
+      // Check for duplicate items
+      const isDuplicate = orderItems.some(oi => oi.adminItemId === pendingItemToAdd.adminItemId);
+      if (isDuplicate) {
+        setErrors({ itemId: 'This item is already added to the order' });
+        setInsufficientStockWarning(null);
+        setPendingItemToAdd(null);
+        return;
+      }
+
+      addItemToOrder(pendingItemToAdd);
+    }
+  };
+
+  const handleCancelStockWarning = () => {
+    setInsufficientStockWarning(null);
+    setPendingItemToAdd(null);
   };
 
   const handleRemoveItem = (index) => {
@@ -200,6 +250,35 @@ const AddOrderForm = ({ onSuccess, onError }) => {
           <p className="text-[#92adc9] mb-4">Please select a customer first to add items</p>
         )}
 
+        {/* Insufficient Stock Warning */}
+        {insufficientStockWarning && (
+          <div className="mb-6 p-4 bg-yellow-900 border border-yellow-500 rounded-lg">
+            <p className="text-yellow-200 font-semibold mb-2">
+              ⚠️ Insufficient Stock Warning
+            </p>
+            <p className="text-yellow-200 mb-4">
+              You are requesting <strong>{insufficientStockWarning.requested} {insufficientStockWarning.requestedUnit}</strong>,
+              but only <strong>{insufficientStockWarning.available} {insufficientStockWarning.unit}</strong> of <strong>{insufficientStockWarning.itemName}</strong> is available.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={handleOverrideStockWarning}
+                variant="primary"
+              >
+                Override & Add Item
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCancelStockWarning}
+                variant="secondary"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4 mb-6">
           {/* Item Selection */}
           <div>
@@ -209,7 +288,16 @@ const AddOrderForm = ({ onSuccess, onError }) => {
             <select
               disabled={!selectedCustomerId}
               value={selectedItemId}
-              onChange={(e) => setSelectedItemId(e.target.value)}
+              onChange={(e) => {
+                setSelectedItemId(e.target.value);
+                // Auto-populate unit based on selected item
+                if (e.target.value) {
+                  const selectedItem = availableItems.find(i => i.id === parseInt(e.target.value));
+                  if (selectedItem && selectedItem.unit) {
+                    setSelectedUnit(selectedItem.unit);
+                  }
+                }
+              }}
               className={`
                 w-full h-12 rounded-lg border bg-[#192633] text-white px-4
                 focus:outline-none focus:border-[#137fec]

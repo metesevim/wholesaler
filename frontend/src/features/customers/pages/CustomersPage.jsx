@@ -97,7 +97,17 @@ const CustomersPage = () => {
                   <h3 className="text-lg font-bold text-white flex-1">
                     {customer.name}
                   </h3>
+
                   <div className="flex gap-2">
+                    <Button
+                        onClick={() => {navigator.clipboard.writeText(customer.iban);
+                          alert('IBAN copied to clipboard!');
+                        }}
+                        variant="primary"
+                        size="sm"
+                    >
+                      Copy IBAN
+                    </Button>
                     <Button
                       onClick={() => navigate(`${ROUTES.CUSTOMERS}/${customer.id}/edit`)}
                       variant="secondary"
@@ -105,31 +115,51 @@ const CustomersPage = () => {
                     >
                       Edit
                     </Button>
-                    <Button
-                      onClick={() => handleDeleteCustomer(customer.id, customer.name)}
-                      variant="danger"
-                      size="sm"
-                    >
-                      ✕
-                    </Button>
                   </div>
                 </div>
-                <div className="space-y-2 text-sm">
-                  <p className="text-[#92adc9]">
-                    <span className="font-semibold">Email:</span> {customer.email}
+
+                <div className="text-sm">
+                  <div className="border-t border-[#324d67] py-2"></div>
+                  <p className="text-[#92adc9] mb-2">
+                    <span className="font-semibold">Email:</span> {customer.email || 'N/A'}
                   </p>
-                  <p className="text-[#92adc9]">
-                    <span className="font-semibold">Phone:</span> {customer.phone}
+                  <p className="text-[#92adc9] mb-2">
+                    <span className="font-semibold">Phone:</span> {customer.phone || 'N/A'}
                   </p>
+                  <div className="border-t border-[#324d67] my-2"></div>
+                  {customer.address && (
+                    <p className="text-[#92adc9] mb-2">
+                      <span className="font-semibold">Address:</span> {customer.address}
+                    </p>
+                  )}
                   {customer.city && (
-                    <p className="text-[#92adc9]">
+                    <p className="text-[#92adc9] mb-2">
                       <span className="font-semibold">City:</span> {customer.city}
                     </p>
                   )}
                   {customer.country && (
-                    <p className="text-[#92adc9]">
+                    <p className="text-[#92adc9] mb-2">
                       <span className="font-semibold">Country:</span> {customer.country}
                     </p>
+                  )}
+                  <div className="border-t border-[#324d67] my-2"></div>
+                  {customer.iban && (
+                    <p className="text-[#92adc9] mb-2">
+                      <span className="font-semibold">IBAN:</span> {customer.iban}
+                    </p>
+                  )}
+                  {!customer.iban && (
+                    <p className="text-[#92adc9] mb-2">
+                      <span className="font-semibold">IBAN:</span> N/A
+                    </p>
+                  )}
+                  {customer.createdAt && (
+                    <>
+                      <div className="border-t border-[#324d67] my-2"></div>
+                      <p className="text-[#92adc9]">
+                        <span className="font-semibold">Customer since:</span> {new Date(customer.createdAt).toLocaleDateString()}
+                      </p>
+                    </>
                   )}
                 </div>
               </div>

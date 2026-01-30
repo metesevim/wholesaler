@@ -37,7 +37,7 @@ const DashboardPage = () => {
               </Button>
               <Button
                   onClick={handleLogout}
-                  variant="secondary"
+                  variant="danger"
                   size="md">
 
                 Logout

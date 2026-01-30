@@ -45,7 +45,7 @@ const OrdersPage = () => {
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Orders"
-          subtitle="  Manage your orders"
+          subtitle="Manage your orders"
           rightContent={
             <Button
               onClick={() => navigate(ROUTES.ADD_ORDER)}
@@ -86,7 +86,7 @@ const OrdersPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {orders.map(order => (
               <div
                 key={order.id}
@@ -96,7 +96,7 @@ const OrdersPage = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-bold text-white">
-                        Order #{order.id}
+                        {order.customer?.name}'s Order - {new Date(order.createdAt).toLocaleDateString()}
                       </h3>
                     </div>
 
@@ -104,26 +104,8 @@ const OrdersPage = () => {
                       Customer ID: {order.customerId}
                     </p>
 
-                    {order.createdAt && (
-                        <p className="text-[#92adc9] text-sm mb-2">
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </p>
-                    )}
-
                   </div>
-                  <div className="text-right" className="flex flex-col items-end gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          order.status === 'PENDING' ? 'bg-yellow-900 text-yellow-200' :
-                              order.status === 'CONFIRMED' ? 'bg-blue-900 text-blue-200' :
-                                  order.status === 'PROCESSING' ? 'bg-blue-800 text-blue-100' :
-                                      order.status === 'SHIPPED' ? 'bg-purple-900 text-purple-200' :
-                                          order.status === 'DELIVERED' ? 'bg-green-900 text-green-200' :
-                                              'bg-red-900 text-red-200'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </div>
+                  <div className="flex flex-col items-end gap-2">
                     <Button
                         onClick={() => navigate(`${ROUTES.ORDERS}/${order.id}/edit`)}
                         variant="secondary"
@@ -135,14 +117,30 @@ const OrdersPage = () => {
                 </div>
                 {order.items && order.items.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-[#324d67]">
-                    <p className="text-sm text-[#92adc9] mb-2">Items:</p>
-                    <ul className="text-sm text-[#92adc9] space-y-1">
-                      {order.items.map((item, idx) => (
-                        <li key={idx}>
-                          • Item {item.adminItemId || item.id}: {item.quantity} {item.unit || 'unit'}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <p className="text-sm text-[#92adc9] mb-2 font-semibold">Items:</p>
+                        <ul className="text-sm text-[#92adc9] space-y-1">
+                          {order.items.map((item, idx) => (
+                            <li key={idx}>
+                              • Item {item.adminItemId || item.id}: {item.quantity} {item.unit || 'unit'}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="flex flex-col items-end justify-end">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                            order.status === 'PENDING' ? 'bg-yellow-900 text-yellow-200' :
+                                order.status === 'CONFIRMED' ? 'bg-blue-900 text-blue-200' :
+                                    order.status === 'PROCESSING' ? 'bg-blue-800 text-blue-100' :
+                                        order.status === 'SHIPPED' ? 'bg-purple-900 text-purple-200' :
+                                            order.status === 'DELIVERED' ? 'bg-green-900 text-green-200' :
+                                                'bg-red-900 text-red-200'
+                        }`}>
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -154,6 +152,8 @@ const OrdersPage = () => {
                     </p>
                   </div>
                 )}
+
+
 
               </div>
             ))}
