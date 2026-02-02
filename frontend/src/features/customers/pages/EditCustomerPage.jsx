@@ -53,7 +53,7 @@ const EditCustomerPage = () => {
       } else {
         setError('Failed to load customer');
         setLoading(false);
-      }
+""      }
     } catch (err) {
       logger.error('Failed to load data:', err);
       setError('Failed to load customer. Please try again.');
