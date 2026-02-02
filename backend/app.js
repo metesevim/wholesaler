@@ -10,7 +10,7 @@ import providerRoutes from "./routes/providerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { specs, swaggerUi } from "./swagger.js";
-import prisma from "../prisma/client.js";
+import prisma from "./prisma/client.js";
 
 const app = express();
 

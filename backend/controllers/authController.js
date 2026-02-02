@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 // use shared prisma client
-import prisma from "../../prisma/client.js";
+import prisma from "../prisma/client.js";
 import { PERMISSIONS } from "../constants/permissions.js";
 
 //Register

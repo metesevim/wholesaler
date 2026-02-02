@@ -1,4 +1,4 @@
-import prisma from "../../prisma/client.js";
+import prisma from "../prisma/client.js";
 
 // ============= GET ALL PROVIDERS =============
 export const getAllProviders = async (req, res) => {

@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { specs } from './src/swagger.js';
+import { specs } from './backend/swagger.js';
 
 // Export the Swagger specification to a JSON file
 const outputPath = './openapi.json';
