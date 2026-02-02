@@ -1,7 +1,7 @@
 /**
  * HomepagePage Component
  *
- * Main homepage - management dashboard
+ * Main homepage - sales dashboard
  */
 
 import React, { useState, useEffect } from 'react';
@@ -36,6 +36,43 @@ const HomepagePage = () => {
     }
   };
 
+  const StatCard = ({ icon, label, value, color = 'blue', subtext }) => (
+    <div className={`relative overflow-hidden rounded-xl p-6 border backdrop-blur-sm ${
+      color === 'blue' 
+        ? 'bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/30 hover:border-blue-500/60' 
+        : 'bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/30 hover:border-cyan-500/60'
+    } transition-all duration-300 hover:shadow-lg`}>
+      {/* Background accent */}
+      <div className={`absolute -right-8 -top-8 w-32 h-32 ${
+        color === 'blue' ? 'bg-blue-500/5' : 'bg-cyan-500/5'
+      } rounded-full`}></div>
+
+      <div className="relative z-10">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-[#92adc9] text-sm font-medium mb-2 uppercase tracking-wider">{label}</p>
+            <h3 className="text-4xl font-bold text-white">
+              {loading ? '...' : value}
+            </h3>
+          </div>
+          <div className={`p-3 rounded-lg ${
+            color === 'blue' 
+              ? 'bg-blue-500/20 text-blue-400' 
+              : 'bg-cyan-500/20 text-cyan-400'
+          }`}>
+            <span className="material-symbols-outlined text-3xl">{icon}</span>
+          </div>
+        </div>
+
+        {subtext && (
+          <div className="pt-3 border-t border-white/10">
+            <p className="text-xs text-[#92adc9]">{subtext}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.HOMEPAGE} />
@@ -43,66 +80,56 @@ const HomepagePage = () => {
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome, {user?.name || user?.username}!</h1>
-            <p className="text-[#92adc9]">Manage your wholesale business from here</p>
+          {/* Welcome Section */}
+          <div className="mb-12">
+            <div className="flex items-baseline justify-between mb-2">
+              <h1 className="text-4xl font-bold text-white">
+                Welcome back, <span className="text-blue-400">{user?.name || user?.username}!</span>
+              </h1>
+            </div>
+            <p className="text-[#92adc9] text-lg">Here's what's happening with your wholesale business</p>
           </div>
 
-          {/* Sales Dashboard */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* Total Sales Card */}
-            <div className="bg-gradient-to-br from-[#1e3a5f] to-[#192633] rounded-lg p-6 border border-[#1e3a5f] shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-[#92adc9] text-sm font-semibold mb-2">Total Sales</p>
-                  <h3 className="text-3xl font-bold text-white">
-                    ${loading ? '-' : totalSales.toFixed(2)}
-                  </h3>
-                </div>
-                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#92adc9', fontVariationSettings: '"wght" 400' }}>
-                  trending_up
-                </span>
+          {/* Info Section */}
+          <div className="bg-gradient-to-r from-blue-500/5 to-cyan-500/5 border border-blue-500/20 rounded-xl p-4 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-md bg-blue-500/20 text-blue-400 w-10 h-10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-2xl">info</span>
               </div>
-              <div className="pt-4 border-t border-[#324d67]">
-                <p className="text-xs text-[#92adc9]">All-time revenue</p>
+              <div>
+                <h3 className="text-white font-semibold mb-2">Manage Your Business</h3>
+                <p className="text-[#92adc9] text-sm leading-relaxed">
+                  Navigate to Orders, Inventory, Customers, or Providers using the sidebar menu. Create new records, edit existing ones, and track your wholesale operations all in one place.
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Total Orders Card */}
-            <div className="bg-gradient-to-br from-[#1e3a5f] to-[#192633] rounded-lg p-6 border border-[#1e3a5f] shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-[#92adc9] text-sm font-semibold mb-2">Total Orders</p>
-                  <h3 className="text-3xl font-bold text-white">
-                    {loading ? '-' : totalOrders}
-                  </h3>
-                </div>
-                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#92adc9', fontVariationSettings: '"wght" 400' }}>
-                  shopping_cart
-                </span>
-              </div>
-              <div className="pt-4 border-t border-[#324d67]">
-                <p className="text-xs text-[#92adc9]">Completed orders</p>
-              </div>
-            </div>
+          {/* Main Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <StatCard
+              icon="trending_up"
+              label="Total Sales"
+              value={`$${loading ? '-' : totalSales.toFixed(2)}`}
+              color="blue"
+              subtext="All-time revenue"
+            />
 
-            {/* Average Order Value Card */}
-            <div className="bg-gradient-to-br from-[#1e3a5f] to-[#192633] rounded-lg p-6 border border-[#1e3a5f] shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-[#92adc9] text-sm font-semibold mb-2">Avg Order Value</p>
-                  <h3 className="text-3xl font-bold text-white">
-                    ${loading || totalOrders === 0 ? '-' : (totalSales / totalOrders).toFixed(2)}
-                  </h3>
-                </div>
-                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#92adc9', fontVariationSettings: '"wght" 400' }}>
-                  assessment
-                </span>
-              </div>
-              <div className="pt-4 border-t border-[#324d67]">
-                <p className="text-xs text-[#92adc9]">Average per order</p>
-              </div>
-            </div>
+            <StatCard
+              icon="shopping_cart"
+              label="Total Orders"
+              value={loading ? '-' : totalOrders}
+              color="cyan"
+              subtext="Completed transactions"
+            />
+
+            <StatCard
+              icon="assessment"
+              label="Average Order"
+              value={`$${loading || totalOrders === 0 ? '-' : (totalSales / totalOrders).toFixed(2)}`}
+              color="blue"
+              subtext="Per order average"
+            />
           </div>
         </div>
       </div>
@@ -111,6 +138,3 @@ const HomepagePage = () => {
 };
 
 export default HomepagePage;
-
-
-
