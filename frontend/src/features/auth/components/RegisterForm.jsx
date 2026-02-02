@@ -7,7 +7,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../../../components/forms/Input';
+import PasswordInput from '../../../components/forms/PasswordInput';
 import Button from '../../../components/forms/Button';
+import FormField from '../../../components/forms/FormField';
+import Message from '../../../components/feedback/Message';
 
 const RegisterForm = ({ onSubmit, loading, error, onToggleMode }) => {
   const [formData, setFormData] = useState({
@@ -63,75 +66,55 @@ const RegisterForm = ({ onSubmit, loading, error, onToggleMode }) => {
   const displayError = validationError || error;
 
   return (
-    <div className="w-full max-w-md">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-        <p className="text-[#92adc9]">Register for a new account</p>
+    <div className="flex flex-col gap-8">
+      {/* Heading */}
+      <div className="flex flex-col gap-3">
+        <p className="text-3xl font-black text-white">Create Account</p>
+        <p className="text-base text-[#92adc9]">
+          Register for a new account
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Username */}
-        <Input
-          label="Username"
-          type="text"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-          placeholder="Enter your username"
-          disabled={loading}
-          required
-        />
-
-        {/* Role Selection */}
-        <div>
-          <label className="block text-sm font-medium text-[#92adc9] mb-2">
-            Role
-          </label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            disabled={loading}
-            className="w-full px-4 py-3 bg-[#192633] border border-[#324d67] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#4a9eff] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="Employee">Employee</option>
-            <option value="Admin">Admin</option>
-          </select>
-          <p className="mt-1 text-xs text-[#92adc9]">
-            Select Admin for full access or Employee for limited access
-          </p>
-        </div>
-
-        {/* Password */}
-        <Input
-          label="Password"
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Enter your password"
-          disabled={loading}
-          required
-        />
-
-        {/* Confirm Password */}
-        <Input
-          label="Confirm Password"
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          placeholder="Confirm your password"
-          disabled={loading}
-          required
-        />
-
-        {/* Error Message */}
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        {/* Global Error Message */}
         {displayError && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3">
-            <p className="text-red-400 text-sm">{displayError}</p>
-          </div>
+          <Message type="error">{displayError}</Message>
         )}
+
+        {/* Username Field */}
+        <FormField label="Username" required>
+          <Input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Enter your username"
+            disabled={loading}
+          />
+        </FormField>
+
+        {/* Password Field */}
+        <FormField label="Password" required>
+          <PasswordInput
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+            disabled={loading}
+          />
+        </FormField>
+
+        {/* Confirm Password Field */}
+        <FormField label="Confirm Password" required>
+          <PasswordInput
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm your password"
+            disabled={loading}
+          />
+        </FormField>
 
         {/* Submit Button */}
         <Button
@@ -144,16 +127,17 @@ const RegisterForm = ({ onSubmit, loading, error, onToggleMode }) => {
         </Button>
 
         {/* Toggle to Login */}
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={onToggleMode}
-            disabled={loading}
-            className="text-[#4a9eff] hover:text-[#6bb0ff] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Already have an account? Login
-          </button>
-        </div>
+        {onToggleMode && (
+          <p className="text-sm text-center text-[#92adc9]">
+            Already have an account?{' '}
+            <span
+              onClick={onToggleMode}
+              className="font-medium text-[#137fec] underline hover:text-[#1a8fff] cursor-pointer"
+            >
+              Login
+            </span>
+          </p>
+        )}
       </form>
     </div>
   );

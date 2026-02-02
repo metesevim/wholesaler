@@ -21,6 +21,9 @@ import EditCustomerPage from '../features/customers/pages/EditCustomerPage';
 import ProvidersPage from '../features/providers/pages/ProvidersPage';
 import AddProviderPage from '../features/providers/pages/AddProviderPage';
 import EditProviderPage from '../features/providers/pages/EditProviderPage';
+import EmployeesPage from '../features/employees/pages/EmployeesPage';
+import AddEmployeePage from '../features/employees/pages/AddEmployeePage';
+import EditEmployeePage from '../features/employees/pages/EditEmployeePage';
 import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
@@ -143,6 +146,32 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <EditProviderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Employee Routes */}
+        <Route
+          path={ROUTES.EMPLOYEES}
+          element={
+            <ProtectedRoute>
+              <EmployeesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.ADD_EMPLOYEE}
+          element={
+            <ProtectedRoute>
+              <AddEmployeePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.EDIT_EMPLOYEE}
+          element={
+            <ProtectedRoute>
+              <EditEmployeePage />
             </ProtectedRoute>
           }
         />

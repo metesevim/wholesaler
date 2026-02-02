@@ -152,164 +152,160 @@ const AdminSettingsPage = () => {
     }
   };
 
-  const handleCancel = () => {
-    navigate(ROUTES.HOMEPAGE);
-  };
-
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.ADMIN_SETTINGS} />
       <div className="flex-1 p-8 overflow-auto">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <PageHeader
             title="Admin Account Settings"
             showDashboardButton={true}
-          />
-
-        <div className="bg-[#192633] rounded-lg border border-[#324d67] p-8 mt-8">
-          {message && (
-            <Message type={messageType} className="mb-6">
-              {message}
-            </Message>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Profile Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white">Profile Information</h3>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Full Name
-                </label>
-                <Input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                  error={errors.fullName}
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Username
-                </label>
-                <Input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="Enter your username"
-                  error={errors.username}
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Email Address
-                </label>
-                <Input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  error={errors.email}
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  IBAN
-                </label>
-                <Input
-                  type="text"
-                  name="iban"
-                  value={formData.iban}
-                  onChange={handleChange}
-                  placeholder="Enter your IBAN"
-                  error={errors.iban}
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            {/* Password Change Section */}
-            <div className="space-y-4 pt-6 border-t border-[#324d67]">
-              <h3 className="text-lg font-bold text-white">Change Password (Optional)</h3>
-              <p className="text-sm text-[#92adc9]">Leave blank if you don't want to change your password</p>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Current Password
-                </label>
-                <Input
-                  type="password"
-                  name="currentPassword"
-                  value={formData.currentPassword}
-                  onChange={handleChange}
-                  placeholder="Enter your current password"
-                  error={errors.currentPassword}
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  New Password
-                </label>
-                <Input
-                  type="password"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  placeholder="Enter new password"
-                  error={errors.newPassword}
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Confirm New Password
-                </label>
-                <Input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm new password"
-                  error={errors.confirmPassword}
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-6 border-t border-[#324d67]">
+            rightContent={
               <Button
-                type="submit"
+                onClick={handleSubmit}
                 variant="primary"
                 disabled={loading}
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleCancel}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
+            }
+          />
+
+          <div className="grid grid-cols-1 gap-6">
+            {/* Form Section */}
+            <div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {message && (
+                  <Message type={messageType} className="mb-6">
+                    {message}
+                  </Message>
+                )}
+
+                {/* Profile Information Section */}
+                <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
+                  <h3 className="text-lg font-bold text-white mb-6">Profile Information</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        Full Name
+                      </label>
+                      <Input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        placeholder="Enter your full name"
+                        error={errors.fullName}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        Username
+                      </label>
+                      <Input
+                        type="text"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        placeholder="Enter your username"
+                        error={errors.username}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        Email Address
+                      </label>
+                      <Input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter your email"
+                        error={errors.email}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        IBAN
+                      </label>
+                      <Input
+                        type="text"
+                        name="iban"
+                        value={formData.iban}
+                        onChange={handleChange}
+                        placeholder="Enter your IBAN"
+                        error={errors.iban}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password Change Section */}
+                <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
+                  <h3 className="text-lg font-bold text-white mb-6">Change Password</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        Current Password
+                      </label>
+                      <Input
+                        type="password"
+                        name="currentPassword"
+                        value={formData.currentPassword}
+                        onChange={handleChange}
+                        placeholder="Enter your current password"
+                        error={errors.currentPassword}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        New Password
+                      </label>
+                      <Input
+                        type="password"
+                        name="newPassword"
+                        value={formData.newPassword}
+                        onChange={handleChange}
+                        placeholder="Enter new password"
+                        error={errors.newPassword}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">
+                        Confirm New Password
+                      </label>
+                      <Input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="Confirm new password"
+                        error={errors.confirmPassword}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </form>
             </div>
-          </form>
-        </div>
+          </div>
         </div>
       </div>
     </div>

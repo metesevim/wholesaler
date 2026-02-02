@@ -2,7 +2,7 @@
  * Application-wide constants
  */
 
-export const APP_NAME = 'Wholesale Hub - Horecaline';
+export const APP_NAME = 'Wholesale Hub';
 
 export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
@@ -20,6 +20,9 @@ export const ROUTES = {
   PROVIDERS: '/providers',
   ADD_PROVIDER: '/providers/add',
   ADMIN_SETTINGS: '/admin/settings',
+  EMPLOYEES: '/employees',
+  ADD_EMPLOYEE: '/employees/add',
+  EDIT_EMPLOYEE: '/employees/:id/edit',
   PROFILE: '/profile'
 };
 

@@ -10,7 +10,7 @@ import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
-import { customerRepository, inventoryRepository } from '../../../data';
+import { customerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
 
@@ -20,8 +20,6 @@ const EditCustomerPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [availableItems, setAvailableItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState(new Set());
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -55,31 +53,7 @@ const EditCustomerPage = () => {
       } else {
         setError('Failed to load customer');
         setLoading(false);
-        return;
       }
-
-      // Load available items
-      const itemsResult = await inventoryRepository.getAllItems();
-      if (itemsResult.success) {
-        setAvailableItems(itemsResult.data || []);
-      }
-
-      // DEACTIVATED: Load customer's inventory items and match with available items
-      // try {
-      //   const inventoryResult = await customerRepository.getCustomerInventory(parseInt(id));
-      //   if (inventoryResult.success && inventoryResult.data && inventoryResult.data.length > 0) {
-      //     const itemIds = new Set();
-      //     inventoryResult.data.forEach(customerItem => {
-      //       const itemId = customerItem.adminItemId || customerItem.id;
-      //       if (itemId) {
-      //         itemIds.add(itemId);
-      //       }
-      //     });
-      //     setSelectedItems(itemIds);
-      //   }
-      // } catch (err) {
-      //   logger.warn('Failed to load customer inventory items:', err);
-      // }
     } catch (err) {
       logger.error('Failed to load data:', err);
       setError('Failed to load customer. Please try again.');
@@ -96,16 +70,6 @@ const EditCustomerPage = () => {
     }));
   };
 
-  const toggleItemSelection = (itemId) => {
-    const newSelected = new Set(selectedItems);
-    if (newSelected.has(itemId)) {
-      newSelected.delete(itemId);
-    } else {
-      newSelected.add(itemId);
-    }
-    setSelectedItems(newSelected);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -119,15 +83,6 @@ const EditCustomerPage = () => {
     try {
       const result = await customerRepository.updateCustomer(parseInt(id), formData);
       if (result.success) {
-        // Save selected items to customer inventory
-        const selectedItemIds = Array.from(selectedItems);
-        if (selectedItemIds.length > 0) {
-          try {
-            await customerRepository.addItemsToInventory(parseInt(id), selectedItemIds);
-          } catch (err) {
-            logger.warn('Failed to save inventory items:', err);
-          }
-        }
 
         setSuccess('Customer updated successfully!');
         setTimeout(() => {
@@ -205,117 +160,121 @@ const EditCustomerPage = () => {
           </div>
         )}
 
-        <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
-          <h2 className="text-2xl font-bold text-white mb-6">Customer Information</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name and Email */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Customer Name <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter customer name"
-                  required
-                />
-              </div>
+        <div className="grid grid-cols-1 gap-6">
+          {/* Form Section */}
+          <div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
+                <h2 className="text-2xl font-bold text-white mb-6">Customer Information</h2>
+                {/* Name and Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Customer Name <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      name="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Enter customer name"
+                      required
+                    />
+                  </div>
 
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter email address"
-                  required
-                />
-              </div>
-            </div>
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter email address"
+                      required
+                    />
+                  </div>
+                </div>
 
-            {/* Phone and Address */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Phone
-                </label>
-                <Input
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Enter phone number"
-                />
-              </div>
+                {/* Phone and Address */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Phone */}
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Phone
+                    </label>
+                    <Input
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Enter phone number"
+                    />
+                  </div>
 
-              {/* Address */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Address
-                </label>
-                <Input
-                  name="address"
-                  type="text"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Enter address"
-                />
-              </div>
-            </div>
+                  {/* Address */}
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Address
+                    </label>
+                    <Input
+                      name="address"
+                      type="text"
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="Enter address"
+                    />
+                  </div>
+                </div>
 
-            {/* City and Country */}
-            <div className="grid grid-cols-2 gap-4">
+                {/* City and Country */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {/* City */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  City
-                </label>
-                <Input
-                  name="city"
-                  type="text"
-                  value={formData.city}
-                  onChange={handleChange}
-                  placeholder="Enter city"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      City
+                    </label>
+                    <Input
+                      name="city"
+                      type="text"
+                      value={formData.city}
+                      onChange={handleChange}
+                      placeholder="Enter city"
+                    />
+                  </div>
 
-              {/* Country */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Country
-                </label>
-                <Input
-                  name="country"
-                  type="text"
-                  value={formData.country}
-                  onChange={handleChange}
-                  placeholder="Enter country"
-                />
-              </div>
-            </div>
+                  {/* Country */}
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Country
+                    </label>
+                    <Input
+                      name="country"
+                      type="text"
+                      value={formData.country}
+                      onChange={handleChange}
+                      placeholder="Enter country"
+                    />
+                  </div>
+                </div>
 
-            {/* IBAN */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                IBAN
-              </label>
-              <Input
-                name="iban"
-                type="text"
-                value={formData.iban}
-                onChange={handleChange}
-                placeholder="Enter IBAN"
-              />
-            </div>
+                {/* IBAN */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-white mb-2">
+                    IBAN
+                  </label>
+                  <Input
+                    name="iban"
+                    type="text"
+                    value={formData.iban}
+                    onChange={handleChange}
+                    placeholder="Enter IBAN"
+                  />
+                </div>
+              </div>
 
               {/* Form Actions */}
               <div className="flex gap-4 mt-8 pt-6">
@@ -329,12 +288,13 @@ const EditCustomerPage = () => {
                 >
                   Delete Customer
                 </Button>
-              </div>
-            </form>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-        </div>
       </div>
+    </div>
   );
 };
 

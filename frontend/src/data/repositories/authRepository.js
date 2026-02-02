@@ -56,6 +56,7 @@ const login = async (credentials) => {
       user: user ? userMapper.fromApi(user) : null
     });
   } catch (error) {
+
     logger.error('Login failed:', error);
     return Result.failure(error.message || 'Login failed. Please try again.');
   }
