@@ -104,7 +104,7 @@ const OrdersPage = () => {
                     </div>
 
                     <p className="text-sm text-[#92adc9] mb-2">
-                      Customer ID: {order.customerId}
+                      Total: <span className="font-bold text-white">${order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}</span>
                     </p>
 
                   </div>
