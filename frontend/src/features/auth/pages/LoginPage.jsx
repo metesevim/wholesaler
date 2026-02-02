@@ -19,8 +19,8 @@ const LoginPage = () => {
     const result = await login(credentials);
 
     if (result.success) {
-      // Redirect to dashboard on successful login
-      navigate(ROUTES.DASHBOARD);
+      // Redirect to homepage on successful login
+      navigate(ROUTES.HOMEPAGE);
     }
   };
 

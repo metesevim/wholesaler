@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import { inventoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
@@ -201,8 +202,10 @@ const EditInventoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.INVENTORY} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-4xl mx-auto">
         <PageHeader
             title={`Edit Item: ${item.name}`}
             subtitle="Update the details of your inventory item"
@@ -333,6 +336,7 @@ const EditInventoryPage = () => {
               </Button>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>

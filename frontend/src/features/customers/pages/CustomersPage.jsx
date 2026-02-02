@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import { customerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
@@ -41,8 +42,10 @@ const CustomersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.CUSTOMERS} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Customers"
           subtitle="Manage your customers"
@@ -166,6 +169,7 @@ const CustomersPage = () => {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

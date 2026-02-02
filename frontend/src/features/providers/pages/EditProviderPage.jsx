@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import { providerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
@@ -133,12 +134,14 @@ const EditProviderPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-4xl mx-auto">
-        <PageHeader
-          title={`Edit Provider - ${formData.name}`}
-          subtitle="Update provider information"
-          backButton
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.PROVIDERS} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-4xl mx-auto">
+          <PageHeader
+            title={`Edit Provider - ${formData.name}`}
+            subtitle="Update provider information"
+            backButton
           onBack={() => navigate(ROUTES.PROVIDERS)}
         />
 
@@ -280,6 +283,7 @@ const EditProviderPage = () => {
               </Button>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
-import DashboardPage from '../features/dashboard/pages/DashboardPage';
+import HomepagePage from '../features/dashboard/pages/HomepagePage';
 import OrdersPage from '../features/orders/pages/OrdersPage';
 import AddOrderPage from '../features/orders/pages/AddOrderPage';
 import EditOrderPage from '../features/orders/pages/EditOrderPage';
@@ -35,10 +35,10 @@ const AppRouter = () => {
 
         {/* Protected Routes */}
         <Route
-          path={ROUTES.DASHBOARD}
+          path={ROUTES.HOMEPAGE}
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <HomepagePage />
             </ProtectedRoute>
           }
         />

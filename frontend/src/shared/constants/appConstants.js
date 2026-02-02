@@ -9,7 +9,7 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3
 export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
-  DASHBOARD: '/dashboard',
+  HOMEPAGE: '/homepage',
   ORDERS: '/orders',
   ADD_ORDER: '/orders/add',
   INVENTORY: '/inventory',

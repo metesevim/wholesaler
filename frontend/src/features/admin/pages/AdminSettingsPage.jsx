@@ -10,6 +10,7 @@ import useAuth from '../../auth/hooks/useAuth';
 import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import Message from '../../../components/feedback/Message';
 import { ROUTES } from '../../../shared/constants/appConstants';
 
@@ -152,16 +153,18 @@ const AdminSettingsPage = () => {
   };
 
   const handleCancel = () => {
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOMEPAGE);
   };
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-2xl mx-auto">
-        <PageHeader
-          title="Admin Account Settings"
-          showDashboardButton={true}
-        />
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.ADMIN_SETTINGS} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-2xl mx-auto">
+          <PageHeader
+            title="Admin Account Settings"
+            showDashboardButton={true}
+          />
 
         <div className="bg-[#192633] rounded-lg border border-[#324d67] p-8 mt-8">
           {message && (
@@ -306,6 +309,7 @@ const AdminSettingsPage = () => {
               </Button>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>

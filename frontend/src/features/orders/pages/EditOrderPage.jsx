@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import { orderRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
@@ -177,11 +178,13 @@ const EditOrderPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-4xl mx-auto">
-        <PageHeader
-          title={`Order #${order.id}`}
-          subtitle="Manage order status and details"
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.ORDERS} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-4xl mx-auto">
+          <PageHeader
+            title={`Order #${order.id}`}
+            subtitle="Manage order status and details"
           backButton
           onBack={() => navigate(ROUTES.ORDERS)}
         />
@@ -320,6 +323,7 @@ const EditOrderPage = () => {
               </Button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

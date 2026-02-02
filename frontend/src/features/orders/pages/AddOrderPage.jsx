@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import AddOrderForm from '../components/AddOrderForm';
 import { ROUTES } from '../../../shared/constants/appConstants';
 
@@ -25,8 +26,10 @@ const AddOrderPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.ORDERS} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Create New Order"
           subtitle="Fill in the details below to create a new order"
@@ -48,6 +51,7 @@ const AddOrderPage = () => {
             onSuccess={handleSuccess}
             onError={setError}
           />
+        </div>
         </div>
       </div>
     </div>

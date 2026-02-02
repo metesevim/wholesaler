@@ -1,66 +1,41 @@
 /**
- * DashboardPage Component
+ * HomepagePage Component
  *
- * Main dashboard - placeholder for now
+ * Main homepage - management dashboard
  */
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
-import Button from '../../../components/forms/Button';
-import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import { ROUTES } from '../../../shared/constants/appConstants';
 
-const DashboardPage = () => {
-  const { user, logout } = useAuth();
+const HomepagePage = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate(ROUTES.LOGIN);
-  };
-
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-7xl mx-auto">
-        <PageHeader
-          title={`Welcome, ${user?.name || user?.username}!`}
-          showDashboardButton={false}
-          rightContent={
-            <div className="flex gap-4">
-                <Button onClick={() => {navigator.clipboard.writeText(user.iban);
-                    alert('IBAN copied to clipboard!');
-                  }}
-                  variant="primary"
-                  size="md"
-                >
-                  Copy IBAN
-                </Button>
-              <Button
-                onClick={() => navigate(ROUTES.ADMIN_SETTINGS)}
-                variant="secondary"
-                size="md"
-              >
-                Settings
-              </Button>
-              <Button
-                  onClick={handleLogout}
-                  variant="danger"
-                  size="md">
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.HOMEPAGE} />
 
-                Logout
-              </Button>
-            </div>
-          }
-        />
+      {/* Main Content */}
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Welcome, {user?.name || user?.username}!</h1>
+            <p className="text-[#92adc9]">Manage your wholesale business from here</p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/*Dashboard cloumn settings.*/}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/*Homepage column settings.*/}
           {/* Orders Card */}
           <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer group"
                onClick={() => navigate(ROUTES.ORDERS)}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-white mb-2">Orders</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#137fec', fontVariationSettings: '"wght" 400' }}>assignment</span>
+                  <h3 className="text-xl font-bold text-white">Orders</h3>
+                </div>
                 <p className="text-[#92adc9]">Manage your orders</p>
               </div>
               <button
@@ -88,7 +63,10 @@ const DashboardPage = () => {
                onClick={() => navigate(ROUTES.INVENTORY)}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-white mb-2">Inventory</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#137fec', fontVariationSettings: '"wght" 400' }}>warehouse</span>
+                  <h3 className="text-xl font-bold text-white">Inventory</h3>
+                </div>
                 <p className="text-[#92adc9]">Track your inventory</p>
               </div>
               <button
@@ -116,7 +94,10 @@ const DashboardPage = () => {
                onClick={() => navigate(ROUTES.CUSTOMERS)}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-white mb-2">Customers</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#137fec', fontVariationSettings: '"wght" 400' }}>people</span>
+                  <h3 className="text-xl font-bold text-white">Customers</h3>
+                </div>
                 <p className="text-[#92adc9]">Manage customers</p>
               </div>
               <button
@@ -144,7 +125,10 @@ const DashboardPage = () => {
                onClick={() => navigate(ROUTES.PROVIDERS)}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-white mb-2">Providers</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#137fec', fontVariationSettings: '"wght" 400' }}>domain</span>
+                  <h3 className="text-xl font-bold text-white">Providers</h3>
+                </div>
                 <p className="text-[#92adc9]">Manage providers</p>
               </div>
               <button
@@ -167,10 +151,11 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default DashboardPage;
+export default HomepagePage;
 

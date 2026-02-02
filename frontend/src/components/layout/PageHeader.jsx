@@ -49,12 +49,12 @@ const PageHeader = ({
         )}
         {!backButton && showDashboardButton && (
           <Button
-            onClick={() => navigate(ROUTES.DASHBOARD)}
+            onClick={() => navigate(ROUTES.HOMEPAGE)}
             variant="secondary"
             size="md"
-            title="Back to Dashboard"
+            title="Back to Homepage"
           >
-            ← Dashboard
+            ← Homepage
           </Button>
         )}
       </div>

@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import AddProviderForm from '../components/AddProviderForm';
 import { ROUTES } from '../../../shared/constants/appConstants';
 
@@ -24,8 +25,10 @@ const AddProviderPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.PROVIDERS} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Add Provider"
           subtitle="Fill in the details below to add a new provider"
@@ -47,6 +50,7 @@ const AddProviderPage = () => {
             onSuccess={handleSuccess}
             onError={setError}
           />
+        </div>
         </div>
       </div>
     </div>

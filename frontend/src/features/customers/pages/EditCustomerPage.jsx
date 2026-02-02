@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
+import Sidebar from '../../../components/layout/Sidebar';
 import { customerRepository, inventoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
@@ -181,12 +182,14 @@ const EditCustomerPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#101922] p-8">
-      <div className="max-w-6xl mx-auto">
-        <PageHeader
-            title={`Edit Customer - ${formData.name}`}
-          subtitle="Update customer information"
-          backButton
+    <div className="min-h-screen bg-[#101922] flex">
+      <Sidebar activeRoute={ROUTES.CUSTOMERS} />
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="max-w-6xl mx-auto">
+          <PageHeader
+              title={`Edit Customer - ${formData.name}`}
+            subtitle="Update customer information"
+            backButton
           onBack={() => navigate(ROUTES.CUSTOMERS)}
         />
 
@@ -329,6 +332,7 @@ const EditCustomerPage = () => {
               </div>
             </form>
           </div>
+        </div>
         </div>
       </div>
   );
