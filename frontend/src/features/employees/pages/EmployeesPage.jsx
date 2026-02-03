@@ -131,7 +131,7 @@ const EmployeesPage = () => {
                     <h3 className="text-lg font-bold text-white">
                       {employee.fullName}
                     </h3>
-                    <p className="text-xs text-[#92adc9]">{employee.username}</p>
+                    <p className="text-xs text-[#92adc9]">@{employee.username}</p>
                   </div>
                   <div className="flex gap-2 flex-col items-end">
                     <Button
@@ -146,9 +146,6 @@ const EmployeesPage = () => {
 
                 <div className="text-sm">
                   <div className="border-t border-[#324d67] my-2"></div>
-                  <p className="text-[#92adc9] mb-2">
-                    <span className="font-semibold">Username:</span> {employee.username}
-                  </p>
                   <p className="text-[#92adc9] mb-2">
                     <span className="font-semibold">Email:</span> {employee.email || 'N/A'}
                   </p>

@@ -12,7 +12,9 @@ const Switch = ({
   onChange,
   disabled = false,
   label = '',
-  name = ''
+  name = '',
+  labelSize = 'text-sm',
+  labelColor = 'text-white'
 }) => {
   return (
     <label className="flex items-center gap-2 p-3 rounded-lg bg-[#0d1117] cursor-pointer">
@@ -38,7 +40,7 @@ const Switch = ({
         </div>
       </div>
       {label && (
-        <span className="text-sm text-white font-medium flex-1">{label}</span>
+        <span className={`${labelSize} ${labelColor} font-medium flex-1`}>{label}</span>
       )}
     </label>
   );
@@ -49,7 +51,9 @@ Switch.propTypes = {
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   label: PropTypes.string,
-  name: PropTypes.string
+  name: PropTypes.string,
+  labelSize: PropTypes.string,
+  labelColor: PropTypes.string
 };
 
 export default Switch;

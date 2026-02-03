@@ -200,6 +200,27 @@ const EditEmployeePage = () => {
     navigate(ROUTES.EMPLOYEES);
   };
 
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
+      setLoading(true);
+      try {
+        const savedEmployees = localStorage.getItem('employees');
+        const employeesArray = savedEmployees ? JSON.parse(savedEmployees) : [];
+
+        // Filter out the employee to delete
+        const updatedArray = employeesArray.filter(emp => emp.id !== parseInt(id));
+
+        localStorage.setItem('employees', JSON.stringify(updatedArray));
+
+        alert('Employee deleted successfully!');
+        navigate(ROUTES.EMPLOYEES);
+      } catch (err) {
+        setError('Failed to delete employee. Please try again.');
+        setLoading(false);
+      }
+    }
+  };
+
 
   if (loading) {
     return (
@@ -223,7 +244,7 @@ const EditEmployeePage = () => {
       <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
           <PageHeader
-            title={`Edit Employee - ${formData.username}`}
+            title={`Edit Employee - ${formData.fullName}`}
             subtitle="Manage employee information and permissions"
             backButton
             onBack={handleCancel}
@@ -231,7 +252,9 @@ const EditEmployeePage = () => {
               <Button
                 onClick={handleSubmit}
                 variant="primary"
+                size="md"
                 disabled={loading}
+                icon="save"
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </Button>
@@ -261,7 +284,7 @@ const EditEmployeePage = () => {
                       <Input
                         type="text"
                         name="username"
-                        value={formData.username}
+                        value={`@${formData.username}`}
                         onChange={handleChange}
                         placeholder="Username"
                         disabled
@@ -280,7 +303,7 @@ const EditEmployeePage = () => {
                     </FormField>
                   </div>
 
-                  {/* Email Field */}
+                  {/* Email and Phone Row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <FormField label="Email" required>
                       <Input
@@ -292,10 +315,7 @@ const EditEmployeePage = () => {
                         disabled={loading}
                       />
                     </FormField>
-                  </div>
 
-                  {/* Phone and National ID Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <FormField label="Phone Number">
                       <Input
                         type="tel"
@@ -306,7 +326,10 @@ const EditEmployeePage = () => {
                         disabled={loading}
                       />
                     </FormField>
+                  </div>
 
+                  {/* National ID and IBAN Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <FormField label="National ID Number">
                       <Input
                         type="text"
@@ -314,6 +337,17 @@ const EditEmployeePage = () => {
                         value={formData.nationalId}
                         onChange={handleChange}
                         placeholder="Enter national ID number"
+                        disabled={loading}
+                      />
+                    </FormField>
+
+                    <FormField label="IBAN">
+                      <Input
+                        type="text"
+                        name="iban"
+                        value={formData.iban}
+                        onChange={handleChange}
+                        placeholder="Enter IBAN"
                         disabled={loading}
                       />
                     </FormField>
@@ -333,18 +367,15 @@ const EditEmployeePage = () => {
                     </FormField>
                   </div>
 
-                  {/* IBAN */}
-                  <div className="mb-6">
-                    <FormField label="IBAN">
-                      <Input
-                        type="text"
-                        name="iban"
-                        value={formData.iban}
-                        onChange={handleChange}
-                        placeholder="Enter IBAN"
-                        disabled={loading}
-                      />
-                    </FormField>
+                  {/* Delete Button */}
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleDelete}
+                      variant="danger"
+                      disabled={loading}
+                    >
+                      Delete Employee
+                    </Button>
                   </div>
                 </div>
 
@@ -358,10 +389,30 @@ const EditEmployeePage = () => {
                   <div className="space-y-4">
                     {/* Orders Permissions */}
                     <div className="mb-6">
-                      <h4 className="text-sm font-semibold text-[#92adc9] mb-3 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">assignment</span>
-                        Orders
-                      </h4>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg">assignment</span>
+                          Orders
+                        </h4>
+                        <Switch
+                          label="ALL"
+                          labelSize="text-xs"
+                          labelColor="text-[#92adc9]"
+                          checked={availablePermissions
+                            .filter(p => p.key.includes('ORDERS'))
+                            .every(p => permissions[p.key])}
+                          onChange={() => {
+                            const ordersPerms = availablePermissions.filter(p => p.key.includes('ORDERS'));
+                            const allEnabled = ordersPerms.every(p => permissions[p.key]);
+                            const newPermissions = { ...permissions };
+                            ordersPerms.forEach(p => {
+                              newPermissions[p.key] = !allEnabled;
+                            });
+                            setPermissions(newPermissions);
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('ORDERS'))
@@ -378,11 +429,31 @@ const EditEmployeePage = () => {
                     </div>
 
                     {/* Inventory Permissions */}
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold text-[#92adc9] mb-3 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">warehouse</span>
-                        Inventory
-                      </h4>
+                    <div className="mb-6 pt-6 border-t border-[#324d67]">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg">warehouse</span>
+                          Inventory
+                        </h4>
+                        <Switch
+                          label="ALL"
+                          labelSize="text-xs"
+                          labelColor="text-[#92adc9]"
+                          checked={availablePermissions
+                            .filter(p => p.key.includes('INVENTORY'))
+                            .every(p => permissions[p.key])}
+                          onChange={() => {
+                            const inventoryPerms = availablePermissions.filter(p => p.key.includes('INVENTORY'));
+                            const allEnabled = inventoryPerms.every(p => permissions[p.key]);
+                            const newPermissions = { ...permissions };
+                            inventoryPerms.forEach(p => {
+                              newPermissions[p.key] = !allEnabled;
+                            });
+                            setPermissions(newPermissions);
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('INVENTORY'))
@@ -399,11 +470,31 @@ const EditEmployeePage = () => {
                     </div>
 
                     {/* Customers Permissions */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-[#92adc9] mb-3 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">people</span>
-                        Customers
-                      </h4>
+                    <div className="mb-6 pt-6 border-t border-[#324d67]">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg">people</span>
+                          Customers
+                        </h4>
+                        <Switch
+                          label="ALL"
+                          labelSize="text-xs"
+                          labelColor="text-[#92adc9]"
+                          checked={availablePermissions
+                            .filter(p => p.key.includes('CUSTOMERS'))
+                            .every(p => permissions[p.key])}
+                          onChange={() => {
+                            const customersPerms = availablePermissions.filter(p => p.key.includes('CUSTOMERS'));
+                            const allEnabled = customersPerms.every(p => permissions[p.key]);
+                            const newPermissions = { ...permissions };
+                            customersPerms.forEach(p => {
+                              newPermissions[p.key] = !allEnabled;
+                            });
+                            setPermissions(newPermissions);
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('CUSTOMERS'))
@@ -420,11 +511,31 @@ const EditEmployeePage = () => {
                     </div>
 
                     {/* Providers Permissions */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-[#92adc9] mb-3 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">domain</span>
-                        Providers
-                      </h4>
+                    <div className="pt-6 border-t border-[#324d67]">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg">domain</span>
+                          Providers
+                        </h4>
+                        <Switch
+                          label="ALL"
+                          labelSize="text-xs"
+                          labelColor="text-[#92adc9]"
+                          checked={availablePermissions
+                            .filter(p => p.key.includes('PROVIDERS'))
+                            .every(p => permissions[p.key])}
+                          onChange={() => {
+                            const providersPerms = availablePermissions.filter(p => p.key.includes('PROVIDERS'));
+                            const allEnabled = providersPerms.every(p => permissions[p.key]);
+                            const newPermissions = { ...permissions };
+                            providersPerms.forEach(p => {
+                              newPermissions[p.key] = !allEnabled;
+                            });
+                            setPermissions(newPermissions);
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('PROVIDERS'))
