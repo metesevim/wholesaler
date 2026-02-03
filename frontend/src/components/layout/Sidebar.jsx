@@ -61,11 +61,11 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
 
   return (
     <div className="w-64 bg-[#0d1117] border-r border-[#324d67] p-6 flex flex-col h-screen sticky top-0">
-      {/* Logo Section */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+      {/* Logo Section - Top Center */}
+      <div className="flex justify-center mb-8 border-b border-[#324d67] pb-6">
+        <div className="flex items-center gap-2">
           <TruckIcon />
-          <h2 className="text-lg font-bold text-[#ffffff]">{APP_NAME}</h2>
+          <h2 className="text-base font-bold text-[#ffffff] text-center">{APP_NAME}</h2>
         </div>
       </div>
 

@@ -41,6 +41,91 @@ const OrdersPage = () => {
     }
   };
 
+  // Group orders by status
+  const getOrdersByStatus = () => {
+    const grouped = {
+      PENDING: [],
+      SHIPPED: [],
+      DELIVERED: [],
+      CANCELLED: []
+    };
+
+    orders.forEach(order => {
+      if (grouped[order.status]) {
+        grouped[order.status].push(order);
+      }
+    });
+
+    return grouped;
+  };
+
+  const StatusSection = ({ status, statusOrders, statusConfig }) => {
+    if (statusOrders.length === 0) return null;
+
+    return (
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className={`text-xl font-bold text-white`}>{status}</h2>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusConfig.color}`}>
+            {statusOrders.length}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {statusOrders.map(order => (
+            <div
+              key={order.id}
+              onClick={() => navigate(`${ROUTES.ORDERS}/${order.id}/edit`)}
+              className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-bold text-white">
+                      {order.customer?.name}'s Order - {new Date(order.createdAt).toLocaleDateString()}
+                    </h3>
+                  </div>
+
+                  <p className="text-sm text-[#92adc9] mb-2">
+                    Total: <span className="font-bold text-white">₺{order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}</span>
+                  </p>
+                </div>
+              </div>
+              {order.items && order.items.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-[#324d67]">
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm text-[#92adc9] mb-2 font-semibold">Items:</p>
+                      <ul className="text-sm text-[#92adc9] space-y-1">
+                        {order.items.map((item, idx) => (
+                          <li key={idx}>
+                            • {item.adminItem?.name || `Item ${item.adminItemId || item.id}`}: {item.quantity} {item.unit || 'unit'}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="flex flex-col items-end justify-end">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${statusConfig.color}`}>
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {order.notes && (
+                <div className="mt-4 pt-4 border-t border-[#324d67]">
+                  <p className="text-sm text-[#92adc9]">
+                    <span className="font-semibold">Notes:</span> {order.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.ORDERS} />
@@ -89,76 +174,27 @@ const OrdersPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {orders.map(order => (
-              <div
-                key={order.id}
-                className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-bold text-white">
-                        {order.customer?.name}'s Order - {new Date(order.createdAt).toLocaleDateString()}
-                      </h3>
-                    </div>
-
-                    <p className="text-sm text-[#92adc9] mb-2">
-                      Total: <span className="font-bold text-white">₺{order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}</span>
-                    </p>
-
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <Button
-                        onClick={() => navigate(`${ROUTES.ORDERS}/${order.id}/edit`)}
-                        variant="secondary"
-                        size="sm"
-                    >
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-                {order.items && order.items.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-[#324d67]">
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <p className="text-sm text-[#92adc9] mb-2 font-semibold">Items:</p>
-                        <ul className="text-sm text-[#92adc9] space-y-1">
-                          {order.items.map((item, idx) => (
-                            <li key={idx}>
-                              • {item.adminItem?.name || `Item ${item.adminItemId || item.id}`}: {item.quantity} {item.unit || 'unit'}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="flex flex-col items-end justify-end">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                            order.status === 'PENDING' ? 'bg-yellow-900 text-yellow-200' :
-                                order.status === 'SHIPPED' ? 'bg-purple-900 text-purple-200' :
-                                    order.status === 'DELIVERED' ? 'bg-green-900 text-green-200' :
-                                        order.status === 'CANCELLED' ? 'bg-red-900 text-red-200' :
-                                            'bg-gray-900 text-gray-200'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-
-                {order.notes && (
-                  <div className="mt-4 pt-4 border-t border-[#324d67]">
-                    <p className="text-sm text-[#92adc9]">
-                      <span className="font-semibold">Notes:</span> {order.notes}
-                    </p>
-                  </div>
-                )}
-
-
-
-              </div>
-            ))}
+          <div>
+            <StatusSection
+              status="Pending"
+              statusOrders={getOrdersByStatus().PENDING}
+              statusConfig={{ color: 'bg-yellow-500/20 text-yellow-400' }}
+            />
+            <StatusSection
+              status="Shipped"
+              statusOrders={getOrdersByStatus().SHIPPED}
+              statusConfig={{ color: 'bg-blue-500/20 text-blue-400' }}
+            />
+            <StatusSection
+              status="Delivered"
+              statusOrders={getOrdersByStatus().DELIVERED}
+              statusConfig={{ color: 'bg-green-500/20 text-green-400' }}
+            />
+            <StatusSection
+              status="Cancelled"
+              statusOrders={getOrdersByStatus().CANCELLED}
+              statusConfig={{ color: 'bg-red-500/20 text-red-400' }}
+            />
           </div>
         )}
         </div>

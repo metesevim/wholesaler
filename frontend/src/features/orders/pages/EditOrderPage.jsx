@@ -16,15 +16,14 @@ import logger from '../../../shared/utils/logger';
 const ORDER_STATUSES = [
   'PENDING',
   'SHIPPED',
-  'DELIVERED',
-  'CANCELLED'
+  'DELIVERED'
 ];
 
 const STATUS_COLORS = {
-  'PENDING': 'bg-yellow-900 text-yellow-200',
-  'SHIPPED': 'bg-purple-900 text-purple-200',
-  'DELIVERED': 'bg-green-900 text-green-200',
-  'CANCELLED': 'bg-red-900 text-red-200'
+  'PENDING': 'bg-yellow-500/20 text-yellow-400',
+  'SHIPPED': 'bg-blue-500/20 text-blue-400',
+  'DELIVERED': 'bg-green-500/20 text-green-400',
+  'CANCELLED': 'bg-red-500/20 text-red-400'
 };
 
 const EditOrderPage = () => {

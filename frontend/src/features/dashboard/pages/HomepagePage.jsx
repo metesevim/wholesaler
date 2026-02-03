@@ -194,14 +194,14 @@ const HomepagePage = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-red-500/10 to-pink-600/5 border border-red-500/30 rounded-lg p-4">
+              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[#92adc9] text-sm mb-1">Shipped</p>
                     <p className="text-2xl font-bold text-white">{orderStatuses.SHIPPED}</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-red-500/20 text-red-400">
-                    <span className="material-symbols-outlined text-2xl">ship</span>
+                  <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+                    <span className="material-symbols-outlined text-2xl">local_shipping</span>
                   </div>
                 </div>
               </div>
