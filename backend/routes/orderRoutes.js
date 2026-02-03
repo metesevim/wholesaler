@@ -196,7 +196,7 @@ router.post("/:id/cancel", authJWT, requirePermission("EDIT_ORDERS"), cancelOrde
  * /orders/{id}:
  *   delete:
  *     summary: Delete an order
- *     description: Delete an order. Can only delete PENDING, CONFIRMED, CANCELLED, or DELIVERED orders. Restores inventory for PENDING and CONFIRMED orders.
+ *     description: Delete an order. Can only delete PENDING, CANCELLED, or DELIVERED orders. Restores inventory for PENDING orders.
  *     tags:
  *       - Orders
  *     security:
@@ -211,7 +211,7 @@ router.post("/:id/cancel", authJWT, requirePermission("EDIT_ORDERS"), cancelOrde
  *       200:
  *         description: Order deleted
  *       400:
- *         description: Cannot delete order in PROCESSING or SHIPPED status
+ *         description: Cannot delete order in SHIPPED status
  *       404:
  *         description: Order not found
  */

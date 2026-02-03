@@ -74,20 +74,20 @@ const RestockModal = ({ item, onConfirm, onCancel, loading }) => {
           {/* Buttons */}
           <div className="flex gap-3">
             <Button
-              onClick={handleSubmit}
-              variant="primary"
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? 'Restocking...' : 'Confirm'}
-            </Button>
-            <Button
               onClick={onCancel}
               variant="secondary"
               disabled={loading}
               className="flex-1"
             >
               Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              variant="primary"
+              disabled={loading}
+              className="flex-1"
+            >
+              {loading ? 'Restocking...' : 'Confirm'}
             </Button>
           </div>
         </div>

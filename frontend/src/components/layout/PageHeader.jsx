@@ -47,16 +47,6 @@ const PageHeader = ({
             ← Back
           </Button>
         )}
-        {!backButton && showDashboardButton && (
-          <Button
-            onClick={() => navigate(ROUTES.HOMEPAGE)}
-            variant="secondary"
-            size="md"
-            title="Back to Homepage"
-          >
-            ← Homepage
-          </Button>
-        )}
       </div>
     </div>
   );

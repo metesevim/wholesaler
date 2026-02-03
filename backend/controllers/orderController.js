@@ -198,7 +198,7 @@ export const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ error: "status is required." });
         }
 
-        const validStatuses = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
+        const validStatuses = ["PENDING", "SHIPPED", "DELIVERED", "CANCELLED"];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
                 error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
@@ -340,8 +340,6 @@ export const getOrderSummary = async (req, res) => {
             totalOrders: allOrders.length,
             byStatus: {
                 PENDING: allOrders.filter((o) => o.status === "PENDING").length,
-                CONFIRMED: allOrders.filter((o) => o.status === "CONFIRMED").length,
-                PROCESSING: allOrders.filter((o) => o.status === "PROCESSING").length,
                 SHIPPED: allOrders.filter((o) => o.status === "SHIPPED").length,
                 DELIVERED: allOrders.filter((o) => o.status === "DELIVERED").length,
                 CANCELLED: allOrders.filter((o) => o.status === "CANCELLED").length,
@@ -551,15 +549,15 @@ export const deleteOrder = async (req, res) => {
         }
 
         // Can only delete orders that are PENDING, CANCELLED, or DELIVERED
-        // PROCESSING and SHIPPED orders cannot be deleted
-        if (order.status === "PROCESSING" || order.status === "SHIPPED") {
+        // SHIPPED orders cannot be deleted
+        if (order.status === "SHIPPED") {
             return res.status(400).json({
-                error: `Cannot delete an order with status ${order.status}. Only PENDING, CONFIRMED, CANCELLED, or DELIVERED orders can be deleted.`,
+                error: `Cannot delete an order with status ${order.status}. Only PENDING, CANCELLED, or DELIVERED orders can be deleted.`,
             });
         }
 
-        // If order is PENDING or CONFIRMED, restore inventory
-        if (order.status === "PENDING" || order.status === "CONFIRMED") {
+        // If order is PENDING, restore inventory
+        if (order.status === "PENDING") {
             for (const item of order.items) {
                 const adminItem = await prisma.adminInventoryItem.findUnique({
                     where: { id: item.adminItemId },
@@ -588,7 +586,7 @@ export const deleteOrder = async (req, res) => {
 
         res.json({
             message: "Order deleted successfully." +
-                (order.status === "PENDING" || order.status === "CONFIRMED"
+                (order.status === "PENDING"
                     ? " Inventory restored."
                     : ""),
             order: deletedOrder,

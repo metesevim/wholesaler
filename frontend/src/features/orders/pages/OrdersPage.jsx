@@ -134,11 +134,10 @@ const OrdersPage = () => {
                       <div className="flex flex-col items-end justify-end">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                             order.status === 'PENDING' ? 'bg-yellow-900 text-yellow-200' :
-                                order.status === 'CONFIRMED' ? 'bg-blue-900 text-blue-200' :
-                                    order.status === 'PROCESSING' ? 'bg-blue-800 text-blue-100' :
-                                        order.status === 'SHIPPED' ? 'bg-purple-900 text-purple-200' :
-                                            order.status === 'DELIVERED' ? 'bg-green-900 text-green-200' :
-                                                'bg-red-900 text-red-200'
+                                order.status === 'SHIPPED' ? 'bg-purple-900 text-purple-200' :
+                                    order.status === 'DELIVERED' ? 'bg-green-900 text-green-200' :
+                                        order.status === 'CANCELLED' ? 'bg-red-900 text-red-200' :
+                                            'bg-gray-900 text-gray-200'
                         }`}>
                           {order.status}
                         </span>

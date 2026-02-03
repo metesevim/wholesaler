@@ -15,18 +15,16 @@ import logger from '../../../shared/utils/logger';
 
 const ORDER_STATUSES = [
   'PENDING',
-  'CONFIRMED',
-  'PROCESSING',
   'SHIPPED',
-  'DELIVERED'
+  'DELIVERED',
+  'CANCELLED'
 ];
 
 const STATUS_COLORS = {
   'PENDING': 'bg-yellow-900 text-yellow-200',
-  'CONFIRMED': 'bg-blue-900 text-blue-200',
-  'PROCESSING': 'bg-blue-800 text-blue-100',
   'SHIPPED': 'bg-purple-900 text-purple-200',
-  'DELIVERED': 'bg-green-900 text-green-200'
+  'DELIVERED': 'bg-green-900 text-green-200',
+  'CANCELLED': 'bg-red-900 text-red-200'
 };
 
 const EditOrderPage = () => {
@@ -112,14 +110,14 @@ const EditOrderPage = () => {
   };
 
   const handleDeleteOrder = async () => {
-    if (order.status === 'PROCESSING' || order.status === 'SHIPPED') {
+    if (order.status === 'SHIPPED') {
       setError(`Cannot delete orders with status: ${order.status}`);
       return;
     }
 
     const confirmed = window.confirm(
       `Delete order #${id}? ${
-        order.status === 'PENDING' || order.status === 'CONFIRMED'
+        order.status === 'PENDING'
           ? 'Inventory will be restored.'
           : ''
       }`
@@ -183,11 +181,11 @@ const EditOrderPage = () => {
       <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-4xl mx-auto">
           <PageHeader
-            title={`Order #${order.id}`}
+            title={order && order.createdAt ? `${order.customer?.name || 'Order'}'s Order - ${new Date(order.createdAt).toLocaleDateString()}` : 'Order Details'}
             subtitle="Manage order status and details"
-          backButton
-          onBack={() => navigate(ROUTES.ORDERS)}
-        />
+            backButton
+            onBack={() => navigate(ROUTES.ORDERS)}
+          />
 
         {error && (
           <div className="mb-6 p-4 bg-red-900 border border-red-500 rounded-lg">
@@ -317,7 +315,7 @@ const EditOrderPage = () => {
                 onClick={handleDeleteOrder}
                 variant="danger"
                 className="w-full"
-                disabled={order.status === 'PROCESSING' || order.status === 'SHIPPED'}
+                disabled={order.status === 'SHIPPED'}
               >
                 Delete Order
               </Button>

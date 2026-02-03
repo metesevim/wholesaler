@@ -21,9 +21,9 @@ const HomepagePage = () => {
   const [lowStockItems, setLowStockItems] = useState([]);
   const [orderStatuses, setOrderStatuses] = useState({
     PENDING: 0,
-    CONFIRMED: 0,
-    PROCESSING: 0,
-    DELIVERED: 0
+    DELIVERED: 0,
+    SHIPPED: 0,
+    CANCELLED: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -45,9 +45,9 @@ const HomepagePage = () => {
         // Count order statuses
         const statusCount = {
           PENDING: 0,
-          CONFIRMED: 0,
-          PROCESSING: 0,
-          DELIVERED: 0
+          DELIVERED: 0,
+          SHIPPED: 0,
+          CANCELLED: 0
         };
         allOrders.forEach(order => {
           if (statusCount.hasOwnProperty(order.status)) {
@@ -169,7 +169,7 @@ const HomepagePage = () => {
           {/* Order Status Summary */}
           <div className="mt-8 mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Order Status Summary</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
               <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/30 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -182,30 +182,6 @@ const HomepagePage = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[#92adc9] text-sm mb-1">Confirmed</p>
-                    <p className="text-2xl font-bold text-white">{orderStatuses.CONFIRMED}</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
-                    <span className="material-symbols-outlined text-2xl">check_circle</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[#92adc9] text-sm mb-1">Processing</p>
-                    <p className="text-2xl font-bold text-white">{orderStatuses.PROCESSING}</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400">
-                    <span className="material-symbols-outlined text-2xl">local_shipping</span>
-                  </div>
-                </div>
-              </div>
-
               <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -214,6 +190,30 @@ const HomepagePage = () => {
                   </div>
                   <div className="p-2 rounded-lg bg-green-500/20 text-green-400">
                     <span className="material-symbols-outlined text-2xl">task_alt</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-500/10 to-pink-600/5 border border-red-500/30 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[#92adc9] text-sm mb-1">Shipped</p>
+                    <p className="text-2xl font-bold text-white">{orderStatuses.SHIPPED}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-red-500/20 text-red-400">
+                    <span className="material-symbols-outlined text-2xl">ship</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/30 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[#92adc9] text-sm mb-1">Cancelled</p>
+                    <p className="text-2xl font-bold text-white">{orderStatuses.CANCELLED}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-red-500/20 text-red-400">
+                    <span className="material-symbols-outlined text-2xl">cancel</span>
                   </div>
                 </div>
               </div>

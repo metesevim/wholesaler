@@ -21,6 +21,7 @@ const InventoryPage = () => {
   const [error, setError] = useState(null);
   const [restockItem, setRestockItem] = useState(null);
   const [restocking, setRestocking] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadItems();
@@ -74,6 +75,12 @@ const InventoryPage = () => {
     }
   };
 
+  // Filter items based on search term
+  const filteredItems = items.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.INVENTORY} />
@@ -93,6 +100,18 @@ const InventoryPage = () => {
             </Button>
           }
         />
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search items by name or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+              placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]"
+          />
+        </div>
 
         {error && (
           <div className="mb-6 p-4 bg-red-900 border border-red-500 rounded-lg">
@@ -123,9 +142,13 @@ const InventoryPage = () => {
               Add Your First Item
             </Button>
           </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-[#92adc9] text-lg mb-4">No items match your search</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map(item => (
+            {filteredItems.map(item => (
               <div
                 key={item.id}
                 className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"
