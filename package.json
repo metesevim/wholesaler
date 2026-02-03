@@ -14,7 +14,6 @@
     "build:backend": "cd backend && npm install",
     "build:frontend": "cd frontend && npm install && npm run build",
     "seed": "cd backend && npm run seed",
-    "export:swagger": "node export-swagger.js",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
   "keywords": [],
