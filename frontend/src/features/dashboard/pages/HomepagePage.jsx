@@ -9,11 +9,13 @@ import useAuth from '../../auth/hooks/useAuth';
 import Sidebar from '../../../components/layout/Sidebar';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import { orderRepository } from '../../../data';
+import formatCurrency from '../../../shared/utils/formatCurrency';
 
 const HomepagePage = () => {
   const { user } = useAuth();
   const [totalSales, setTotalSales] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
+  const [bestCustomer, setBestCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,6 +30,31 @@ const HomepagePage = () => {
         setTotalOrders(result.data.length);
         const total = result.data.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
         setTotalSales(total);
+
+        // Calculate best customer
+        const customerStats = {};
+        result.data.forEach(order => {
+          const customerId = order.customerId;
+          if (!customerStats[customerId]) {
+            customerStats[customerId] = {
+              customerId,
+              customerName: order.customer?.name || 'Unknown',
+              orderCount: 0,
+              totalValue: 0
+            };
+          }
+          customerStats[customerId].orderCount += 1;
+          customerStats[customerId].totalValue += order.totalAmount || 0;
+        });
+
+        // Find best customer (most orders, then highest value)
+        const best = Object.values(customerStats).reduce((prev, current) => {
+          if (current.orderCount > prev.orderCount) return current;
+          if (current.orderCount === prev.orderCount && current.totalValue > prev.totalValue) return current;
+          return prev;
+        });
+
+        setBestCustomer(best);
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -110,7 +137,7 @@ const HomepagePage = () => {
             <StatCard
               icon="trending_up"
               label="Total Sales"
-              value={`$${loading ? '-' : totalSales.toFixed(2)}`}
+              value={loading ? '-' : formatCurrency(totalSales)}
               color="blue"
               subtext="All-time revenue"
             />
@@ -126,10 +153,43 @@ const HomepagePage = () => {
             <StatCard
               icon="assessment"
               label="Average Order"
-              value={`$${loading || totalOrders === 0 ? '-' : (totalSales / totalOrders).toFixed(2)}`}
+              value={loading || totalOrders === 0 ? '-' : formatCurrency(totalSales / totalOrders)}
               color="blue"
               subtext="Per order average"
             />
+          </div>
+
+          {/* Best Customer Card */}
+          <div className="mt-8">
+            {loading ? (
+              <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
+                <p className="text-[#92adc9]">Loading...</p>
+              </div>
+            ) : bestCustomer ? (
+              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-xl p-6 hover:border-green-500/60 transition-all duration-300">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[#92adc9] text-sm font-medium mb-2 uppercase tracking-wider">Best Customer</p>
+                    <h3 className="text-3xl font-bold text-white mb-4">{bestCustomer.customerName}</h3>
+                    <div className="space-y-2">
+                      <p className="text-[#92adc9]">
+                        <span className="font-semibold">Total Orders:</span> {bestCustomer.orderCount}
+                      </p>
+                      <p className="text-[#92adc9]">
+                        <span className="font-semibold">Total Value:</span> {formatCurrency(bestCustomer.totalValue)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-green-500/20 text-green-400">
+                    <span className="material-symbols-outlined text-4xl">star</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
+                <p className="text-[#92adc9]">No customers found</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

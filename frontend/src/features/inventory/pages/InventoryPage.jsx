@@ -119,7 +119,7 @@ const InventoryPage = () => {
                     <span className="font-semibold">Quantity:</span> {item.quantity} {item.unit}
                   </p>
                   <p className="text-[#92adc9]">
-                    <span className="font-semibold">Price:</span> ${item.pricePerUnit?.toFixed(2) || '0.00'}
+                    <span className="font-semibold">Price:</span> ₺{item.pricePerUnit?.toFixed(2) || '0.00'}
                   </p>
                 </div>
               </div>

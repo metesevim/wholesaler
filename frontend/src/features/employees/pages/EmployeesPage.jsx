@@ -133,7 +133,19 @@ const EmployeesPage = () => {
                     </h3>
                     <p className="text-xs text-[#92adc9]">@{employee.username}</p>
                   </div>
-                  <div className="flex gap-2 flex-col items-end">
+                  <div className="flex gap-2 items-center">
+                    {employee.iban && (
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard.writeText(employee.iban);
+                          alert('IBAN copied to clipboard!');
+                        }}
+                        variant="primary"
+                        size="sm"
+                      >
+                        Copy IBAN
+                      </Button>
+                    )}
                     <Button
                       onClick={() => navigate(`${ROUTES.EMPLOYEES}/${employee.id}/edit`)}
                       variant="secondary"

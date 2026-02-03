@@ -254,7 +254,6 @@ const EditEmployeePage = () => {
                 variant="primary"
                 size="md"
                 disabled={loading}
-                icon="save"
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </Button>
@@ -386,9 +385,9 @@ const EditEmployeePage = () => {
                     Permissions
                   </h3>
 
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {/* Orders Permissions */}
-                    <div className="mb-6">
+                    <div>
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
                           <span className="material-symbols-outlined text-lg">assignment</span>
@@ -413,7 +412,7 @@ const EditEmployeePage = () => {
                           disabled={loading}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('ORDERS'))
                           .map(permission => (
@@ -429,7 +428,7 @@ const EditEmployeePage = () => {
                     </div>
 
                     {/* Inventory Permissions */}
-                    <div className="mb-6 pt-6 border-t border-[#324d67]">
+                    <div className="pt-6 border-t border-[#324d67]">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
                           <span className="material-symbols-outlined text-lg">warehouse</span>
@@ -454,7 +453,7 @@ const EditEmployeePage = () => {
                           disabled={loading}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('INVENTORY'))
                           .map(permission => (
@@ -470,7 +469,7 @@ const EditEmployeePage = () => {
                     </div>
 
                     {/* Customers Permissions */}
-                    <div className="mb-6 pt-6 border-t border-[#324d67]">
+                    <div className="pt-6 border-t border-[#324d67]">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
                           <span className="material-symbols-outlined text-lg">people</span>
@@ -495,7 +494,7 @@ const EditEmployeePage = () => {
                           disabled={loading}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('CUSTOMERS'))
                           .map(permission => (
@@ -536,7 +535,7 @@ const EditEmployeePage = () => {
                           disabled={loading}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
                           .filter(p => p.key.includes('PROVIDERS'))
                           .map(permission => (

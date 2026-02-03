@@ -226,7 +226,7 @@ const EditOrderPage = () => {
 
                 <div>
                   <p className="text-[#92adc9] text-sm font-semibold mb-1">Total Amount</p>
-                  <p className="text-white text-lg font-bold">${order.totalAmount?.toFixed(2) || '0.00'}</p>
+                  <p className="text-white text-lg font-bold">₺{order.totalAmount?.toFixed(2) || '0.00'}</p>
                 </div>
 
                 <div>
@@ -258,11 +258,11 @@ const EditOrderPage = () => {
                           <p className="text-white font-semibold">{item.itemName || `Item ${item.adminItemId}`}</p>
                           <p className="text-[#92adc9] text-sm">ID: {item.adminItemId}</p>
                         </div>
-                        <p className="text-white font-bold">${item.totalPrice?.toFixed(2) || '0.00'}</p>
+                        <p className="text-white font-bold">₺{item.totalPrice?.toFixed(2) || '0.00'}</p>
                       </div>
                       <div className="flex justify-between text-sm text-[#92adc9]">
                         <span>Quantity: {item.quantity} {item.unit}</span>
-                        <span>Price: ${item.pricePerUnit?.toFixed(2) || '0.00'} per unit</span>
+                        <span>Price: ₺{item.pricePerUnit?.toFixed(2) || '0.00'} per unit</span>
                       </div>
                     </div>
                   ))}
