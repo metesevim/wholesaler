@@ -28,6 +28,7 @@ const EditInventoryPage = () => {
     quantity: '',
     unit: 'piece',
     price: '',
+    lowStockAlert: 20,
   });
   const [errors, setErrors] = useState({});
 
@@ -49,6 +50,7 @@ const EditInventoryPage = () => {
           quantity: result.data.quantity || '',
           unit: result.data.unit || 'piece',
           price: result.data.pricePerUnit || '',
+          lowStockAlert: result.data.lowStockAlert || 20,
         });
       } else {
         setError('Failed to load inventory item');
@@ -120,8 +122,11 @@ const EditInventoryPage = () => {
         description: formData.description,
         quantity: Number(formData.quantity),
         unit: formData.unit,
-        pricePerUnit: Number(formData.price),
+        pricePerUnit: parseFloat(formData.price),
+        lowStockAlert: Number(formData.lowStockAlert) || 20,
       };
+
+      logger.info('Submitting item data:', itemData);
 
       const result = await inventoryRepository.updateItem(parseInt(id), itemData);
 
@@ -313,6 +318,26 @@ const EditInventoryPage = () => {
                 error={errors.price}
                 disabled={submitting}
               />
+            </div>
+
+            {/* Low Stock Alert Threshold */}
+            <div>
+              <label className="block text-white font-semibold mb-2">
+                Low Stock Alert Threshold
+              </label>
+              <Input
+                type="number"
+                name="lowStockAlert"
+                value={formData.lowStockAlert}
+                onChange={handleInputChange}
+                placeholder="Set minimum quantity before alert"
+                step="1"
+                min="0"
+                disabled={submitting}
+              />
+              <p className="text-xs text-[#92adc9] mt-2">
+                When quantity drops below this number, it will appear in the Low Stock Alert section on the homepage
+              </p>
             </div>
 
             {/* Buttons */}

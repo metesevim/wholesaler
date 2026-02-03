@@ -3,11 +3,13 @@ import prisma from "../prisma/client.js";
 // ============= CREATE ADMIN INVENTORY ITEM =============
 /**
  * Admin/Employee creates an item in admin inventory
- * Includes name, description, quantity, unit, image, and price
+ * Includes name, description, quantity, unit, image, price, and low stock alert threshold
  */
 export const createAdminInventoryItem = async (req, res) => {
     try {
-        const { name, description, quantity, unit, imageUrl, pricePerUnit } = req.body;
+        const { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert } = req.body;
+
+        console.log('Create item request received:', { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert });
 
         if (!name) {
             return res.status(400).json({ error: "Item name is required." });
@@ -45,6 +47,7 @@ export const createAdminInventoryItem = async (req, res) => {
                 unit: unit || "piece",
                 imageUrl,
                 pricePerUnit,
+                lowStockAlert: lowStockAlert || 20,
             },
         });
 
@@ -121,7 +124,9 @@ export const getAdminInventoryItemById = async (req, res) => {
 export const updateAdminInventoryItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, quantity, unit, imageUrl, pricePerUnit } = req.body;
+        const { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert } = req.body;
+
+        console.log('Update item request received:', { id, name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert });
 
         const item = await prisma.adminInventoryItem.update({
             where: { id: parseInt(id) },
@@ -132,6 +137,7 @@ export const updateAdminInventoryItem = async (req, res) => {
                 ...(unit && { unit }),
                 ...(imageUrl && { imageUrl }),
                 ...(pricePerUnit !== undefined && { pricePerUnit }),
+                ...(lowStockAlert !== undefined && { lowStockAlert }),
             },
         });
 

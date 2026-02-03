@@ -5,17 +5,26 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
 import Sidebar from '../../../components/layout/Sidebar';
+import Button from '../../../components/forms/Button';
 import { ROUTES } from '../../../shared/constants/appConstants';
-import { orderRepository } from '../../../data';
+import { orderRepository, inventoryRepository } from '../../../data';
 import formatCurrency from '../../../shared/utils/formatCurrency';
 
 const HomepagePage = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [totalSales, setTotalSales] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
-  const [bestCustomer, setBestCustomer] = useState(null);
+  const [lowStockItems, setLowStockItems] = useState([]);
+  const [orderStatuses, setOrderStatuses] = useState({
+    PENDING: 0,
+    CONFIRMED: 0,
+    PROCESSING: 0,
+    DELIVERED: 0
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,36 +34,44 @@ const HomepagePage = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
+      // Load orders data
       const result = await orderRepository.getAllOrders();
       if (result.success && result.data) {
-        setTotalOrders(result.data.length);
-        const total = result.data.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+        const allOrders = result.data;
+        setTotalOrders(allOrders.length);
+        const total = allOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
         setTotalSales(total);
 
-        // Calculate best customer
-        const customerStats = {};
-        result.data.forEach(order => {
-          const customerId = order.customerId;
-          if (!customerStats[customerId]) {
-            customerStats[customerId] = {
-              customerId,
-              customerName: order.customer?.name || 'Unknown',
-              orderCount: 0,
-              totalValue: 0
-            };
+        // Count order statuses
+        const statusCount = {
+          PENDING: 0,
+          CONFIRMED: 0,
+          PROCESSING: 0,
+          DELIVERED: 0
+        };
+        allOrders.forEach(order => {
+          if (statusCount.hasOwnProperty(order.status)) {
+            statusCount[order.status]++;
           }
-          customerStats[customerId].orderCount += 1;
-          customerStats[customerId].totalValue += order.totalAmount || 0;
         });
+        setOrderStatuses(statusCount);
+      }
 
-        // Find best customer (most orders, then highest value)
-        const best = Object.values(customerStats).reduce((prev, current) => {
-          if (current.orderCount > prev.orderCount) return current;
-          if (current.orderCount === prev.orderCount && current.totalValue > prev.totalValue) return current;
-          return prev;
-        });
-
-        setBestCustomer(best);
+      // Load inventory data for low stock alerts
+      const inventoryResult = await inventoryRepository.getAllItems();
+      if (inventoryResult.success && inventoryResult.data) {
+        console.log('📦 All inventory items loaded:', inventoryResult.data);
+        const lowStock = inventoryResult.data
+          .filter(item => {
+            const threshold = item.lowStockAlert !== undefined && item.lowStockAlert !== null ? item.lowStockAlert : 20;
+            const quantity = item.quantity || 0;
+            const isLow = quantity < threshold;
+            console.log(`  - ${item.name}: qty=${quantity}, threshold=${threshold}, lowStockAlert=${item.lowStockAlert}, isLow=${isLow}`);
+            return isLow;
+          })
+          .sort((a, b) => a.quantity - b.quantity); // Sort by quantity ascending
+        console.log('🚨 Low stock items found:', lowStock);
+        setLowStockItems(lowStock);
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -117,19 +134,9 @@ const HomepagePage = () => {
             <p className="text-[#92adc9] text-lg">Here's what's happening with your wholesale business</p>
           </div>
 
-          {/* Info Section */}
-          <div className="bg-gradient-to-r from-blue-500/5 to-cyan-500/5 border border-blue-500/20 rounded-xl p-4 mb-8">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-md bg-blue-500/20 text-blue-400 w-10 h-10 flex items-center justify-center">
-                <span className="material-symbols-outlined text-2xl">info</span>
-              </div>
-              <div>
-                <h3 className="text-white font-semibold mb-2">Manage Your Business</h3>
-                <p className="text-[#92adc9] text-sm leading-relaxed">
-                  Navigate to Orders, Inventory, Customers, or Providers using the sidebar menu. Create new records, edit existing ones, and track your wholesale operations all in one place.
-                </p>
-              </div>
-            </div>
+          {/* Sales Section Header */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-white">Sales Overview</h2>
           </div>
 
           {/* Main Stats Grid */}
@@ -159,35 +166,112 @@ const HomepagePage = () => {
             />
           </div>
 
-          {/* Best Customer Card */}
-          <div className="mt-8">
-            {loading ? (
-              <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
-                <p className="text-[#92adc9]">Loading...</p>
-              </div>
-            ) : bestCustomer ? (
-              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-xl p-6 hover:border-green-500/60 transition-all duration-300">
-                <div className="flex items-start justify-between">
+          {/* Order Status Summary */}
+          <div className="mt-8 mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Order Status Summary</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/30 rounded-lg p-4">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[#92adc9] text-sm font-medium mb-2 uppercase tracking-wider">Best Customer</p>
-                    <h3 className="text-3xl font-bold text-white mb-4">{bestCustomer.customerName}</h3>
-                    <div className="space-y-2">
-                      <p className="text-[#92adc9]">
-                        <span className="font-semibold">Total Orders:</span> {bestCustomer.orderCount}
-                      </p>
-                      <p className="text-[#92adc9]">
-                        <span className="font-semibold">Total Value:</span> {formatCurrency(bestCustomer.totalValue)}
-                      </p>
-                    </div>
+                    <p className="text-[#92adc9] text-sm mb-1">Pending</p>
+                    <p className="text-2xl font-bold text-white">{orderStatuses.PENDING}</p>
                   </div>
+                  <div className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400">
+                    <span className="material-symbols-outlined text-2xl">schedule</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[#92adc9] text-sm mb-1">Confirmed</p>
+                    <p className="text-2xl font-bold text-white">{orderStatuses.CONFIRMED}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+                    <span className="material-symbols-outlined text-2xl">check_circle</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[#92adc9] text-sm mb-1">Processing</p>
+                    <p className="text-2xl font-bold text-white">{orderStatuses.PROCESSING}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400">
+                    <span className="material-symbols-outlined text-2xl">local_shipping</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[#92adc9] text-sm mb-1">Delivered</p>
+                    <p className="text-2xl font-bold text-white">{orderStatuses.DELIVERED}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-green-500/20 text-green-400">
+                    <span className="material-symbols-outlined text-2xl">task_alt</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Low Stock Alert */}
+          <div className="mt-8 mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Low Stock Alert</h2>
+            {lowStockItems.length === 0 ? (
+              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-lg p-6">
+                <div className="flex items-center gap-4">
                   <div className="p-3 rounded-lg bg-green-500/20 text-green-400">
-                    <span className="material-symbols-outlined text-4xl">star</span>
+                    <span className="material-symbols-outlined text-3xl">check_circle</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold">All Stock Levels Healthy</p>
+                    <p className="text-[#92adc9] text-sm mt-1">All items are well-stocked</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-[#192633] rounded-lg p-6 border border-[#324d67]">
-                <p className="text-[#92adc9]">No customers found</p>
+              <div className="space-y-3">
+                {lowStockItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/30 rounded-lg p-4 hover:border-red-500/60 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 rounded-lg bg-red-500/20 text-red-400">
+                            <span className="material-symbols-outlined text-2xl">warning</span>
+                          </div>
+                          <div>
+                            <p className="text-white font-semibold">{item.name}</p>
+                            <p className="text-xs text-[#92adc9] mt-1">
+                              {item.description && `${item.description}`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-red-400 font-bold text-lg">
+                          {item.quantity} {item.unit}
+                        </p>
+                        <Button
+                          onClick={() => navigate(ROUTES.INVENTORY)}
+                          variant="ghost"
+                          size="sm"
+                          className="mt-2"
+                        >
+                          Restock
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

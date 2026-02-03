@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
+import RestockModal from '../components/RestockModal';
 import { inventoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
@@ -18,6 +19,8 @@ const InventoryPage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [restockItem, setRestockItem] = useState(null);
+  const [restocking, setRestocking] = useState(false);
 
   useEffect(() => {
     loadItems();
@@ -38,6 +41,36 @@ const InventoryPage = () => {
       setError('Failed to load inventory items. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRestockConfirm = async (restockData) => {
+    setRestocking(true);
+    try {
+      const result = await inventoryRepository.updateItem(restockItem.id, {
+        ...restockItem,
+        quantity: restockData.newTotal
+      });
+
+      if (result.success) {
+        // Update the items list with the new quantity
+        setItems(prev =>
+          prev.map(item =>
+            item.id === restockItem.id
+              ? { ...item, quantity: restockData.newTotal }
+              : item
+          )
+        );
+        setRestockItem(null);
+        logger.info(`Item restocked: ${restockItem.name} + ${restockData.addedQuantity} ${restockData.unit}`);
+      } else {
+        setError(result.error || 'Failed to restock item');
+      }
+    } catch (err) {
+      logger.error('Failed to restock item:', err);
+      setError('Failed to restock item. Please try again.');
+    } finally {
+      setRestocking(false);
     }
   };
 
@@ -101,13 +134,22 @@ const InventoryPage = () => {
                   <h3 className="text-lg font-bold text-white">
                     {item.name}
                   </h3>
-                  <Button
-                    onClick={() => navigate(`/inventory/${item.id}/edit`)}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    Edit
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setRestockItem(item)}
+                      variant="primary"
+                      size="sm"
+                    >
+                      Restock
+                    </Button>
+                    <Button
+                      onClick={() => navigate(`/inventory/${item.id}/edit`)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Edit
+                    </Button>
+                  </div>
                 </div>
                 {item.description && (
                   <p className="text-sm text-[#92adc9] mb-2">
@@ -128,6 +170,16 @@ const InventoryPage = () => {
         )}
         </div>
       </div>
+
+      {/* Restock Modal */}
+      {restockItem && (
+        <RestockModal
+          item={restockItem}
+          onConfirm={handleRestockConfirm}
+          onCancel={() => setRestockItem(null)}
+          loading={restocking}
+        />
+      )}
     </div>
   );
 };

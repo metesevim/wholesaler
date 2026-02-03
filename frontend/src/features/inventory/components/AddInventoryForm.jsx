@@ -18,6 +18,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
     quantity: '',
     unit: 'piece',
     price: '',
+    lowStockAlert: 20,
   });
   const [errors, setErrors] = useState({});
 
@@ -77,8 +78,11 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         description: formData.description,
         quantity: Number(formData.quantity),
         unit: formData.unit,
-        price: Number(formData.price),
+        pricePerUnit: parseFloat(formData.price),
+        lowStockAlert: Number(formData.lowStockAlert) || 20,
       };
+
+      console.log('Creating item with data:', itemData);
 
       const result = await inventoryRepository.createItem(itemData);
 
@@ -178,6 +182,25 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
           min="0"
           error={errors.price}
         />
+      </div>
+
+      {/* Low Stock Alert Threshold */}
+      <div>
+        <label className="block text-white font-semibold mb-2">
+          Low Stock Alert Threshold
+        </label>
+        <Input
+          type="number"
+          name="lowStockAlert"
+          value={formData.lowStockAlert}
+          onChange={handleInputChange}
+          placeholder="Set minimum quantity before alert"
+          step="1"
+          min="0"
+        />
+        <p className="text-xs text-[#92adc9] mt-2">
+          When quantity drops below this number, it will appear in the Low Stock Alert section on the homepage
+        </p>
       </div>
 
       {/* Submit Button */}

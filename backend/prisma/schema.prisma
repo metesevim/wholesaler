@@ -99,6 +99,9 @@ model AdminInventoryItem {
   // Price info
   pricePerUnit Float? // Price per unit for ordering
 
+  // Low stock alert threshold
+  lowStockAlert Int @default(20) // Alert when quantity drops below this (minimum stock level)
+
   // Reference to items in customer inventory (for tracking)
   customerItems CustomerInventoryItem[] @relation("AdminItemToCustomerItem")
 
