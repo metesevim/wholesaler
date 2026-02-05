@@ -6,28 +6,14 @@ import {createAdminInventoryItem, getAllAdminInventoryItems, getAdminInventoryIt
 
 const router = express.Router();
 
-//Admin Inventory Management
-
-/**
-router.get("/items", authJWT, requirePermission("VIEW_PRODUCTS"), getAllAdminInventoryItems);
-
-/**
-router.post("/items", authJWT, requirePermission("CREATE_PRODUCT"), createAdminInventoryItem);
-
-/**
-router.get("/items/:id", authJWT, requirePermission("VIEW_PRODUCTS"), getAdminInventoryItemById);
-
-/**
-router.put("/items/:id", authJWT, requirePermission("EDIT_PRODUCT"), updateAdminInventoryItem);
-
-/**
-router.delete("/items/:id", authJWT, requirePermission("EDIT_PRODUCT"), deleteAdminInventoryItem);
-
-/**
-router.post("/items/:id/adjust", authJWT, requirePermission("EDIT_PRODUCT"), adjustInventoryQuantity);
-
-/**
-router.get("/summary", authJWT, requirePermission("VIEW_PRODUCTS"), getInventorySummary);
+// Admin Inventory Management
+router.get("/items", authJWT, requirePermission("view_inventory"), getAllAdminInventoryItems);
+router.post("/items", authJWT, requirePermission("manage_inventory"), createAdminInventoryItem);
+router.get("/items/:id", authJWT, requirePermission("view_inventory"), getAdminInventoryItemById);
+router.put("/items/:id", authJWT, requirePermission("manage_inventory"), updateAdminInventoryItem);
+router.delete("/items/:id", authJWT, requirePermission("manage_inventory"), deleteAdminInventoryItem);
+router.post("/items/:id/adjust", authJWT, requirePermission("manage_inventory"), adjustInventoryQuantity);
+router.get("/summary", authJWT, requirePermission("view_inventory"), getInventorySummary);
 
 export default router;
 

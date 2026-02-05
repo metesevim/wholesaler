@@ -56,6 +56,11 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
       route: ROUTES.EMPLOYEES,
       label: 'Employees',
       icon: 'group'
+    },
+    {
+      route: ROUTES.LOGS,
+      label: 'Logs',
+      icon: 'description'
     }
   ];
 

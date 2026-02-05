@@ -33,6 +33,7 @@ const InventoryPage = () => {
     try {
       const result = await inventoryRepository.getAllItems();
       if (result.success) {
+        console.log('Inventory items loaded:', result.data);
         setItems(result.data || []);
       } else {
         setError(result.error || 'Failed to load inventory items');
@@ -185,6 +186,9 @@ const InventoryPage = () => {
                   </p>
                   <p className="text-[#92adc9]">
                     <span className="font-semibold">Price:</span> ₺{item.pricePerUnit?.toFixed(2) || '0.00'}
+                  </p>
+                  <p className="text-[#92adc9]">
+                    <span className="font-semibold">Provider:</span> {item.provider?.name || 'Not assigned'}
                   </p>
                 </div>
               </div>

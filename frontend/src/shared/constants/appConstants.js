@@ -23,6 +23,7 @@ export const ROUTES = {
   EMPLOYEES: '/employees',
   ADD_EMPLOYEE: '/employees/add',
   EDIT_EMPLOYEE: '/employees/:id/edit',
+  LOGS: '/logs',
   PROFILE: '/profile'
 };
 

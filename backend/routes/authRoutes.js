@@ -4,13 +4,9 @@ import { authJWT } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/**
+// Authentication Routes
 router.post("/register", register);
-
-/**
 router.post("/login", login);
-
-/**
 router.put("/profile", authJWT, updateProfile);
 
 export default router;

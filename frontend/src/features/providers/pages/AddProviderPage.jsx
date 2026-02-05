@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import AddProviderForm from '../components/AddProviderForm';
@@ -16,11 +15,7 @@ const AddProviderPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
-  const handleSuccess = (newProvider) => {
-    navigate(ROUTES.PROVIDERS);
-  };
-
-  const handleGoBack = () => {
+  const handleSuccess = () => {
     navigate(ROUTES.PROVIDERS);
   };
 
@@ -32,11 +27,8 @@ const AddProviderPage = () => {
         <PageHeader
           title="Add Provider"
           subtitle="Fill in the details below to add a new provider"
-          rightContent={
-            <Button onClick={handleGoBack} variant="secondary">
-              Back to Providers
-            </Button>
-          }
+          backButton
+          onBack={() => navigate(ROUTES.PROVIDERS)}
         />
 
         {error && (

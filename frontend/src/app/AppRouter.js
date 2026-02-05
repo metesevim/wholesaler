@@ -25,6 +25,7 @@ import EmployeesPage from '../features/employees/pages/EmployeesPage';
 import AddEmployeePage from '../features/employees/pages/AddEmployeePage';
 import EditEmployeePage from '../features/employees/pages/EditEmployeePage';
 import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage';
+import LogsPage from '../features/logs/pages/LogsPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from '../shared/constants/appConstants';
 
@@ -182,6 +183,16 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <AdminSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Logs Route */}
+        <Route
+          path={ROUTES.LOGS}
+          element={
+            <ProtectedRoute>
+              <LogsPage />
             </ProtectedRoute>
           }
         />

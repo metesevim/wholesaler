@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import AddInventoryForm from '../components/AddInventoryForm';
@@ -16,11 +15,7 @@ const AddInventoryPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
-  const handleSuccess = (newItem) => {
-    navigate(ROUTES.INVENTORY);
-  };
-
-  const handleGoBack = () => {
+  const handleSuccess = () => {
     navigate(ROUTES.INVENTORY);
   };
 
@@ -32,11 +27,8 @@ const AddInventoryPage = () => {
         <PageHeader
           title="Add Inventory Item"
           subtitle="Fill in the details below to add a new inventory item"
-          rightContent={
-            <Button onClick={handleGoBack} variant="secondary">
-              Back to Inventory
-            </Button>
-          }
+          backButton
+          onBack={() => navigate(ROUTES.INVENTORY)}
         />
 
         {error && (

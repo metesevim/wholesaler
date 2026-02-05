@@ -5,37 +5,17 @@ import {createOrder, getAllOrders, getOrderById, updateOrderStatus, cancelOrder,
 
 const router = express.Router();
 
-//Order Management
-
-/**
-router.get("/", authJWT, requirePermission("VIEW_ORDERS"), getAllOrders);
-
-/**
-router.post("/", authJWT, requirePermission("CREATE_ORDER"), createOrder);
-
-/**
-router.get("/summary", authJWT, requirePermission("VIEW_ORDERS"), getOrderSummary);
-
-/**
-router.get("/:id", authJWT, requirePermission("VIEW_ORDERS"), getOrderById);
-
-/**
-router.put("/:id/status", authJWT, requirePermission("EDIT_ORDERS"), updateOrderStatus);
-
-/**
-router.post("/:id/cancel", authJWT, requirePermission("EDIT_ORDERS"), cancelOrder);
-
-/**
-router.delete("/:id", authJWT, requirePermission("EDIT_ORDERS"), deleteOrder);
-
-/**
-router.post("/:id/items", authJWT, requirePermission("EDIT_ORDERS"), addItemToOrder);
-
-/**
-router.get("/customer/:customerId", authJWT, requirePermission("VIEW_ORDERS"), getCustomerOrders);
-
-/**
-router.get("/customer/:customerId/available-items", authJWT, requirePermission("VIEW_ORDERS"), getCustomerAvailableItems);
+// Order Management
+router.get("/", authJWT, requirePermission("view_orders"), getAllOrders);
+router.post("/", authJWT, requirePermission("manage_orders"), createOrder);
+router.get("/summary", authJWT, requirePermission("view_orders"), getOrderSummary);
+router.get("/:id", authJWT, requirePermission("view_orders"), getOrderById);
+router.put("/:id/status", authJWT, requirePermission("manage_orders"), updateOrderStatus);
+router.post("/:id/cancel", authJWT, requirePermission("manage_orders"), cancelOrder);
+router.delete("/:id", authJWT, requirePermission("manage_orders"), deleteOrder);
+router.post("/:id/items", authJWT, requirePermission("manage_orders"), addItemToOrder);
+router.get("/customer/:customerId", authJWT, requirePermission("view_orders"), getCustomerOrders);
+router.get("/customer/:customerId/available-items", authJWT, requirePermission("view_orders"), getCustomerAvailableItems);
 
 export default router;
 

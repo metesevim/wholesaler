@@ -59,66 +59,75 @@ const OrdersPage = () => {
     return grouped;
   };
 
-  const StatusSection = ({ status, statusOrders, statusConfig }) => {
+  const getStatusColor = (status) => {
+    const colors = {
+      PENDING: 'bg-yellow-500/20 text-yellow-400',
+      SHIPPED: 'bg-blue-500/20 text-blue-400',
+      DELIVERED: 'bg-green-500/20 text-green-400',
+      CANCELLED: 'bg-red-500/20 text-red-400'
+    };
+    return colors[status] || 'bg-gray-500/20 text-gray-400';
+  };
+
+  const StatusSection = ({ status, statusOrders }) => {
     if (statusOrders.length === 0) return null;
+
+    const statusColor = getStatusColor(status);
 
     return (
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <h2 className={`text-xl font-bold text-white`}>{status}</h2>
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusConfig.color}`}>
+          <h2 className="text-xl font-bold text-white">{status}</h2>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor}`}>
             {statusOrders.length}
           </span>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-3">
           {statusOrders.map(order => (
             <div
               key={order.id}
               onClick={() => navigate(`${ROUTES.ORDERS}/${order.id}/edit`)}
-              className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer"
+              className="bg-[#192633] rounded-lg p-5 border border-[#324d67] hover:border-[#137fec] transition-colors cursor-pointer"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
+              <div className="flex items-center justify-between gap-4">
+                {/* Left Section - Customer and Order Info */}
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-bold text-white">
-                      {order.customer?.name}'s Order - {new Date(order.createdAt).toLocaleDateString()}
+                    <h3 className="text-base font-bold text-white truncate">
+                      {order.customer?.name || 'Unknown Customer'}
                     </h3>
+                    <span className="text-xs text-[#92adc9] whitespace-nowrap">
+                      #{order.id}
+                    </span>
                   </div>
-
-                  <p className="text-sm text-[#92adc9] mb-2">
-                    Total: <span className="font-bold text-white">₺{order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}</span>
+                  <p className="text-sm text-[#92adc9]">
+                    {new Date(order.createdAt).toLocaleDateString()}
                   </p>
+                </div>
+
+                {/* Middle Left Section - Total Items */}
+                <div className="text-right">
+                  <p className="text-sm text-[#92adc9] mb-1">Items</p>
+                  <p className="text-lg font-bold text-white">
+                    {order.items?.length || 0}
+                  </p>
+                </div>
+
+                {/* Middle Right Section - Total Amount */}
+                <div className="text-right">
+                  <p className="text-sm text-[#92adc9] mb-1">Total Amount</p>
+                  <p className="text-lg font-bold text-white">
+                    ₺{order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}
+                  </p>
+                </div>
+
+                {/* Right Section - Status */}
+                <div className="flex-shrink-0">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${statusColor}`}>
+                    {order.status}
+                  </span>
                 </div>
               </div>
-              {order.items && order.items.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-[#324d67]">
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <p className="text-sm text-[#92adc9] mb-2 font-semibold">Items:</p>
-                      <ul className="text-sm text-[#92adc9] space-y-1">
-                        {order.items.map((item, idx) => (
-                          <li key={idx}>
-                            • {item.adminItem?.name || `Item ${item.adminItemId || item.id}`}: {item.quantity} {item.unit || 'unit'}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="flex flex-col items-end justify-end">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${statusConfig.color}`}>
-                        {order.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {order.notes && (
-                <div className="mt-4 pt-4 border-t border-[#324d67]">
-                  <p className="text-sm text-[#92adc9]">
-                    <span className="font-semibold">Notes:</span> {order.notes}
-                  </p>
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -176,24 +185,20 @@ const OrdersPage = () => {
         ) : (
           <div>
             <StatusSection
-              status="Pending"
+              status="PENDING"
               statusOrders={getOrdersByStatus().PENDING}
-              statusConfig={{ color: 'bg-yellow-500/20 text-yellow-400' }}
             />
             <StatusSection
-              status="Shipped"
+              status="SHIPPED"
               statusOrders={getOrdersByStatus().SHIPPED}
-              statusConfig={{ color: 'bg-blue-500/20 text-blue-400' }}
             />
             <StatusSection
-              status="Delivered"
+              status="DELIVERED"
               statusOrders={getOrdersByStatus().DELIVERED}
-              statusConfig={{ color: 'bg-green-500/20 text-green-400' }}
             />
             <StatusSection
-              status="Cancelled"
+              status="CANCELLED"
               statusOrders={getOrdersByStatus().CANCELLED}
-              statusConfig={{ color: 'bg-red-500/20 text-red-400' }}
             />
           </div>
         )}

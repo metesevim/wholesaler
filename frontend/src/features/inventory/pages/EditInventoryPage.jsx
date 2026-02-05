@@ -10,7 +10,7 @@ import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
-import { inventoryRepository } from '../../../data';
+import { inventoryRepository, providerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
 
@@ -22,6 +22,8 @@ const EditInventoryPage = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [item, setItem] = useState(null);
+  const [providers, setProviders] = useState([]);
+  const [loadingProviders, setLoadingProviders] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -29,12 +31,27 @@ const EditInventoryPage = () => {
     unit: 'piece',
     price: '',
     lowStockAlert: 20,
+    providerId: '',
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     loadItem();
+    loadProviders();
   }, [id]);
+
+  const loadProviders = async () => {
+    try {
+      const result = await providerRepository.getAllProviders();
+      if (result.success) {
+        setProviders(result.data || []);
+      }
+    } catch (error) {
+      logger.error('Failed to load providers:', error);
+    } finally {
+      setLoadingProviders(false);
+    }
+  };
 
   const loadItem = async () => {
     setLoading(true);
@@ -51,6 +68,7 @@ const EditInventoryPage = () => {
           unit: result.data.unit || 'piece',
           price: result.data.pricePerUnit || '',
           lowStockAlert: result.data.lowStockAlert || 20,
+          providerId: result.data.providerId || '',
         });
       } else {
         setError('Failed to load inventory item');
@@ -124,6 +142,7 @@ const EditInventoryPage = () => {
         unit: formData.unit,
         pricePerUnit: parseFloat(formData.price),
         lowStockAlert: Number(formData.lowStockAlert) || 20,
+        providerId: formData.providerId ? parseInt(formData.providerId) : null,
       };
 
       logger.info('Submitting item data:', itemData);
@@ -318,6 +337,31 @@ const EditInventoryPage = () => {
                 error={errors.price}
                 disabled={submitting}
               />
+            </div>
+
+            {/* Provider */}
+            <div>
+              <label className="block text-white font-semibold mb-2">
+                Provider
+              </label>
+              <select
+                name="providerId"
+                value={formData.providerId}
+                onChange={handleInputChange}
+                disabled={submitting || loadingProviders}
+                className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+                  focus:outline-none focus:border-[#137fec] disabled:opacity-50"
+              >
+                <option value="">Select a provider (optional)</option>
+                {providers.map(provider => (
+                  <option key={provider.id} value={provider.id}>
+                    {provider.name}
+                  </option>
+                ))}
+              </select>
+              {loadingProviders && (
+                <p className="text-xs text-[#92adc9] mt-2">Loading providers...</p>
+              )}
             </div>
 
             {/* Low Stock Alert Threshold */}

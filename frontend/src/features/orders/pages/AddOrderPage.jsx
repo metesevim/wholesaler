@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import AddOrderForm from '../components/AddOrderForm';
@@ -16,12 +15,8 @@ const AddOrderPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
-  const handleSuccess = (newOrder) => {
+  const handleSuccess = () => {
     // Navigate back to orders page after successful creation
-    navigate(ROUTES.ORDERS);
-  };
-
-  const handleGoBack = () => {
     navigate(ROUTES.ORDERS);
   };
 
@@ -33,11 +28,8 @@ const AddOrderPage = () => {
         <PageHeader
           title="Create New Order"
           subtitle="Fill in the details below to create a new order"
-          rightContent={
-            <Button onClick={handleGoBack} variant="secondary">
-              Back to Orders
-            </Button>
-          }
+          backButton
+          onBack={() => navigate(ROUTES.ORDERS)}
         />
 
         {error && (

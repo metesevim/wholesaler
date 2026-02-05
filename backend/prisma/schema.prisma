@@ -59,6 +59,9 @@ model Provider {
   country String?
   iban String?  // IBAN for provider payments
 
+  // Items sourced from this provider
+  items AdminInventoryItem[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -98,6 +101,10 @@ model AdminInventoryItem {
 
   // Price info
   pricePerUnit Float? // Price per unit for ordering
+
+  // Provider information (where we buy this item from)
+  providerId Int?
+  provider Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
 
   // Low stock alert threshold
   lowStockAlert Int @default(20) // Alert when quantity drops below this (minimum stock level)

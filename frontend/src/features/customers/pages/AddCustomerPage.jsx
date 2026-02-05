@@ -6,9 +6,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
-  import Sidebar from '../../../components/layout/Sidebar';
+import Sidebar from '../../../components/layout/Sidebar';
 import AddCustomerForm from '../components/AddCustomerForm';
 import { ROUTES } from '../../../shared/constants/appConstants';
 
@@ -16,11 +15,7 @@ const AddCustomerPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
-  const handleSuccess = (newCustomer) => {
-    navigate(ROUTES.CUSTOMERS);
-  };
-
-  const handleGoBack = () => {
+  const handleSuccess = () => {
     navigate(ROUTES.CUSTOMERS);
   };
 
@@ -32,11 +27,8 @@ const AddCustomerPage = () => {
         <PageHeader
           title="Add Customer"
           subtitle="Fill in the details below to add a new customer"
-          rightContent={
-            <Button onClick={handleGoBack} variant="secondary">
-              Back to Customers
-            </Button>
-          }
+          backButton
+          onBack={() => navigate(ROUTES.CUSTOMERS)}
         />
 
         {error && (

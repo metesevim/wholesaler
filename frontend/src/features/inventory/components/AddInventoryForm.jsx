@@ -4,14 +4,16 @@
  * Form for adding a new inventory item
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Input from '../../../components/forms/Input';
 import Button from '../../../components/forms/Button';
-import { inventoryRepository } from '../../../data';
+import { inventoryRepository, providerRepository } from '../../../data';
 import logger from '../../../shared/utils/logger';
 
 const AddInventoryForm = ({ onSuccess, onError }) => {
   const [loading, setLoading] = useState(false);
+  const [providers, setProviders] = useState([]);
+  const [loadingProviders, setLoadingProviders] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -19,8 +21,27 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
     unit: 'piece',
     price: '',
     lowStockAlert: 20,
+    providerId: '',
   });
   const [errors, setErrors] = useState({});
+
+  // Load providers on mount
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const result = await providerRepository.getAllProviders();
+        if (result.success) {
+          setProviders(result.data || []);
+        }
+      } catch (error) {
+        logger.error('Failed to load providers:', error);
+      } finally {
+        setLoadingProviders(false);
+      }
+    };
+
+    loadProviders();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -80,6 +101,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         unit: formData.unit,
         pricePerUnit: parseFloat(formData.price),
         lowStockAlert: Number(formData.lowStockAlert) || 20,
+        providerId: formData.providerId ? parseInt(formData.providerId) : null,
       };
 
       console.log('Creating item with data:', itemData);
@@ -182,6 +204,31 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
           min="0"
           error={errors.price}
         />
+      </div>
+
+      {/* Provider */}
+      <div>
+        <label className="block text-white font-semibold mb-2">
+          Provider
+        </label>
+        <select
+          name="providerId"
+          value={formData.providerId}
+          onChange={handleInputChange}
+          disabled={loadingProviders}
+          className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+            focus:outline-none focus:border-[#137fec] disabled:opacity-50"
+        >
+          <option value="">Select a provider (optional)</option>
+          {providers.map(provider => (
+            <option key={provider.id} value={provider.id}>
+              {provider.name}
+            </option>
+          ))}
+        </select>
+        {loadingProviders && (
+          <p className="text-xs text-[#92adc9] mt-2">Loading providers...</p>
+        )}
       </div>
 
       {/* Low Stock Alert Threshold */}
