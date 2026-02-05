@@ -2,16 +2,26 @@
  * Sidebar Component
  *
  * Reusable sidebar for all protected pages
- * Includes navigation menu and user actions
+ * Includes navigation menu with collapsible sections
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES, APP_NAME } from '../../shared/constants/appConstants';
 
 const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
   const navigate = useNavigate();
+  const [expandedSections, setExpandedSections] = useState({
+    operations: true,
+    admin: true
+  });
 
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   const TruckIcon = () => (
     <span className="material-symbols-outlined text-3xl" style={{ color: '#137fec', fontVariationSettings: '"FILL" 1' }}>
@@ -19,46 +29,53 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
     </span>
   );
 
-  const navItems = [
+  const sections = [
     {
-      route: ROUTES.HOMEPAGE,
-      label: 'Homepage',
-      icon: 'home'
+      id: 'operations',
+      label: 'OPERATIONS',
+      items: [
+        {
+          route: ROUTES.ORDERS,
+          label: 'Orders',
+          icon: 'assignment'
+        },
+        {
+          route: ROUTES.INVENTORY,
+          label: 'Inventory',
+          icon: 'warehouse'
+        },
+        {
+          route: ROUTES.CATEGORIES,
+          label: 'Categories',
+          icon: 'category'
+        },
+        {
+          route: ROUTES.CUSTOMERS,
+          label: 'Customers',
+          icon: 'restaurant'
+        },
+        {
+          route: ROUTES.PROVIDERS,
+          label: 'Providers',
+          icon: 'domain'
+        }
+      ]
     },
     {
-      route: ROUTES.ORDERS,
-      label: 'Orders',
-      icon: 'assignment'
-    },
-    {
-      route: ROUTES.INVENTORY,
-      label: 'Inventory',
-      icon: 'warehouse'
-    },
-    {
-      route: ROUTES.CATEGORIES,
-      label: 'Categories',
-      icon: 'category'
-    },
-    {
-      route: ROUTES.CUSTOMERS,
-      label: 'Customers',
-      icon: 'people'
-    },
-    {
-      route: ROUTES.PROVIDERS,
-      label: 'Providers',
-      icon: 'domain'
-    },
-    {
-      route: ROUTES.EMPLOYEES,
-      label: 'Employees',
-      icon: 'group'
-    },
-    {
-      route: ROUTES.LOGS,
-      label: 'Logs',
-      icon: 'description'
+      id: 'admin',
+      label: 'ADMINISTRATIVE',
+      items: [
+        {
+          route: ROUTES.EMPLOYEES,
+          label: 'Employees',
+          icon: 'group'
+        },
+        {
+          route: ROUTES.LOGS,
+          label: 'Logs',
+          icon: 'description'
+        }
+      ]
     }
   ];
 
@@ -73,22 +90,61 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
       </div>
 
       {/* Navigation Menu (Scrollable) */}
-      <nav className="space-y-3 flex-1 overflow-y-auto overflow-x-hidden pr-2">
-        {navItems.map((item) => (
-          <button
-            key={item.route}
-            onClick={() => navigate(item.route)}
-            className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
-              activeRoute === item.route
-                ? 'bg-[#137fec] text-white font-medium hover:bg-[#1a8fff]'
-                : 'text-[#92adc9] hover:bg-[#192633] hover:text-white'
-            }`}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-              {item.icon}
-            </span>
-            {item.label}
-          </button>
+      <nav className="space-y-4 flex-1 overflow-y-auto overflow-x-hidden pr-2">
+        {/* Homepage - Standalone Item */}
+        <button
+          onClick={() => navigate(ROUTES.HOMEPAGE)}
+          className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
+            activeRoute === ROUTES.HOMEPAGE
+              ? 'bg-[#137fec] text-white font-medium hover:bg-[#1a8fff]'
+              : 'text-[#92adc9] hover:bg-[#192633] hover:text-white'
+          }`}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+            home
+          </span>
+          Homepage
+        </button>
+
+
+        {/* Collapsible Sections */}
+        {sections.map((section) => (
+          <div key={section.id} className="mt-4 first:mt-0">
+            {/* Section Header */}
+            <button
+              onClick={() => toggleSection(section.id)}
+              className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-white bg-[#137fec]/15 border border-[#137fec]/30 rounded-lg hover:bg-[#137fec]/25 hover:border-[#137fec]/50 transition-all"
+            >
+              <span>{section.label}</span>
+              <span className="material-symbols-outlined text-sm transition-transform duration-200" style={{
+                transform: expandedSections[section.id] ? 'rotate(180deg)' : 'rotate(0deg)'
+              }}>
+                expand_more
+              </span>
+            </button>
+
+            {/* Section Items */}
+            {expandedSections[section.id] && (
+              <div className="space-y-2 mt-3 pl-2">
+                {section.items.map((item) => (
+                  <button
+                    key={item.route}
+                    onClick={() => navigate(item.route)}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
+                      activeRoute === item.route
+                        ? 'bg-[#137fec] text-white font-medium hover:bg-[#1a8fff]'
+                        : 'text-[#92adc9] hover:bg-[#192633] hover:text-white'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </nav>
     </div>

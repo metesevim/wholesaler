@@ -19,6 +19,7 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadOrders();
@@ -51,7 +52,14 @@ const OrdersPage = () => {
       CANCELLED: []
     };
 
-    orders.forEach(order => {
+    const filteredOrders = orders.filter(order => {
+      const searchLower = searchTerm.toLowerCase();
+      const customerName = order.customer?.name?.toLowerCase() || '';
+      const orderId = order.id?.toString() || '';
+      return customerName.includes(searchLower) || orderId.includes(searchLower);
+    });
+
+    filteredOrders.forEach(order => {
       if (grouped[order.status]) {
         grouped[order.status].push(order);
       }
@@ -164,6 +172,31 @@ const OrdersPage = () => {
             </Button>
           }
         />
+
+        {/* Search Bar */}
+        <div className="mb-8 relative">
+          <input
+            type="text"
+            placeholder="Search by customer name or order ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 pl-12
+              placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]"
+          />
+          <svg
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#92adc9]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
 
         {error && (
           <div className="mb-6 p-4 bg-red-900 border border-red-500 rounded-lg">

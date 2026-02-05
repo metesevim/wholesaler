@@ -429,21 +429,6 @@ const ItemRow = ({ item, getStockColor, navigate, setRestockItem }) => {
           </div>
         </div>
 
-        {/* Status Badges */}
-        <div className="flex flex-col gap-2">
-          {capacityPercentage <= 50 && (
-            <div className={`${stockColor.text.includes('red') ? 'bg-red-600/20 border border-red-500' : stockColor.text.includes('orange') ? 'bg-orange-600/20 border border-orange-500' : 'bg-yellow-600/20 border border-yellow-500'} rounded px-2 py-1`}>
-              <p className={`text-xs font-semibold whitespace-nowrap ${stockColor.badge}`}>
-                {capacityPercentage <= 25 ? 'CRITICAL' : 'LOW STOCK'}
-              </p>
-            </div>
-          )}
-          {isExpired && (
-            <div className="bg-red-600/20 border border-red-500 rounded px-2 py-1">
-              <p className="text-xs text-red-400 font-semibold whitespace-nowrap">EXPIRED</p>
-            </div>
-          )}
-        </div>
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-2">

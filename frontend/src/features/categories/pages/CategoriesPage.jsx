@@ -163,7 +163,7 @@ const CategoriesPage = () => {
 
   return (
     <div className="min-h-screen bg-[#101922] flex">
-      <Sidebar activeRoute={ROUTES.INVENTORY} />
+      <Sidebar activeRoute={ROUTES.CATEGORIES} />
       <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
           <PageHeader
@@ -316,8 +316,8 @@ const CategoriesPage = () => {
                 >
                   {editingId === category.id ? (
                     // Edit Form
-                    <form onSubmit={handleSaveEdit} className="space-y-3">
-                      <div className="grid grid-cols-2 gap-4">
+                    <form onSubmit={handleSaveEdit} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-6">
                         <div>
                           <label className="block text-white font-semibold mb-2">Name</label>
                           <input
@@ -351,11 +351,10 @@ const CategoriesPage = () => {
                               errors.description ? 'border-red-500' : ''
                             }`}
                           />
-                          {errors.description && <p className="mt-1 text-xs text-red-400">{errors.description}</p>}
                         </div>
                       </div>
 
-                      <div className="flex gap-2 pt-2">
+                      <div className="flex gap-2 pt-3 border-t border-[#324d67]">
                         <Button type="submit" variant="primary" size="sm" className="flex-1">
                           Save Changes
                         </Button>
