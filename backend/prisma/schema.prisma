@@ -66,6 +66,19 @@ model Provider {
   updatedAt DateTime @updatedAt
 }
 
+// ============= CATEGORIES =============
+model Category {
+  id Int @id @default(autoincrement())
+  name String @unique
+  description String?
+
+  // Inventory items in this category
+  items AdminInventoryItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ============= ADMIN INVENTORY (Warehouse) =============
 model AdminInventory {
   id Int @id @default(autoincrement())
@@ -92,7 +105,11 @@ model AdminInventoryItem {
   name String
   description String?
 
-  // Mass information (quantity, weight, volume)
+  // Category relationship
+  categoryId Int?
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Quantity and unit
   quantity Int @default(0)        // Count of items
   unit String @default("piece")   // "piece", "kg", "liter", etc.
 

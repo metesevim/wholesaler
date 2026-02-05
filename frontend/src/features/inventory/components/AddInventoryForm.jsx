@@ -7,13 +7,15 @@
 import React, { useState, useEffect } from 'react';
 import Input from '../../../components/forms/Input';
 import Button from '../../../components/forms/Button';
-import { inventoryRepository, providerRepository } from '../../../data';
+import { inventoryRepository, categoryRepository, providerRepository } from '../../../data';
 import logger from '../../../shared/utils/logger';
 
 const AddInventoryForm = ({ onSuccess, onError }) => {
   const [loading, setLoading] = useState(false);
   const [providers, setProviders] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loadingProviders, setLoadingProviders] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -23,25 +25,34 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
     providerId: '',
     productionDate: '',
     expiryDate: '',
+    category: '',
   });
   const [errors, setErrors] = useState({});
 
-  // Load providers on mount
+  // Load providers and categories on mount
   useEffect(() => {
-    const loadProviders = async () => {
+    const loadData = async () => {
       try {
-        const result = await providerRepository.getAllProviders();
-        if (result.success) {
-          setProviders(result.data || []);
+        const [providersResult, categoriesResult] = await Promise.all([
+          providerRepository.getAllProviders(),
+          categoryRepository.getAllCategories(),
+        ]);
+
+        if (providersResult.success) {
+          setProviders(providersResult.data || []);
+        }
+
+        if (categoriesResult.success) {
+          setCategories(categoriesResult.data || []);
         }
       } catch (error) {
-        logger.error('Failed to load providers:', error);
+        logger.error('Failed to load data:', error);
       } finally {
         setLoadingProviders(false);
+        setLoadingCategories(false);
       }
     };
-
-    loadProviders();
+    loadData();
   }, []);
 
   const validateForm = () => {
@@ -85,6 +96,10 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       newErrors.expiryDate = 'Expiry date is required';
     }
 
+    if (!formData.category) {
+      newErrors.category = 'Category is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -122,6 +137,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         providerId: parseInt(formData.providerId),
         productionDate: formData.productionDate,
         expiryDate: formData.expiryDate,
+        categoryId: formData.category ? parseInt(formData.category) : null,
       };
 
       console.log('Creating item with data:', itemData);
@@ -143,22 +159,51 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Item Name */}
-      <div>
-        <label className="block text-white font-semibold mb-2">
-          Item Name <span className="text-red-500">*</span>
-        </label>
-        <Input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          placeholder="Enter item name"
-          error={errors.name}
-        />
+      {/* Item Name and Provider - 2 Columns */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Item Name <span className="text-red-500">*</span>
+          </label>
+          <Input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Enter item name"
+            error={errors.name}
+          />
+        </div>
+
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Provider <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="providerId"
+            value={formData.providerId}
+            onChange={handleInputChange}
+            disabled={loadingProviders}
+            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+              focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+              errors.providerId ? 'border-red-500' : ''
+            }`}
+          >
+            <option value="">Select provider</option>
+            {providers.map(provider => (
+              <option key={provider.id} value={provider.id}>
+                {provider.name}
+              </option>
+            ))}
+          </select>
+          {loadingProviders && (
+            <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+          )}
+          {errors.providerId && <p className="mt-2 text-xs text-red-400">{errors.providerId}</p>}
+        </div>
       </div>
 
-      {/* Description */}
+      {/* Description - Full Width */}
       <div>
         <label className="block text-white font-semibold mb-2">
           Description <span className="text-red-500">*</span>
@@ -168,7 +213,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
           value={formData.description}
           onChange={handleInputChange}
           placeholder="Enter item description"
-          rows="4"
+          rows="3"
           className={`w-full rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-3
             placeholder-[#92adc9] focus:outline-none focus:border-[#137fec] ${
             errors.description ? 'border-red-500' : ''
@@ -177,90 +222,59 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         {errors.description && <p className="mt-2 text-sm text-red-400">{errors.description}</p>}
       </div>
 
-      {/* Quantity */}
-      <div>
-        <label className="block text-white font-semibold mb-2">
-          Quantity <span className="text-red-500">*</span>
-        </label>
-        <Input
-          type="number"
-          name="quantity"
-          value={formData.quantity}
-          onChange={handleInputChange}
-          placeholder="Enter quantity"
-          step="0.1"
-          min="0"
-          error={errors.quantity}
-        />
+      {/* Quantity, Price, Low Stock Alert - 3 Columns */}
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Quantity <span className="text-red-500">*</span>
+          </label>
+          <Input
+            type="number"
+            name="quantity"
+            value={formData.quantity}
+            onChange={handleInputChange}
+            placeholder="Enter quantity"
+            step="0.1"
+            min="0"
+            error={errors.quantity}
+          />
+        </div>
+
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Price <span className="text-red-500">*</span>
+          </label>
+          <Input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            placeholder="Enter price"
+            step="0.01"
+            min="0"
+            error={errors.price}
+          />
+        </div>
+
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Low Stock Alert <span className="text-red-500">*</span>
+          </label>
+          <Input
+            type="number"
+            name="lowStockAlert"
+            value={formData.lowStockAlert}
+            onChange={handleInputChange}
+            placeholder="Min quantity"
+            step="1"
+            min="0"
+            error={errors.lowStockAlert}
+          />
+        </div>
       </div>
 
-      {/* Price */}
-      <div>
-        <label className="block text-white font-semibold mb-2">
-          Price <span className="text-red-500">*</span>
-        </label>
-        <Input
-          type="number"
-          name="price"
-          value={formData.price}
-          onChange={handleInputChange}
-          placeholder="Enter price"
-          step="0.01"
-          min="0"
-          error={errors.price}
-        />
-      </div>
-
-      {/* Provider */}
-      <div>
-        <label className="block text-white font-semibold mb-2">
-          Provider <span className="text-red-500">*</span>
-        </label>
-        <select
-          name="providerId"
-          value={formData.providerId}
-          onChange={handleInputChange}
-          disabled={loadingProviders}
-          className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
-            focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
-            errors.providerId ? 'border-red-500' : ''
-          }`}
-        >
-          <option value="">Select a provider</option>
-          {providers.map(provider => (
-            <option key={provider.id} value={provider.id}>
-              {provider.name}
-            </option>
-          ))}
-        </select>
-        {loadingProviders && (
-          <p className="text-xs text-[#92adc9] mt-2">Loading providers...</p>
-        )}
-        {errors.providerId && <p className="mt-2 text-sm text-red-400">{errors.providerId}</p>}
-      </div>
-
-      {/* Low Stock Alert Threshold */}
-      <div>
-        <label className="block text-white font-semibold mb-2">
-          Low Stock Alert Threshold <span className="text-red-500">*</span>
-        </label>
-        <Input
-          type="number"
-          name="lowStockAlert"
-          value={formData.lowStockAlert}
-          onChange={handleInputChange}
-          placeholder="Set minimum quantity before alert"
-          step="1"
-          min="0"
-          error={errors.lowStockAlert}
-        />
-        <p className="text-xs text-[#92adc9] mt-2">
-          When quantity drops below this number, it will appear in the Low Stock Alert section on the homepage
-        </p>
-      </div>
-
-      {/* Production and Expiry Dates */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Production Date, Expiry Date, and Category - 3 Columns */}
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="block text-white font-semibold mb-2">
             Production Date <span className="text-red-500">*</span>
@@ -275,7 +289,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
               errors.productionDate ? 'border-red-500' : ''
             }`}
           />
-          {errors.productionDate && <p className="mt-2 text-sm text-red-400">{errors.productionDate}</p>}
+          {errors.productionDate && <p className="mt-2 text-xs text-red-400">{errors.productionDate}</p>}
         </div>
 
         <div>
@@ -292,7 +306,34 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
               errors.expiryDate ? 'border-red-500' : ''
             }`}
           />
-          {errors.expiryDate && <p className="mt-2 text-sm text-red-400">{errors.expiryDate}</p>}
+          {errors.expiryDate && <p className="mt-2 text-xs text-red-400">{errors.expiryDate}</p>}
+        </div>
+
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Category <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            disabled={loadingCategories}
+            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+              focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+              errors.category ? 'border-red-500' : ''
+            }`}
+          >
+            <option value="">Select category</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          {loadingCategories && (
+            <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+          )}
+          {errors.category && <p className="mt-2 text-xs text-red-400">{errors.category}</p>}
         </div>
       </div>
 

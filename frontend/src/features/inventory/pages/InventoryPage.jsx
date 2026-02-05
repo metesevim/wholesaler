@@ -183,6 +183,9 @@ const InventoryPage = () => {
                 )}
                 <div className="space-y-2 text-sm">
                   <p className="text-[#92adc9]">
+                    <span className="font-semibold">Category:</span> {item.category?.name || 'Uncategorized'}
+                  </p>
+                  <p className="text-[#92adc9]">
                     <span className="font-semibold">Quantity:</span> {item.quantity} {item.unit}
                   </p>
                   <p className="text-[#92adc9]">

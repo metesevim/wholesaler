@@ -237,7 +237,7 @@ const AddOrderForm = ({ onSuccess, onError }) => {
           value={selectedCustomerId}
           onChange={(e) => setSelectedCustomerId(e.target.value)}
           className={`
-            w-full h-12 rounded-lg border bg-[#192633] text-white px-4
+            w-full h-12 rounded-lg border bg-[#192633] text-white pl-3
             focus:outline-none focus:border-[#137fec]
             ${errors.customerId ? 'border-red-500' : 'border-[#324d67]'}
           `}
@@ -311,7 +311,7 @@ const AddOrderForm = ({ onSuccess, onError }) => {
                 }
               }}
               className={`
-                w-full h-12 rounded-lg border bg-[#192633] text-white px-4
+                w-full h-12 rounded-lg border bg-[#192633] text-white pl-3
                 focus:outline-none focus:border-[#137fec]
                 ${!selectedCustomerId ? 'opacity-50 cursor-not-allowed' : ''}
                 ${errors.itemId ? 'border-red-500' : 'border-[#324d67]'}
@@ -355,7 +355,7 @@ const AddOrderForm = ({ onSuccess, onError }) => {
                 value={selectedUnit}
                 onChange={(e) => setSelectedUnit(e.target.value)}
                 className={`
-                  w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+                  w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
                   focus:outline-none focus:border-[#137fec]
                   ${!selectedCustomerId ? 'opacity-50 cursor-not-allowed' : ''}
                 `}

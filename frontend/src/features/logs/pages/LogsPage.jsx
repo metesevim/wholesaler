@@ -137,7 +137,7 @@ const LogsPage = () => {
               <select
                 value={filterLevel}
                 onChange={(e) => setFilterLevel(e.target.value)}
-                className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-3
+                className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
                   focus:outline-none focus:border-[#137fec]"
               >
                 <option value="ALL">All Levels</option>

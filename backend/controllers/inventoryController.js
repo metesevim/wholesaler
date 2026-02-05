@@ -7,17 +7,15 @@ import prisma from "../prisma/client.js";
  */
 export const createAdminInventoryItem = async (req, res) => {
     try {
-        const { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate } = req.body;
+        const { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate, categoryId } = req.body;
 
-        console.log('Create item request received:', { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate });
+        console.log('Create item request received:', { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate, categoryId });
 
         if (!name) {
             return res.status(400).json({ error: "Item name is required." });
         }
 
         // Get or create admin inventory for the admin user
-        // For now, we'll assume there's a main admin user (id: 1)
-        // In production, this should be configurable
         let adminInventory = await prisma.adminInventory.findFirst({
             where: { user: { role: "Admin" } },
         });
@@ -51,9 +49,11 @@ export const createAdminInventoryItem = async (req, res) => {
                 providerId: providerId ? parseInt(providerId) : null,
                 productionDate: productionDate ? new Date(productionDate) : null,
                 expiryDate: expiryDate ? new Date(expiryDate) : null,
+                categoryId: categoryId ? parseInt(categoryId) : null,
             },
             include: {
                 provider: true,
+                category: true,
             },
         });
 
@@ -72,6 +72,7 @@ export const getAllAdminInventoryItems = async (req, res) => {
         const items = await prisma.adminInventoryItem.findMany({
             include: {
                 provider: true,
+                category: true,
                 customerItems: {
                     include: {
                         customerInventory: {
@@ -128,13 +129,12 @@ export const getAdminInventoryItemById = async (req, res) => {
     }
 };
 
-// ============= UPDATE ADMIN INVENTORY ITEM =============
 export const updateAdminInventoryItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate } = req.body;
+        const { name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate, categoryId } = req.body;
 
-        console.log('Update item request received:', { id, name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate });
+        console.log('Update item request received:', { id, name, description, quantity, unit, imageUrl, pricePerUnit, lowStockAlert, providerId, productionDate, expiryDate, categoryId });
 
         const item = await prisma.adminInventoryItem.update({
             where: { id: parseInt(id) },
@@ -149,9 +149,11 @@ export const updateAdminInventoryItem = async (req, res) => {
                 ...(providerId !== undefined && { providerId: providerId ? parseInt(providerId) : null }),
                 ...(productionDate !== undefined && { productionDate: productionDate ? new Date(productionDate) : null }),
                 ...(expiryDate !== undefined && { expiryDate: expiryDate ? new Date(expiryDate) : null }),
+                ...(categoryId !== undefined && { categoryId: categoryId ? parseInt(categoryId) : null }),
             },
             include: {
                 provider: true,
+                category: true,
             },
         });
 

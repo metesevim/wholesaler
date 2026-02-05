@@ -10,7 +10,7 @@ import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
-import { inventoryRepository, providerRepository } from '../../../data';
+import { inventoryRepository, categoryRepository, providerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
 
@@ -23,7 +23,9 @@ const EditInventoryPage = () => {
   const [success, setSuccess] = useState(null);
   const [item, setItem] = useState(null);
   const [providers, setProviders] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loadingProviders, setLoadingProviders] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -33,24 +35,34 @@ const EditInventoryPage = () => {
     providerId: '',
     productionDate: '',
     expiryDate: '',
+    category: '',
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     loadItem();
-    loadProviders();
+    loadData();
   }, [id]);
 
-  const loadProviders = async () => {
+  const loadData = async () => {
     try {
-      const result = await providerRepository.getAllProviders();
-      if (result.success) {
-        setProviders(result.data || []);
+      const [providersResult, categoriesResult] = await Promise.all([
+        providerRepository.getAllProviders(),
+        categoryRepository.getAllCategories(),
+      ]);
+
+      if (providersResult.success) {
+        setProviders(providersResult.data || []);
+      }
+
+      if (categoriesResult.success) {
+        setCategories(categoriesResult.data || []);
       }
     } catch (error) {
-      logger.error('Failed to load providers:', error);
+      logger.error('Failed to load data:', error);
     } finally {
       setLoadingProviders(false);
+      setLoadingCategories(false);
     }
   };
 
@@ -71,6 +83,7 @@ const EditInventoryPage = () => {
           providerId: result.data.providerId || '',
           productionDate: result.data.productionDate ? result.data.productionDate.split('T')[0] : '',
           expiryDate: result.data.expiryDate ? result.data.expiryDate.split('T')[0] : '',
+          category: result.data.category || '',
         });
       } else {
         setError('Failed to load inventory item');
@@ -124,6 +137,10 @@ const EditInventoryPage = () => {
       newErrors.expiryDate = 'Expiry date is required';
     }
 
+    if (!formData.category) {
+      newErrors.category = 'Category is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -164,6 +181,7 @@ const EditInventoryPage = () => {
         providerId: parseInt(formData.providerId),
         productionDate: formData.productionDate,
         expiryDate: formData.expiryDate,
+        categoryId: formData.category ? parseInt(formData.category) : null,
       };
 
       logger.info('Submitting item data:', itemData);
@@ -272,23 +290,52 @@ const EditInventoryPage = () => {
 
         <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Item Name */}
-            <div>
-              <label className="block text-white font-semibold mb-2">
-                Item Name <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Enter item name"
-                error={errors.name}
-                disabled={submitting}
-              />
+            {/* Item Name and Provider - 2 Columns */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Item Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter item name"
+                  error={errors.name}
+                  disabled={submitting}
+                />
+              </div>
+
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Provider <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="providerId"
+                  value={formData.providerId}
+                  onChange={handleInputChange}
+                  disabled={submitting || loadingProviders}
+                  className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+                    focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+                    errors.providerId ? 'border-red-500' : ''
+                  }`}
+                >
+                  <option value="">Select provider</option>
+                  {providers.map(provider => (
+                    <option key={provider.id} value={provider.id}>
+                      {provider.name}
+                    </option>
+                  ))}
+                </select>
+                {loadingProviders && (
+                  <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+                )}
+                {errors.providerId && <p className="mt-2 text-xs text-red-400">{errors.providerId}</p>}
+              </div>
             </div>
 
-            {/* Description */}
+            {/* Description - Full Width */}
             <div>
               <label className="block text-white font-semibold mb-2">
                 Description <span className="text-red-500">*</span>
@@ -298,7 +345,7 @@ const EditInventoryPage = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 placeholder="Enter item description"
-                rows="4"
+                rows="3"
                 disabled={submitting}
                 className={`w-full rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-3
                   placeholder-[#92adc9] focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
@@ -308,93 +355,62 @@ const EditInventoryPage = () => {
               {errors.description && <p className="mt-2 text-sm text-red-400">{errors.description}</p>}
             </div>
 
-            {/* Quantity */}
-            <div>
-              <label className="block text-white font-semibold mb-2">
-                Quantity <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="number"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleInputChange}
-                placeholder="Enter quantity"
-                step="0.1"
-                min="0"
-                error={errors.quantity}
-                disabled={submitting}
-              />
+            {/* Quantity, Price, Low Stock Alert - 3 Columns */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Quantity <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleInputChange}
+                  placeholder="Enter quantity"
+                  step="0.1"
+                  min="0"
+                  error={errors.quantity}
+                  disabled={submitting}
+                />
+              </div>
+
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Price <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  placeholder="Enter price"
+                  step="0.01"
+                  min="0"
+                  error={errors.price}
+                  disabled={submitting}
+                />
+              </div>
+
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Low Stock Alert <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  name="lowStockAlert"
+                  value={formData.lowStockAlert}
+                  onChange={handleInputChange}
+                  placeholder="Min quantity"
+                  step="1"
+                  min="0"
+                  error={errors.lowStockAlert}
+                  disabled={submitting}
+                />
+              </div>
             </div>
 
-            {/* Price */}
-            <div>
-              <label className="block text-white font-semibold mb-2">
-                Price <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                placeholder="Enter price"
-                step="0.01"
-                min="0"
-                error={errors.price}
-                disabled={submitting}
-              />
-            </div>
-
-            {/* Provider */}
-            <div>
-              <label className="block text-white font-semibold mb-2">
-                Provider <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="providerId"
-                value={formData.providerId}
-                onChange={handleInputChange}
-                disabled={submitting || loadingProviders}
-                className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
-                  focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
-                  errors.providerId ? 'border-red-500' : ''
-                }`}
-              >
-                <option value="">Select a provider</option>
-                {providers.map(provider => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.name}
-                  </option>
-                ))}
-              </select>
-              {loadingProviders && (
-                <p className="text-xs text-[#92adc9] mt-2">Loading providers...</p>
-              )}
-              {errors.providerId && <p className="mt-2 text-sm text-red-400">{errors.providerId}</p>}
-            </div>
-
-            {/* Low Stock Alert Threshold */}
-            <div>
-              <label className="block text-white font-semibold mb-2">
-                Low Stock Alert Threshold <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="number"
-                name="lowStockAlert"
-                value={formData.lowStockAlert}
-                onChange={handleInputChange}
-                placeholder="Set minimum quantity before alert"
-                step="1"
-                min="0"
-                error={errors.lowStockAlert}
-                disabled={submitting}
-              />
-              <p className="text-xs text-[#92adc9] mt-2">
-                When quantity drops below this number, it will appear in the Low Stock Alert section on the homepage
-              </p>
-            </div>
-
-            {/* Production and Expiry Dates */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Production and Expiry Dates and Category - 3 Columns */}
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-white font-semibold mb-2">
                   Production Date <span className="text-red-500">*</span>
@@ -410,7 +426,7 @@ const EditInventoryPage = () => {
                     errors.productionDate ? 'border-red-500' : ''
                   }`}
                 />
-                {errors.productionDate && <p className="mt-2 text-sm text-red-400">{errors.productionDate}</p>}
+                {errors.productionDate && <p className="mt-2 text-xs text-red-400">{errors.productionDate}</p>}
               </div>
 
               <div>
@@ -428,7 +444,34 @@ const EditInventoryPage = () => {
                     errors.expiryDate ? 'border-red-500' : ''
                   }`}
                 />
-                {errors.expiryDate && <p className="mt-2 text-sm text-red-400">{errors.expiryDate}</p>}
+                {errors.expiryDate && <p className="mt-2 text-xs text-red-400">{errors.expiryDate}</p>}
+              </div>
+
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  disabled={submitting || loadingCategories}
+                  className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+                    focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+                    errors.category ? 'border-red-500' : ''
+                  }`}
+                >
+                  <option value="">Select category</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                {loadingCategories && (
+                  <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+                )}
+                {errors.category && <p className="mt-2 text-xs text-red-400">{errors.category}</p>}
               </div>
             </div>
 
