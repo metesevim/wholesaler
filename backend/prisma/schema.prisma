@@ -123,8 +123,9 @@ model AdminInventoryItem {
   providerId Int?
   provider Provider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
 
-  // Low stock alert threshold
-  lowStockAlert Int @default(20) // Alert when quantity drops below this (minimum stock level)
+  // Capacity management
+  minimumCapacity Int @default(20)  // Alert when quantity drops below this (minimum stock level)
+  maximumCapacity Int @default(100) // Maximum stock level
 
   // Date information
   productionDate DateTime?  // When the item was produced

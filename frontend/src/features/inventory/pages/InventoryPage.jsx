@@ -83,6 +83,19 @@ const InventoryPage = () => {
     (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Helper function to determine color based on capacity percentage
+  const getStockColor = (percentage) => {
+    if (percentage >= 75) {
+      return { bar: 'bg-green-500', text: 'text-green-400', badge: 'text-green-400' };
+    } else if (percentage >= 50) {
+      return { bar: 'bg-yellow-500', text: 'text-yellow-400', badge: 'text-yellow-400' };
+    } else if (percentage >= 25) {
+      return { bar: 'bg-orange-500', text: 'text-orange-400', badge: 'text-orange-400' };
+    } else {
+      return { bar: 'bg-red-500', text: 'text-red-400', badge: 'text-red-400' };
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.INVENTORY} />
@@ -149,21 +162,108 @@ const InventoryPage = () => {
             <p className="text-[#92adc9] text-lg mb-4">No items match your search</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredItems.map(item => (
-              <div
-                key={item.id}
-                className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"
-              >
-                <div className="flex items-start justify-between mb-1">
-                  <h3 className="text-lg font-bold text-white">
-                    {item.name}
-                  </h3>
-                  <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map(item => {
+              const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
+              const capacityPercentage = Math.min((item.quantity / item.maximumCapacity) * 100, 100);
+              const stockColor = getStockColor(capacityPercentage);
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 overflow-hidden"
+                >
+                  {/* Header Section */}
+                  <div className="p-4 border-b border-[#324d67] bg-[#0d1117]">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-[#137fec] font-semibold uppercase tracking-wide">
+                          {item.category?.name || 'Uncategorized'}
+                        </p>
+                      </div>
+                      {capacityPercentage <= 50 && (
+                        <div className={`${stockColor.text.includes('red') ? 'bg-red-600/20 border border-red-500' : stockColor.text.includes('orange') ? 'bg-orange-600/20 border border-orange-500' : 'bg-yellow-600/20 border border-yellow-500'} rounded px-2 py-1 ml-2`}>
+                          <p className={`text-xs font-semibold ${stockColor.badge}`}>
+                            {capacityPercentage <= 25 ? 'CRITICAL' : 'LOW STOCK'}
+                          </p>
+                        </div>
+                      )}
+                      {isExpired && (
+                        <div className="bg-red-600/20 border border-red-500 rounded px-2 py-1 ml-2">
+                          <p className="text-xs text-red-400 font-semibold">EXPIRED</p>
+                        </div>
+                      )}
+                    </div>
+                    {item.description && (
+                      <p className="text-sm text-[#92adc9] line-clamp-2">
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Main Content */}
+                  <div className="p-4 space-y-4">
+                    {/* Stock Status */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold text-[#92adc9]">Stock Level</span>
+                        <span className={`text-sm font-bold ${stockColor.text}`}>
+                          {item.quantity} {item.unit}
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-[#0d1117] rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all ${stockColor.bar}`}
+                          style={{ width: `${capacityPercentage}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-[#92adc9]">
+                        <span>Min: {item.minimumCapacity} {item.unit}</span>
+                        <span>Max: {item.maximumCapacity} {item.unit}</span>
+                      </div>
+                    </div>
+
+                    {/* Price & Provider */}
+                    <div className="grid grid-cols-2 gap-3 py-2 border-y border-[#324d67]">
+                      <div>
+                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Price</p>
+                        <p className="text-lg font-bold text-white">₺{item.pricePerUnit?.toFixed(2) || '0.00'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Provider</p>
+                        <p className="text-sm font-semibold text-white truncate">
+                          {item.provider?.name || '—'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Dates */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Produced</p>
+                        <p className="text-sm text-white">
+                          {item.productionDate ? formatDateToEuropean(item.productionDate) : '—'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Expires</p>
+                        <p className={`text-sm font-semibold ${isExpired ? 'text-red-400' : 'text-white'}`}>
+                          {item.expiryDate ? formatDateToEuropean(item.expiryDate) : '—'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="p-4 border-t border-[#324d67] bg-[#0d1117] flex gap-2">
                     <Button
                       onClick={() => setRestockItem(item)}
                       variant="primary"
                       size="sm"
+                      className="flex-1"
                     >
                       Restock
                     </Button>
@@ -171,42 +271,14 @@ const InventoryPage = () => {
                       onClick={() => navigate(`/inventory/${item.id}/edit`)}
                       variant="secondary"
                       size="sm"
+                      className="flex-1"
                     >
                       Edit
                     </Button>
                   </div>
                 </div>
-                {item.description && (
-                  <p className="text-sm text-[#92adc9] mb-2">
-                    {item.description}
-                  </p>
-                )}
-                <div className="space-y-2 text-sm">
-                  <p className="text-[#92adc9]">
-                    <span className="font-semibold">Category:</span> {item.category?.name || 'Uncategorized'}
-                  </p>
-                  <p className="text-[#92adc9]">
-                    <span className="font-semibold">Quantity:</span> {item.quantity} {item.unit}
-                  </p>
-                  <p className="text-[#92adc9]">
-                    <span className="font-semibold">Price:</span> ₺{item.pricePerUnit?.toFixed(2) || '0.00'}
-                  </p>
-                  <p className="text-[#92adc9]">
-                    <span className="font-semibold">Provider:</span> {item.provider?.name || 'Not assigned'}
-                  </p>
-                  {item.productionDate && (
-                    <p className="text-[#92adc9]">
-                      <span className="font-semibold">Produced:</span> {formatDateToEuropean(item.productionDate)}
-                    </p>
-                  )}
-                  {item.expiryDate && (
-                    <p className={`${new Date(item.expiryDate) < new Date() ? 'text-red-400' : 'text-[#92adc9]'}`}>
-                      <span className="font-semibold">Expires:</span> {formatDateToEuropean(item.expiryDate)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         </div>

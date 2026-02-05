@@ -31,7 +31,8 @@ const EditInventoryPage = () => {
     description: '',
     quantity: '',
     price: '',
-    lowStockAlert: 20,
+    minimumCapacity: 20,
+    maximumCapacity: 100,
     providerId: '',
     productionDate: '',
     expiryDate: '',
@@ -79,7 +80,8 @@ const EditInventoryPage = () => {
           description: result.data.description || '',
           quantity: result.data.quantity || '',
           price: result.data.pricePerUnit || '',
-          lowStockAlert: result.data.lowStockAlert || 20,
+          minimumCapacity: result.data.minimumCapacity || 20,
+          maximumCapacity: result.data.maximumCapacity || 100,
           providerId: result.data.providerId || '',
           productionDate: result.data.productionDate ? result.data.productionDate.split('T')[0] : '',
           expiryDate: result.data.expiryDate ? result.data.expiryDate.split('T')[0] : '',
@@ -119,10 +121,20 @@ const EditInventoryPage = () => {
       newErrors.price = 'Price must be a positive number';
     }
 
-    if (!formData.lowStockAlert) {
-      newErrors.lowStockAlert = 'Low stock alert threshold is required';
-    } else if (isNaN(formData.lowStockAlert) || Number(formData.lowStockAlert) < 0) {
-      newErrors.lowStockAlert = 'Low stock alert must be a non-negative number';
+    if (!formData.minimumCapacity) {
+      newErrors.minimumCapacity = 'Minimum capacity is required';
+    } else if (isNaN(formData.minimumCapacity) || Number(formData.minimumCapacity) < 0) {
+      newErrors.minimumCapacity = 'Minimum capacity must be a non-negative number';
+    }
+
+    if (!formData.maximumCapacity) {
+      newErrors.maximumCapacity = 'Maximum capacity is required';
+    } else if (isNaN(formData.maximumCapacity) || Number(formData.maximumCapacity) <= 0) {
+      newErrors.maximumCapacity = 'Maximum capacity must be a positive number';
+    }
+
+    if (Number(formData.minimumCapacity) >= Number(formData.maximumCapacity)) {
+      newErrors.minimumCapacity = 'Minimum capacity must be less than maximum capacity';
     }
 
     if (!formData.providerId) {
@@ -177,7 +189,8 @@ const EditInventoryPage = () => {
         description: formData.description,
         quantity: Number(formData.quantity),
         pricePerUnit: parseFloat(formData.price),
-        lowStockAlert: Number(formData.lowStockAlert),
+        minimumCapacity: Number(formData.minimumCapacity),
+        maximumCapacity: Number(formData.maximumCapacity),
         providerId: parseInt(formData.providerId),
         productionDate: formData.productionDate,
         expiryDate: formData.expiryDate,
@@ -393,17 +406,34 @@ const EditInventoryPage = () => {
 
               <div>
                 <label className="block text-white font-semibold mb-2">
-                  Low Stock Alert <span className="text-red-500">*</span>
+                  Min Capacity <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
-                  name="lowStockAlert"
-                  value={formData.lowStockAlert}
+                  name="minimumCapacity"
+                  value={formData.minimumCapacity}
                   onChange={handleInputChange}
-                  placeholder="Min quantity"
+                  placeholder="Minimum stock level"
                   step="1"
                   min="0"
-                  error={errors.lowStockAlert}
+                  error={errors.minimumCapacity}
+                  disabled={submitting}
+                />
+              </div>
+
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Max Capacity <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  name="maximumCapacity"
+                  value={formData.maximumCapacity}
+                  onChange={handleInputChange}
+                  placeholder="Maximum stock level"
+                  step="1"
+                  min="1"
+                  error={errors.maximumCapacity}
                   disabled={submitting}
                 />
               </div>
