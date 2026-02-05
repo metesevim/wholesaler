@@ -10,6 +10,7 @@ import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import { ROUTES } from '../../../shared/constants/appConstants';
+import { formatDateTimeToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const LogsPage = () => {
@@ -101,8 +102,7 @@ const LogsPage = () => {
   };
 
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
+    return formatDateTimeToEuropean(timestamp);
   };
 
   const toggleExpanded = (index) => {

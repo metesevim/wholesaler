@@ -11,6 +11,7 @@ import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import { customerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
+import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const CustomersPage = () => {
@@ -160,7 +161,7 @@ const CustomersPage = () => {
                     <>
                       <div className="border-t border-[#324d67] my-2"></div>
                       <p className="text-[#92adc9]">
-                        <span className="font-semibold">Customer since:</span> {new Date(customer.createdAt).toLocaleDateString()}
+                        <span className="font-semibold">Customer since:</span> {formatDateToEuropean(customer.createdAt)}
                       </p>
                     </>
                   )}

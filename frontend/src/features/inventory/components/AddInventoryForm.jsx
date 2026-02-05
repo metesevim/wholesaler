@@ -18,10 +18,11 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
     name: '',
     description: '',
     quantity: '',
-    unit: 'piece',
     price: '',
     lowStockAlert: 20,
     providerId: '',
+    productionDate: '',
+    expiryDate: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -50,20 +51,38 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       newErrors.name = 'Item name is required';
     }
 
+    if (!formData.description.trim()) {
+      newErrors.description = 'Description is required';
+    }
+
     if (!formData.quantity) {
       newErrors.quantity = 'Quantity is required';
     } else if (isNaN(formData.quantity) || Number(formData.quantity) <= 0) {
       newErrors.quantity = 'Quantity must be a positive number';
     }
 
-    if (!formData.unit) {
-      newErrors.unit = 'Unit is required';
-    }
-
     if (!formData.price) {
       newErrors.price = 'Price is required';
     } else if (isNaN(formData.price) || Number(formData.price) <= 0) {
       newErrors.price = 'Price must be a positive number';
+    }
+
+    if (!formData.lowStockAlert) {
+      newErrors.lowStockAlert = 'Low stock alert threshold is required';
+    } else if (isNaN(formData.lowStockAlert) || Number(formData.lowStockAlert) < 0) {
+      newErrors.lowStockAlert = 'Low stock alert must be a non-negative number';
+    }
+
+    if (!formData.providerId) {
+      newErrors.providerId = 'Provider is required';
+    }
+
+    if (!formData.productionDate) {
+      newErrors.productionDate = 'Production date is required';
+    }
+
+    if (!formData.expiryDate) {
+      newErrors.expiryDate = 'Expiry date is required';
     }
 
     setErrors(newErrors);
@@ -98,10 +117,11 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         name: formData.name,
         description: formData.description,
         quantity: Number(formData.quantity),
-        unit: formData.unit,
         pricePerUnit: parseFloat(formData.price),
-        lowStockAlert: Number(formData.lowStockAlert) || 20,
-        providerId: formData.providerId ? parseInt(formData.providerId) : null,
+        lowStockAlert: Number(formData.lowStockAlert),
+        providerId: parseInt(formData.providerId),
+        productionDate: formData.productionDate,
+        expiryDate: formData.expiryDate,
       };
 
       console.log('Creating item with data:', itemData);
@@ -141,52 +161,37 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       {/* Description */}
       <div>
         <label className="block text-white font-semibold mb-2">
-          Description
+          Description <span className="text-red-500">*</span>
         </label>
         <textarea
           name="description"
           value={formData.description}
           onChange={handleInputChange}
-          placeholder="Enter item description (optional)"
+          placeholder="Enter item description"
           rows="4"
-          className="w-full rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-3
-            placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]"
+          className={`w-full rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-3
+            placeholder-[#92adc9] focus:outline-none focus:border-[#137fec] ${
+            errors.description ? 'border-red-500' : ''
+          }`}
         />
+        {errors.description && <p className="mt-2 text-sm text-red-400">{errors.description}</p>}
       </div>
 
-      {/* Quantity and Unit */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-white font-semibold mb-2">
-            Quantity <span className="text-red-500">*</span>
-          </label>
-          <Input
-            type="number"
-            name="quantity"
-            value={formData.quantity}
-            onChange={handleInputChange}
-            placeholder="Enter quantity"
-            step="0.1"
-            min="0"
-            error={errors.quantity}
-          />
-        </div>
-
-        <div>
-          <label className="block text-white font-semibold mb-2">Unit</label>
-          <select
-            name="unit"
-            value={formData.unit}
-            onChange={handleInputChange}
-            className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
-              focus:outline-none focus:border-[#137fec]"
-          >
-            <option value="piece">Piece</option>
-            <option value="kg">KG</option>
-            <option value="liter">Liter</option>
-            <option value="box">Box</option>
-          </select>
-        </div>
+      {/* Quantity */}
+      <div>
+        <label className="block text-white font-semibold mb-2">
+          Quantity <span className="text-red-500">*</span>
+        </label>
+        <Input
+          type="number"
+          name="quantity"
+          value={formData.quantity}
+          onChange={handleInputChange}
+          placeholder="Enter quantity"
+          step="0.1"
+          min="0"
+          error={errors.quantity}
+        />
       </div>
 
       {/* Price */}
@@ -209,17 +214,19 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       {/* Provider */}
       <div>
         <label className="block text-white font-semibold mb-2">
-          Provider
+          Provider <span className="text-red-500">*</span>
         </label>
         <select
           name="providerId"
           value={formData.providerId}
           onChange={handleInputChange}
           disabled={loadingProviders}
-          className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
-            focus:outline-none focus:border-[#137fec] disabled:opacity-50"
+          className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+            focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+            errors.providerId ? 'border-red-500' : ''
+          }`}
         >
-          <option value="">Select a provider (optional)</option>
+          <option value="">Select a provider</option>
           {providers.map(provider => (
             <option key={provider.id} value={provider.id}>
               {provider.name}
@@ -229,12 +236,13 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         {loadingProviders && (
           <p className="text-xs text-[#92adc9] mt-2">Loading providers...</p>
         )}
+        {errors.providerId && <p className="mt-2 text-sm text-red-400">{errors.providerId}</p>}
       </div>
 
       {/* Low Stock Alert Threshold */}
       <div>
         <label className="block text-white font-semibold mb-2">
-          Low Stock Alert Threshold
+          Low Stock Alert Threshold <span className="text-red-500">*</span>
         </label>
         <Input
           type="number"
@@ -244,10 +252,48 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
           placeholder="Set minimum quantity before alert"
           step="1"
           min="0"
+          error={errors.lowStockAlert}
         />
         <p className="text-xs text-[#92adc9] mt-2">
           When quantity drops below this number, it will appear in the Low Stock Alert section on the homepage
         </p>
+      </div>
+
+      {/* Production and Expiry Dates */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Production Date <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            name="productionDate"
+            value={formData.productionDate}
+            onChange={handleInputChange}
+            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+              focus:outline-none focus:border-[#137fec] ${
+              errors.productionDate ? 'border-red-500' : ''
+            }`}
+          />
+          {errors.productionDate && <p className="mt-2 text-sm text-red-400">{errors.productionDate}</p>}
+        </div>
+
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Expiry Date <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            name="expiryDate"
+            value={formData.expiryDate}
+            onChange={handleInputChange}
+            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+              focus:outline-none focus:border-[#137fec] ${
+              errors.expiryDate ? 'border-red-500' : ''
+            }`}
+          />
+          {errors.expiryDate && <p className="mt-2 text-sm text-red-400">{errors.expiryDate}</p>}
+        </div>
       </div>
 
       {/* Submit Button */}

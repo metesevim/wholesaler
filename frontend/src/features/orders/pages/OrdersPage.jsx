@@ -11,6 +11,7 @@ import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import { orderRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
+import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const OrdersPage = () => {
@@ -101,7 +102,7 @@ const OrdersPage = () => {
                     </span>
                   </div>
                   <p className="text-sm text-[#92adc9]">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {formatDateToEuropean(order.createdAt)}
                   </p>
                 </div>
 
@@ -110,6 +111,17 @@ const OrdersPage = () => {
                   <p className="text-sm text-[#92adc9] mb-1">Items</p>
                   <p className="text-lg font-bold text-white">
                     {order.items?.length || 0}
+                  </p>
+                </div>
+
+                {/* Middle Center Section - Payment Deadline */}
+                <div className="text-right">
+                  <p className="text-sm text-[#92adc9] mb-1">Payment Deadline</p>
+                  <p className="text-lg font-bold text-white">
+                    {order.lastPaymentDate
+                      ? formatDateToEuropean(order.lastPaymentDate)
+                      : '-'
+                    }
                   </p>
                 </div>
 

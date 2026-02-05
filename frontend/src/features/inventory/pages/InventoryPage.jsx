@@ -12,6 +12,7 @@ import Sidebar from '../../../components/layout/Sidebar';
 import RestockModal from '../components/RestockModal';
 import { inventoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
+import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const InventoryPage = () => {
@@ -190,6 +191,16 @@ const InventoryPage = () => {
                   <p className="text-[#92adc9]">
                     <span className="font-semibold">Provider:</span> {item.provider?.name || 'Not assigned'}
                   </p>
+                  {item.productionDate && (
+                    <p className="text-[#92adc9]">
+                      <span className="font-semibold">Produced:</span> {formatDateToEuropean(item.productionDate)}
+                    </p>
+                  )}
+                  {item.expiryDate && (
+                    <p className={`${new Date(item.expiryDate) < new Date() ? 'text-red-400' : 'text-[#92adc9]'}`}>
+                      <span className="font-semibold">Expires:</span> {formatDateToEuropean(item.expiryDate)}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

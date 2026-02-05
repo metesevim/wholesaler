@@ -9,9 +9,10 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
-import { providerRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
+import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
+import { providerRepository } from '../../../data';
 
 const ProvidersPage = () => {
   const navigate = useNavigate();
@@ -182,7 +183,7 @@ const ProvidersPage = () => {
                     <>
                       <div className="border-t border-[#324d67] my-2"></div>
                       <p className="text-[#92adc9]">
-                        <span className="font-semibold">Provider since:</span> {new Date(provider.createdAt).toLocaleDateString()}
+                        <span className="font-semibold">Provider since:</span> {formatDateToEuropean(provider.createdAt)}
                       </p>
                     </>
                   )}

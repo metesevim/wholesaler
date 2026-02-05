@@ -8,6 +8,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Input from '../../../components/forms/Input';
 import Button from '../../../components/forms/Button';
 import { orderRepository, customerRepository, inventoryRepository } from '../../../data';
+import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const AddOrderForm = ({ onSuccess, onError }) => {
@@ -17,6 +18,12 @@ const AddOrderForm = ({ onSuccess, onError }) => {
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [orderItems, setOrderItems] = useState([]);
   const [notes, setNotes] = useState('');
+  const [paymentDeadlineDate, setPaymentDeadlineDate] = useState(() => {
+    // Default to 30 days from today in YYYY-MM-DD format (for input type="date")
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return date.toISOString().split('T')[0];
+  });
   const [errors, setErrors] = useState({});
   const [selectedItemId, setSelectedItemId] = useState('');
   const [selectedQuantity, setSelectedQuantity] = useState('');
@@ -188,6 +195,10 @@ const AddOrderForm = ({ onSuccess, onError }) => {
 
     setLoading(true);
     try {
+      // Use the selected payment deadline date
+      const deadline = new Date(paymentDeadlineDate);
+      deadline.setHours(23, 59, 59, 999); // Set to end of day
+
       const orderData = {
         customerId: parseInt(selectedCustomerId),
         items: orderItems.map(item => ({
@@ -195,7 +206,8 @@ const AddOrderForm = ({ onSuccess, onError }) => {
           quantity: item.quantity,
           unit: item.unit
         })),
-        notes: notes || undefined
+        notes: notes || undefined,
+        lastPaymentDate: deadline.toISOString()
       };
 
       logger.info('Creating order:', orderData);
@@ -399,22 +411,47 @@ const AddOrderForm = ({ onSuccess, onError }) => {
       </div>
 
       {/* Notes */}
-      <div className="border-t border-[#324d67] pt-6">
-        <label className="block text-white font-semibold mb-3">
-          Order Notes (Optional)
-        </label>
-        <textarea
-          disabled={!selectedCustomerId}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add any special notes for this order..."
-          rows="4"
-          className={`
-            w-full rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-3
-            placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]
-            ${!selectedCustomerId ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
-        />
+      <div className="border-t border-[#324d67] pt-6 space-y-4">
+        {/* Payment Deadline Calendar */}
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Payment Deadline <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            value={paymentDeadlineDate}
+            onChange={(e) => setPaymentDeadlineDate(e.target.value)}
+            disabled={!selectedCustomerId}
+            min={new Date().toISOString().split('T')[0]}
+            className={`
+              w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-2
+              focus:outline-none focus:border-[#137fec]
+              ${!selectedCustomerId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+            `}
+          />
+          <p className="text-xs text-[#92adc9] mt-2">
+            Selected deadline: <span className="font-semibold">{formatDateToEuropean(paymentDeadlineDate)}</span>
+          </p>
+        </div>
+
+        {/* Notes */}
+        <div>
+          <label className="block text-white font-semibold mb-3">
+            Order Notes (Optional)
+          </label>
+          <textarea
+            disabled={!selectedCustomerId}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add any special notes for this order..."
+            rows="4"
+            className={`
+              w-full rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 py-3
+              placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]
+              ${!selectedCustomerId ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+          />
+        </div>
       </div>
 
       {/* Submit Buttons */}

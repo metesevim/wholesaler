@@ -5,7 +5,7 @@ import prisma from "../prisma/client.js";
 
 export const createOrder = async (req, res) => {
     try {
-        const { customerId, items, notes } = req.body;
+        const { customerId, items, notes, lastPaymentDate } = req.body;
 
         // 1) Validate input
         if (!customerId || !items || items.length === 0) {
@@ -88,6 +88,7 @@ export const createOrder = async (req, res) => {
                 notes,
                 totalAmount,
                 status: "PENDING",
+                lastPaymentDate: lastPaymentDate ? new Date(lastPaymentDate) : null,
                 items: {
                     createMany: {
                         data: validatedItems.map((item) => ({

@@ -11,6 +11,7 @@ import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import { orderRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
+import { formatDateToEuropean, formatDateTimeToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const ORDER_STATUSES = [
@@ -143,6 +144,31 @@ const EditOrderPage = () => {
     }
   };
 
+  const handleSetPaymentDate = async () => {
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Allow updating the payment deadline
+      const newDeadline = new Date();
+      newDeadline.setDate(newDeadline.getDate() + 30); // Default to 30 days from now
+
+      const result = await orderRepository.updateOrder(parseInt(id), {
+        ...order,
+        lastPaymentDate: newDeadline.toISOString()
+      });
+      if (result.success) {
+        setOrder(prev => ({ ...prev, lastPaymentDate: newDeadline.toISOString() }));
+        setSuccess('Payment deadline updated');
+      } else {
+        setError(result.error || 'Failed to update payment deadline');
+      }
+    } catch (err) {
+      logger.error('Failed to update payment deadline:', err);
+      setError('Failed to update payment deadline. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#101922] p-8">
@@ -180,7 +206,7 @@ const EditOrderPage = () => {
       <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-4xl mx-auto">
           <PageHeader
-            title={order && order.createdAt ? `${order.customer?.name || 'Order'}'s Order - ${new Date(order.createdAt).toLocaleDateString()}` : 'Order Details'}
+            title={order && order.createdAt ? `${order.customer?.name || 'Order'}'s Order - ${formatDateToEuropean(order.createdAt)}` : 'Order Details'}
             subtitle="Manage order status and details"
             backButton
             onBack={() => navigate(ROUTES.ORDERS)}
@@ -229,7 +255,14 @@ const EditOrderPage = () => {
                 <div>
                   <p className="text-[#92adc9] text-sm font-semibold mb-1">Created</p>
                   <p className="text-white">
-                    {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}
+                    {order.createdAt ? formatDateTimeToEuropean(order.createdAt) : 'N/A'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[#92adc9] text-sm font-semibold mb-1">Payment Deadline</p>
+                  <p className="text-white">
+                    {order.lastPaymentDate ? formatDateToEuropean(order.lastPaymentDate) : 'Not set'}
                   </p>
                 </div>
 
@@ -301,6 +334,14 @@ const EditOrderPage = () => {
 
             {/* Actions */}
             <div className="space-y-3">
+              <Button
+                onClick={handleSetPaymentDate}
+                variant="primary"
+                className="w-full"
+              >
+                {order.lastPaymentDate ? 'Update Payment Deadline' : 'Set Payment Deadline'}
+              </Button>
+
               <Button
                 onClick={handleCancelOrder}
                 variant="secondary"

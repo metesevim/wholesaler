@@ -10,6 +10,7 @@ import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import { ROUTES } from '../../../shared/constants/appConstants';
+import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 
 const EmployeesPage = () => {
   const navigate = useNavigate();
@@ -182,7 +183,7 @@ const EmployeesPage = () => {
                     </p>
                   )}
                   <p className="text-[#92adc9] mb-2">
-                    <span className="font-semibold">Created:</span> {new Date(employee.createdAt).toLocaleDateString()}
+                    <span className="font-semibold">Created:</span> {formatDateToEuropean(employee.createdAt)}
                   </p>
                 </div>
 
