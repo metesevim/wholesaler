@@ -157,7 +157,7 @@ const AdminSettingsPage = () => {
         <div className="max-w-6xl mx-auto">
           <PageHeader
             title="Admin Account Settings"
-            showDashboardButton={true}
+            backButton={true}
             rightContent={
               <Button
                 onClick={handleSubmit}

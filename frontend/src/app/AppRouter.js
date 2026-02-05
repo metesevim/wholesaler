@@ -15,6 +15,7 @@ import EditOrderPage from '../features/orders/pages/EditOrderPage';
 import InventoryPage from '../features/inventory/pages/InventoryPage';
 import AddInventoryPage from '../features/inventory/pages/AddInventoryPage';
 import EditInventoryPage from '../features/inventory/pages/EditInventoryPage';
+import CategoriesPage from '../features/categories/pages/CategoriesPage';
 import CustomersPage from '../features/customers/pages/CustomersPage';
 import AddCustomerPage from '../features/customers/pages/AddCustomerPage';
 import EditCustomerPage from '../features/customers/pages/EditCustomerPage';
@@ -95,6 +96,16 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <EditInventoryPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Categories Routes */}
+        <Route
+          path={ROUTES.CATEGORIES}
+          element={
+            <ProtectedRoute>
+              <CategoriesPage />
             </ProtectedRoute>
           }
         />

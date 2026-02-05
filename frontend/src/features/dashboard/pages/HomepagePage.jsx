@@ -15,7 +15,7 @@ import formatCurrency from '../../../shared/utils/formatCurrency';
 
 const HomepagePage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [totalSales, setTotalSales] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
   const [lowStockItems, setLowStockItems] = useState([]);
@@ -30,6 +30,11 @@ const HomepagePage = () => {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(ROUTES.LOGIN);
+  };
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -122,19 +127,71 @@ const HomepagePage = () => {
       <Sidebar activeRoute={ROUTES.HOMEPAGE} />
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-auto">
-        <div className="max-w-7xl mx-auto">
-          {/* Welcome Section */}
-          <div className="mb-12">
-            <div className="flex items-baseline justify-between mb-2">
-              <h1 className="text-4xl font-bold text-white">
-                Welcome back, <span className="text-blue-400">{user?.name || user?.username}!</span>
-              </h1>
+      <div className="flex-1 flex flex-col">
+        {/* Top Bar */}
+        <div className="bg-[#0d1117] border-b border-[#324d67] px-8 py-4 flex items-center justify-between sticky top-0 z-50">
+          {/* Left Section - User Info */}
+          <div className="flex items-center gap-4">
+            <div>
+              <p className="text-xs text-[#92adc9] font-semibold uppercase tracking-wider">Welcome back</p>
+              <p className="text-lg font-bold text-white">
+                {user?.name || user?.fullName || user?.username}
+              </p>
             </div>
-            <p className="text-[#92adc9] text-lg">Here's what's happening with your wholesale business</p>
+            <div className="w-px h-8 bg-[#324d67]"></div>
+            <span className="px-4 py-2 bg-[#137fec]/15 text-[#137fec] rounded-lg text-xs font-bold uppercase tracking-wide border border-[#137fec]/30">
+              {user?.role}
+            </span>
           </div>
 
-          {/* Sales Section Header */}
+          {/* Right Section - Action Buttons */}
+          <div className="flex items-center gap-3">
+            {/* Copy IBAN Button */}
+            {user?.iban && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(user.iban);
+                  alert('IBAN copied to clipboard!');
+                }}
+                className="px-4 py-2.5 rounded-lg text-sm font-semibold text-[#137fec] bg-[#137fec]/10 border border-[#137fec]/30 hover:bg-[#137fec]/20 hover:border-[#137fec]/50 transition-all"
+                title="Copy IBAN to clipboard"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base">content_copy</span>
+                  IBAN
+                </span>
+              </button>
+            )}
+
+            {/* Settings Button */}
+            <button
+              onClick={() => navigate(ROUTES.ADMIN_SETTINGS)}
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-[#92adc9] bg-[#192633] border border-[#324d67] hover:bg-[#1f3045] hover:border-[#137fec] hover:text-[#137fec] transition-all"
+              title="Settings"
+            >
+              <span className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">settings</span>
+                Settings
+              </span>
+            </button>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-red-400 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 hover:border-red-500/50 transition-all"
+              title="Logout"
+            >
+              <span className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">logout</span>
+                Logout
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable Content Area */}
+        <div className="flex-1 p-8 overflow-auto">
+          <div className="max-w-7xl mx-auto">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-white">Sales Overview</h2>
           </div>
@@ -276,6 +333,7 @@ const HomepagePage = () => {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

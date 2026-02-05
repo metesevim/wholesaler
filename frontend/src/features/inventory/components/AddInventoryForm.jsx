@@ -20,6 +20,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
     name: '',
     description: '',
     quantity: '',
+    unit: 'piece',
     price: '',
     minimumCapacity: 20,
     maximumCapacity: 100,
@@ -71,6 +72,10 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       newErrors.quantity = 'Quantity is required';
     } else if (isNaN(formData.quantity) || Number(formData.quantity) <= 0) {
       newErrors.quantity = 'Quantity must be a positive number';
+    }
+
+    if (!formData.unit) {
+      newErrors.unit = 'Unit is required';
     }
 
     if (!formData.price) {
@@ -143,6 +148,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         name: formData.name,
         description: formData.description,
         quantity: Number(formData.quantity),
+        unit: formData.unit,
         pricePerUnit: parseFloat(formData.price),
         minimumCapacity: Number(formData.minimumCapacity),
         maximumCapacity: Number(formData.maximumCapacity),
@@ -234,8 +240,8 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         {errors.description && <p className="mt-2 text-sm text-red-400">{errors.description}</p>}
       </div>
 
-      {/* Quantity, Price, Min Capacity, Max Capacity - 4 Columns */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* Quantity, Unit, Price - 3 Columns */}
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="block text-white font-semibold mb-2">
             Quantity <span className="text-red-500">*</span>
@@ -254,6 +260,26 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
 
         <div>
           <label className="block text-white font-semibold mb-2">
+            Unit <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="unit"
+            value={formData.unit}
+            onChange={handleInputChange}
+            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+              focus:outline-none focus:border-[#137fec] ${
+              errors.unit ? 'border-red-500' : ''
+            }`}
+          >
+            <option value="piece">Piece</option>
+            <option value="kg">KG</option>
+            <option value="liter">Liter</option>
+          </select>
+          {errors.unit && <p className="mt-2 text-xs text-red-400">{errors.unit}</p>}
+        </div>
+
+        <div>
+          <label className="block text-white font-semibold mb-2">
             Price <span className="text-red-500">*</span>
           </label>
           <Input
@@ -267,7 +293,10 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
             error={errors.price}
           />
         </div>
+      </div>
 
+      {/* Min Capacity, Max Capacity, Category - 3 Columns */}
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="block text-white font-semibold mb-2">
             Min Capacity <span className="text-red-500">*</span>
@@ -297,10 +326,37 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
             error={errors.maximumCapacity}
           />
         </div>
+
+        <div>
+          <label className="block text-white font-semibold mb-2">
+            Category <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            disabled={loadingCategories}
+            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+              focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+              errors.category ? 'border-red-500' : ''
+            }`}
+          >
+            <option value="">Select category</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          {loadingCategories && (
+            <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+          )}
+          {errors.category && <p className="mt-2 text-xs text-red-400">{errors.category}</p>}
+        </div>
       </div>
 
-      {/* Production Date, Expiry Date, and Category - 3 Columns */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Production Date, Expiry Date - 2 Columns */}
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-white font-semibold mb-2">
             Production Date <span className="text-red-500">*</span>
@@ -334,36 +390,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
           />
           {errors.expiryDate && <p className="mt-2 text-xs text-red-400">{errors.expiryDate}</p>}
         </div>
-
-        <div>
-          <label className="block text-white font-semibold mb-2">
-            Category <span className="text-red-500">*</span>
-          </label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleInputChange}
-            disabled={loadingCategories}
-            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
-              focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
-              errors.category ? 'border-red-500' : ''
-            }`}
-          >
-            <option value="">Select category</option>
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          {loadingCategories && (
-            <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
-          )}
-          {errors.category && <p className="mt-2 text-xs text-red-400">{errors.category}</p>}
-        </div>
       </div>
-
-      {/* Submit Button */}
       <div className="flex gap-4 pt-6 border-t border-[#324d67]">
         <Button
           type="submit"

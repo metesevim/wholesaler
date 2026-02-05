@@ -23,6 +23,7 @@ const InventoryPage = () => {
   const [restockItem, setRestockItem] = useState(null);
   const [restocking, setRestocking] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   useEffect(() => {
     loadItems();
@@ -105,27 +106,72 @@ const InventoryPage = () => {
           title="Inventory"
           subtitle="Manage your inventory items"
           rightContent={
-            <Button
-
-              onClick={() => navigate(ROUTES.ADD_INVENTORY)}
-              variant="primary"
-              size="md"
-            >
-              + Add Item
-            </Button>
+            <div className="flex gap-2">
+              <div className="flex gap-2 border border-[#324d67] rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-2 rounded transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-[#137fec] text-white'
+                      : 'text-[#92adc9] hover:text-white'
+                  }`}
+                  title="Grid View"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" />
+                    <path d="M3 10a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 rounded transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-[#137fec] text-white'
+                      : 'text-[#92adc9] hover:text-white'
+                  }`}
+                  title="List View"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" />
+                    <path d="M3 10a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" />
+                    <path d="M3 16a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" />
+                  </svg>
+                </button>
+              </div>
+              <Button
+                onClick={() => navigate(ROUTES.ADD_INVENTORY)}
+                variant="primary"
+                size="md"
+              >
+                + Add Item
+              </Button>
+            </div>
           }
         />
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-6 relative">
           <input
             type="text"
             placeholder="Search items by name or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4
+            className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 pl-12
               placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]"
           />
+          <svg
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#92adc9]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
         </div>
 
         {error && (
@@ -161,124 +207,17 @@ const InventoryPage = () => {
           <div className="text-center py-12">
             <p className="text-[#92adc9] text-lg mb-4">No items match your search</p>
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map(item => {
-              const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
-              const capacityPercentage = Math.min((item.quantity / item.maximumCapacity) * 100, 100);
-              const stockColor = getStockColor(capacityPercentage);
-
-              return (
-                <div
-                  key={item.id}
-                  className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 overflow-hidden"
-                >
-                  {/* Header Section */}
-                  <div className="p-4 border-b border-[#324d67] bg-[#0d1117]">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-white mb-1">
-                          {item.name}
-                        </h3>
-                        <p className="text-xs text-[#137fec] font-semibold uppercase tracking-wide">
-                          {item.category?.name || 'Uncategorized'}
-                        </p>
-                      </div>
-                      {capacityPercentage <= 50 && (
-                        <div className={`${stockColor.text.includes('red') ? 'bg-red-600/20 border border-red-500' : stockColor.text.includes('orange') ? 'bg-orange-600/20 border border-orange-500' : 'bg-yellow-600/20 border border-yellow-500'} rounded px-2 py-1 ml-2`}>
-                          <p className={`text-xs font-semibold ${stockColor.badge}`}>
-                            {capacityPercentage <= 25 ? 'CRITICAL' : 'LOW STOCK'}
-                          </p>
-                        </div>
-                      )}
-                      {isExpired && (
-                        <div className="bg-red-600/20 border border-red-500 rounded px-2 py-1 ml-2">
-                          <p className="text-xs text-red-400 font-semibold">EXPIRED</p>
-                        </div>
-                      )}
-                    </div>
-                    {item.description && (
-                      <p className="text-sm text-[#92adc9] line-clamp-2">
-                        {item.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Main Content */}
-                  <div className="p-4 space-y-4">
-                    {/* Stock Status */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-[#92adc9]">Stock Level</span>
-                        <span className={`text-sm font-bold ${stockColor.text}`}>
-                          {item.quantity} {item.unit}
-                        </span>
-                      </div>
-                      <div className="w-full h-2 bg-[#0d1117] rounded-full overflow-hidden">
-                        <div
-                          className={`h-full transition-all ${stockColor.bar}`}
-                          style={{ width: `${capacityPercentage}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-xs text-[#92adc9]">
-                        <span>Min: {item.minimumCapacity} {item.unit}</span>
-                        <span>Max: {item.maximumCapacity} {item.unit}</span>
-                      </div>
-                    </div>
-
-                    {/* Price & Provider */}
-                    <div className="grid grid-cols-2 gap-3 py-2 border-y border-[#324d67]">
-                      <div>
-                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Price</p>
-                        <p className="text-lg font-bold text-white">₺{item.pricePerUnit?.toFixed(2) || '0.00'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Provider</p>
-                        <p className="text-sm font-semibold text-white truncate">
-                          {item.provider?.name || '—'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Dates */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Produced</p>
-                        <p className="text-sm text-white">
-                          {item.productionDate ? formatDateToEuropean(item.productionDate) : '—'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Expires</p>
-                        <p className={`text-sm font-semibold ${isExpired ? 'text-red-400' : 'text-white'}`}>
-                          {item.expiryDate ? formatDateToEuropean(item.expiryDate) : '—'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="p-4 border-t border-[#324d67] bg-[#0d1117] flex gap-2">
-                    <Button
-                      onClick={() => setRestockItem(item)}
-                      variant="primary"
-                      size="sm"
-                      className="flex-1"
-                    >
-                      Restock
-                    </Button>
-                    <Button
-                      onClick={() => navigate(`/inventory/${item.id}/edit`)}
-                      variant="secondary"
-                      size="sm"
-                      className="flex-1"
-                    >
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredItems.map(item => (
+              <ItemCard key={item.id} item={item} getStockColor={getStockColor} navigate={navigate} setRestockItem={setRestockItem} />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredItems.map(item => (
+              <ItemRow key={item.id} item={item} getStockColor={getStockColor} navigate={navigate} setRestockItem={setRestockItem} />
+            ))}
           </div>
         )}
         </div>
@@ -293,6 +232,237 @@ const InventoryPage = () => {
           loading={restocking}
         />
       )}
+    </div>
+  );
+};
+
+// Grid Card Component
+const ItemCard = ({ item, getStockColor, navigate, setRestockItem }) => {
+  const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
+  const capacityPercentage = Math.min((item.quantity / item.maximumCapacity) * 100, 100);
+  const stockColor = getStockColor(capacityPercentage);
+
+  return (
+    <div
+      className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 overflow-hidden"
+    >
+      {/* Header Section */}
+      <div className="p-4 border-b border-[#324d67] bg-[#0d1117]">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-white mb-1">
+              {item.name}
+            </h3>
+            <p className="text-xs text-[#137fec] font-semibold uppercase tracking-wide">
+              {item.category?.name || 'Uncategorized'}
+            </p>
+          </div>
+          {capacityPercentage <= 50 && (
+            <div className={`${stockColor.text.includes('red') ? 'bg-red-600/20 border border-red-500' : stockColor.text.includes('orange') ? 'bg-orange-600/20 border border-orange-500' : 'bg-yellow-600/20 border border-yellow-500'} rounded px-2 py-1 ml-2`}>
+              <p className={`text-xs font-semibold ${stockColor.badge}`}>
+                {capacityPercentage <= 25 ? 'CRITICAL' : 'LOW STOCK'}
+              </p>
+            </div>
+          )}
+          {isExpired && (
+            <div className="bg-red-600/20 border border-red-500 rounded px-2 py-1 ml-2">
+              <p className="text-xs text-red-400 font-semibold">EXPIRED</p>
+            </div>
+          )}
+        </div>
+        {item.description && (
+          <p className="text-sm text-[#92adc9] line-clamp-2">
+            {item.description}
+          </p>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <div className="p-4 space-y-4">
+        {/* Stock Status */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-semibold text-[#92adc9]">Stock Level</span>
+            <span className={`text-sm font-bold ${stockColor.text}`}>
+              {item.quantity} {item.unit}
+            </span>
+          </div>
+          <div className="w-full h-2 bg-[#0d1117] rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all ${stockColor.bar}`}
+              style={{ width: `${capacityPercentage}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-[#92adc9]">
+            <span>Min: {item.minimumCapacity} {item.unit}</span>
+            <span>Max: {item.maximumCapacity} {item.unit}</span>
+          </div>
+        </div>
+
+        {/* Price & Provider */}
+        <div className="grid grid-cols-2 gap-3 py-2 border-y border-[#324d67]">
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Price</p>
+            <p className="text-lg font-bold text-white">₺{item.pricePerUnit?.toFixed(2) || '0.00'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Provider</p>
+            <p className="text-sm font-semibold text-white truncate">
+              {item.provider?.name || '—'}
+            </p>
+          </div>
+        </div>
+
+        {/* Dates */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Produced</p>
+            <p className="text-sm text-white">
+              {item.productionDate ? formatDateToEuropean(item.productionDate) : '—'}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Expires</p>
+            <p className={`text-sm font-semibold ${isExpired ? 'text-red-400' : 'text-white'}`}>
+              {item.expiryDate ? formatDateToEuropean(item.expiryDate) : '—'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="p-4 border-t border-[#324d67] bg-[#0d1117] flex gap-2">
+        <Button
+          onClick={() => setRestockItem(item)}
+          variant="primary"
+          size="sm"
+          className="flex-1"
+        >
+          Restock
+        </Button>
+        <Button
+          onClick={() => navigate(`/inventory/${item.id}/edit`)}
+          variant="secondary"
+          size="sm"
+          className="flex-1"
+        >
+          Edit
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// List Row Component
+const ItemRow = ({ item, getStockColor, navigate, setRestockItem }) => {
+  const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
+  const capacityPercentage = Math.min((item.quantity / item.maximumCapacity) * 100, 100);
+  const stockColor = getStockColor(capacityPercentage);
+
+  return (
+    <div className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 p-4">
+      <div className="flex items-center gap-6">
+        {/* Item Info */}
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className="text-lg font-bold text-white">
+              {item.name}
+            </h3>
+            <p className="text-xs text-[#137fec] font-semibold uppercase tracking-wide">
+              {item.category?.name || 'Uncategorized'}
+            </p>
+          </div>
+          {item.description && (
+            <p className="text-sm text-[#92adc9] mb-3 line-clamp-1">
+              {item.description}
+            </p>
+          )}
+        </div>
+
+        {/* Stock Level */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs text-[#92adc9] font-semibold">Stock</span>
+                <span className={`text-sm font-bold ${stockColor.text}`}>
+                  {item.quantity} {item.unit}
+                </span>
+              </div>
+              <div className="w-full h-2 bg-[#0d1117] rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all ${stockColor.bar}`}
+                  style={{ width: `${capacityPercentage}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Price & Provider */}
+        <div className="grid grid-cols-2 gap-4 min-w-fit">
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Price</p>
+            <p className="font-bold text-white">₺{item.pricePerUnit?.toFixed(2) || '0.00'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Provider</p>
+            <p className="text-sm font-semibold text-white truncate max-w-xs">
+              {item.provider?.name || '—'}
+            </p>
+          </div>
+        </div>
+
+        {/* Dates */}
+        <div className="grid grid-cols-2 gap-4 min-w-fit">
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Produced</p>
+            <p className="text-sm text-white">
+              {item.productionDate ? formatDateToEuropean(item.productionDate) : '—'}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-[#92adc9] font-semibold uppercase mb-1">Expires</p>
+            <p className={`text-sm font-semibold ${isExpired ? 'text-red-400' : 'text-white'}`}>
+              {item.expiryDate ? formatDateToEuropean(item.expiryDate) : '—'}
+            </p>
+          </div>
+        </div>
+
+        {/* Status Badges */}
+        <div className="flex flex-col gap-2">
+          {capacityPercentage <= 50 && (
+            <div className={`${stockColor.text.includes('red') ? 'bg-red-600/20 border border-red-500' : stockColor.text.includes('orange') ? 'bg-orange-600/20 border border-orange-500' : 'bg-yellow-600/20 border border-yellow-500'} rounded px-2 py-1`}>
+              <p className={`text-xs font-semibold whitespace-nowrap ${stockColor.badge}`}>
+                {capacityPercentage <= 25 ? 'CRITICAL' : 'LOW STOCK'}
+              </p>
+            </div>
+          )}
+          {isExpired && (
+            <div className="bg-red-600/20 border border-red-500 rounded px-2 py-1">
+              <p className="text-xs text-red-400 font-semibold whitespace-nowrap">EXPIRED</p>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-2">
+          <Button
+            onClick={() => setRestockItem(item)}
+            variant="primary"
+            size="sm"
+          >
+            Restock
+          </Button>
+          <Button
+            onClick={() => navigate(`/inventory/${item.id}/edit`)}
+            variant="secondary"
+            size="sm"
+          >
+            Edit
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
