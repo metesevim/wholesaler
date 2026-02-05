@@ -187,6 +187,204 @@ const EditOrderPage = () => {
     });
   };
 
+  // Generate and print warehouse picking list
+  const handlePrintPickingList = () => {
+    if (!order?.items || order.items.length === 0) {
+      alert('No items in this order to print');
+      return;
+    }
+
+    const sortedItems = getSortedItems();
+    const printWindow = window.open('', '_blank');
+
+    // Group items by category
+    const itemsByCategory = {};
+    sortedItems.forEach(item => {
+      const categoryName = item.adminItem?.category?.name || 'UNCATEGORIZED';
+      if (!itemsByCategory[categoryName]) {
+        itemsByCategory[categoryName] = [];
+      }
+      itemsByCategory[categoryName].push(item);
+    });
+
+    // Build HTML content
+    let htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Picking List - Order #${order.id}</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #fff;
+            color: #333;
+            padding: 40px;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+          }
+          .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+          }
+          .header p {
+            font-size: 14px;
+            color: #666;
+          }
+          .order-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 13px;
+          }
+          .order-info div {
+            display: flex;
+            gap: 20px;
+          }
+          .category-section {
+            margin-bottom: 30px;
+            break-inside: avoid;
+          }
+          .category-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #137fec;
+          }
+          .category-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #137fec;
+            color: white;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+          }
+          .category-name {
+            font-size: 18px;
+            font-weight: bold;
+          }
+          .item {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-left: 3px solid #137fec;
+            border-radius: 4px;
+          }
+          .item-name {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 5px;
+          }
+          .item-detail {
+            font-size: 13px;
+            color: #666;
+            margin: 3px 0;
+          }
+          .item-quantity {
+            font-size: 14px;
+            font-weight: 600;
+            color: #137fec;
+            margin-top: 5px;
+          }
+          .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+          }
+          @media print {
+            body { padding: 20px; }
+            .category-section { break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>📋 Warehouse Picking List</h1>
+          <p>Order #${order.id}</p>
+        </div>
+
+        <div class="order-info">
+          <div>
+            <div><strong>Customer:</strong> ${order.customer?.name || 'Unknown'}</div>
+            <div><strong>Date:</strong> ${formatDateToEuropean(order.createdAt)}</div>
+          </div>
+          <div>
+            <div><strong>Total Items:</strong> ${sortedItems.length}</div>
+            <div><strong>Total Amount:</strong> ₺${order.totalAmount?.toFixed(2) || '0.00'}</div>
+          </div>
+        </div>
+    `;
+
+    // Get all categories sorted by priority
+    const categories = Object.keys(itemsByCategory).sort((a, b) => {
+      const priorityA = itemsByCategory[a][0]?.adminItem?.category?.priority || 999;
+      const priorityB = itemsByCategory[b][0]?.adminItem?.category?.priority || 999;
+      return priorityA - priorityB;
+    });
+
+    // Add categories and items
+    categories.forEach((categoryName, idx) => {
+      const items = itemsByCategory[categoryName];
+      const categoryPriority = items[0]?.adminItem?.category?.priority ?? (idx + 1);
+
+      htmlContent += `
+        <div class="category-section">
+          <div class="category-header">
+            <div class="category-number">${categoryPriority + 1}</div>
+            <div class="category-name">${categoryName}</div>
+          </div>
+      `;
+
+      items.forEach(item => {
+        htmlContent += `
+          <div class="item">
+            <div class="item-name">${item.itemName || `Item ${item.adminItemId}`}</div>
+            <div class="item-detail">ID: ${item.adminItemId}</div>
+            <div class="item-quantity">📦 Qty: ${item.quantity} ${item.unit}</div>
+            <div class="item-detail">Price: ₺${item.pricePerUnit?.toFixed(2) || '0.00'} per unit</div>
+            <div class="item-detail">Total: ₺${item.totalPrice?.toFixed(2) || '0.00'}</div>
+          </div>
+        `;
+      });
+
+      htmlContent += `</div>`;
+    });
+
+    htmlContent += `
+        <div class="footer">
+          <p>Printed on: ${new Date().toLocaleString()}</p>
+          <p>Please verify all items before sealing the shipment</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#101922] p-8">
@@ -296,7 +494,18 @@ const EditOrderPage = () => {
             {/* Order Items */}
             {order.items && order.items.length > 0 && (
               <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
-                <h2 className="text-xl font-bold text-white mb-6">Items ({order.items.length}) - Sorted by Pickup Order</h2>
+                <div className="flex items-center justify-between gap-4 mb-6">
+                  <h2 className="text-xl font-bold text-white">Items ({order.items.length})</h2>
+                  <button
+                    onClick={() => handlePrintPickingList(order)}
+                    className="h-10 px-6 rounded-lg bg-[#137fec] text-white hover:bg-[#0f5fb8]
+                      hover:shadow-lg hover:shadow-blue-500/20 active:scale-98
+                      transition-all duration-200 flex items-center justify-center font-medium text-sm"
+                    title="Print Picking List"
+                  >
+                    Print
+                  </button>
+                </div>
 
                 <div className="space-y-4">
                   {getSortedItems().map((item, idx) => (
@@ -359,6 +568,7 @@ const EditOrderPage = () => {
 
             {/* Actions */}
             <div className="space-y-3">
+
               <Button
                 onClick={handleSetPaymentDate}
                 variant="primary"
