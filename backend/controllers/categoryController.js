@@ -4,7 +4,7 @@ import prisma from "../prisma/client.js";
 export const getAllCategories = async (req, res) => {
     try {
         const categories = await prisma.category.findMany({
-            orderBy: { name: 'asc' },
+            orderBy: { priority: 'asc' },
         });
 
         res.json({
@@ -20,7 +20,7 @@ export const getAllCategories = async (req, res) => {
 // ============= CREATE CATEGORY =============
 export const createCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, priority } = req.body;
 
         if (!name) {
             return res.status(400).json({ error: "Category name is required." });
@@ -39,6 +39,7 @@ export const createCategory = async (req, res) => {
             data: {
                 name,
                 description: description || null,
+                priority: priority !== undefined ? parseInt(priority) : 0,
             },
         });
 
@@ -55,7 +56,7 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description } = req.body;
+        const { name, description, priority } = req.body;
 
         if (!name) {
             return res.status(400).json({ error: "Category name is required." });
@@ -75,6 +76,7 @@ export const updateCategory = async (req, res) => {
             data: {
                 name,
                 description: description !== undefined ? description : undefined,
+                priority: priority !== undefined ? parseInt(priority) : undefined,
             },
         });
 

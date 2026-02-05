@@ -187,9 +187,18 @@ const CategoriesPage = () => {
       return;
     }
 
-    // Work with filtered categories for positioning
-    const sourceIndex = filteredCategories.findIndex(c => c.id === draggedCategory.id);
-    const targetIndex = filteredCategories.findIndex(c => c.id === targetCategory.id);
+    // Only allow reordering when not filtering (search is empty)
+    if (searchTerm.trim() !== '') {
+      setError('Please clear search to reorder categories');
+      setDraggedCategory(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Create new ordered array from all categories (since no filter is active)
+    const reordered = [...categories];
+    const sourceIndex = categories.findIndex(c => c.id === draggedCategory.id);
+    const targetIndex = categories.findIndex(c => c.id === targetCategory.id);
 
     if (sourceIndex === -1 || targetIndex === -1) {
       setDraggedCategory(null);
@@ -197,22 +206,15 @@ const CategoriesPage = () => {
       return;
     }
 
-    // Create new ordered array from filtered categories
-    const reorderedFiltered = [...filteredCategories];
-    reorderedFiltered.splice(sourceIndex, 1);
-    reorderedFiltered.splice(targetIndex, 0, draggedCategory);
+    // Reorder the array
+    reordered.splice(sourceIndex, 1);
+    reordered.splice(targetIndex, 0, draggedCategory);
 
-    // Get IDs of reordered categories
-    const reorderedIds = reorderedFiltered.map(c => c.id);
-
-    // Update ALL categories: reordered ones get new priorities, others keep theirs
-    const updatedCategories = categories.map(cat => {
-      const newIndex = reorderedIds.indexOf(cat.id);
-      if (newIndex !== -1) {
-        return { ...cat, priority: newIndex };
-      }
-      return cat;
-    });
+    // Assign priorities 0, 1, 2, ... based on new order
+    const updatedCategories = reordered.map((cat, index) => ({
+      ...cat,
+      priority: index
+    }));
 
     // Update UI optimistically
     setCategories(updatedCategories);
@@ -447,13 +449,15 @@ const CategoriesPage = () => {
                     )}
 
                     <div
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, category)}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDrop={(e) => handleDrop(e, category)}
+                      draggable={searchTerm.trim() === ''}
+                      onDragStart={(e) => searchTerm.trim() === '' && handleDragStart(e, category)}
+                      onDragOver={(e) => searchTerm.trim() === '' && handleDragOver(e, index)}
+                      onDrop={(e) => searchTerm.trim() === '' && handleDrop(e, category)}
                       onDragEnd={handleDragEnd}
                       onDragLeave={handleDragLeave}
-                      className={`bg-[#192633] rounded-lg border border-[#324d67] p-4 hover:border-[#137fec] transition-all cursor-move ${
+                      className={`bg-[#192633] rounded-lg border border-[#324d67] p-4 hover:border-[#137fec] transition-all ${
+                        searchTerm.trim() === '' ? 'cursor-move' : 'cursor-not-allowed opacity-75'
+                      } ${
                         draggedCategory?.id === category.id ? 'opacity-50 bg-[#137fec]/10 border-[#137fec]' : ''
                       } ${
                         dragOverIndex === index && draggedCategory?.id !== category.id

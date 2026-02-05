@@ -71,6 +71,7 @@ model Category {
   id Int @id @default(autoincrement())
   name String @unique
   description String?
+  priority Int @default(0)  // Priority order for pickup/warehouse operations
 
   // Inventory items in this category
   items AdminInventoryItem[]

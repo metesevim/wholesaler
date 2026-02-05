@@ -142,7 +142,11 @@ export const getAllOrders = async (req, res) => {
                 customer: true,
                 items: {
                     include: {
-                        adminItem: true,
+                        adminItem: {
+                            include: {
+                                category: true,
+                            },
+                        },
                     },
                 },
             },
@@ -170,7 +174,11 @@ export const getOrderById = async (req, res) => {
                 customer: true,
                 items: {
                     include: {
-                        adminItem: true,
+                        adminItem: {
+                            include: {
+                                category: true,
+                            },
+                        },
                     },
                 },
             },
@@ -307,7 +315,11 @@ export const getCustomerOrders = async (req, res) => {
                 customer: true,
                 items: {
                     include: {
-                        adminItem: true,
+                        adminItem: {
+                            include: {
+                                category: true,
+                            },
+                        },
                     },
                 },
             },

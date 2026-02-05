@@ -130,7 +130,8 @@ const AddOrderForm = ({ onSuccess, onError }) => {
         quantity: requestedQuantity,
         unit: selectedUnit,
         availableQuantity: item.quantity,
-        price: item.pricePerUnit || 0
+        price: item.pricePerUnit || 0,
+        category: item.category || null
       });
       return;
     }
@@ -148,7 +149,8 @@ const AddOrderForm = ({ onSuccess, onError }) => {
       quantity: requestedQuantity,
       unit: selectedUnit,
       availableQuantity: item.quantity,
-      price: item.pricePerUnit || 0
+      price: item.pricePerUnit || 0,
+      category: item.category || null
     });
   };
 
@@ -184,6 +186,22 @@ const AddOrderForm = ({ onSuccess, onError }) => {
 
   const handleRemoveItem = (index) => {
     setOrderItems(orderItems.filter((_, i) => i !== index));
+  };
+
+  // Sort items by category priority (lower priority number = higher in list)
+  const getSortedOrderItems = () => {
+    return [...orderItems].sort((a, b) => {
+      const categoryA = a.category;
+      const categoryB = b.category;
+
+      // If either has no category, sort to end
+      if (!categoryA && !categoryB) return 0;
+      if (!categoryA) return 1;
+      if (!categoryB) return -1;
+
+      // Sort by category priority (ascending)
+      return (categoryA.priority || 0) - (categoryB.priority || 0);
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -382,19 +400,26 @@ const AddOrderForm = ({ onSuccess, onError }) => {
         {/* Added Items List */}
         {orderItems.length > 0 && (
           <div className="mt-6">
-            <h4 className="text-lg font-semibold text-white mb-3">Order Items</h4>
+            <h4 className="text-lg font-semibold text-white mb-3">Order Items (Sorted by Pickup Order)</h4>
             <div className="space-y-2 bg-[#101922] rounded-lg p-4 border border-[#324d67]">
-              {orderItems.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-[#192633] rounded border border-[#324d67]">
+              {getSortedOrderItems().map((item) => (
+                <div key={item.adminItemId} className="flex items-center justify-between p-3 bg-[#192633] rounded border border-[#324d67]">
                   <div className="flex-1">
-                    <p className="text-white font-semibold">{item.itemName}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-white font-semibold">{item.itemName}</p>
+                      {item.category && (
+                        <span className="text-xs px-2 py-1 rounded bg-[#137fec]/20 text-[#137fec]">
+                          {item.category.name}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-[#92adc9]">
                       Quantity: {item.quantity} {item.unit}
                     </p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleRemoveItem(index)}
+                    onClick={() => handleRemoveItem(orderItems.findIndex(oi => oi.adminItemId === item.adminItemId))}
                     className="ml-4 px-3 py-2 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
                   >
                     Remove

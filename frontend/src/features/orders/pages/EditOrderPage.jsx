@@ -169,6 +169,24 @@ const EditOrderPage = () => {
     }
   };
 
+  // Sort items by category priority (lower priority number = higher in list)
+  const getSortedItems = () => {
+    if (!order?.items) return [];
+
+    return [...order.items].sort((a, b) => {
+      const categoryA = a.adminItem?.category;
+      const categoryB = b.adminItem?.category;
+
+      // If either has no category, sort to end
+      if (!categoryA && !categoryB) return 0;
+      if (!categoryA) return 1;
+      if (!categoryB) return -1;
+
+      // Sort by category priority (ascending)
+      return (categoryA.priority || 0) - (categoryB.priority || 0);
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#101922] p-8">
@@ -278,14 +296,21 @@ const EditOrderPage = () => {
             {/* Order Items */}
             {order.items && order.items.length > 0 && (
               <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
-                <h2 className="text-xl font-bold text-white mb-6">Items ({order.items.length})</h2>
+                <h2 className="text-xl font-bold text-white mb-6">Items ({order.items.length}) - Sorted by Pickup Order</h2>
 
                 <div className="space-y-4">
-                  {order.items.map((item, idx) => (
+                  {getSortedItems().map((item, idx) => (
                     <div key={idx} className="bg-[#101922] rounded p-4 border border-[#324d67]">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <p className="text-white font-semibold">{item.itemName || `Item ${item.adminItemId}`}</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-white font-semibold">{item.itemName || `Item ${item.adminItemId}`}</p>
+                            {item.adminItem?.category && (
+                              <span className="text-xs px-2 py-1 rounded bg-[#137fec]/20 text-[#137fec]">
+                                {item.adminItem.category.name}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[#92adc9] text-sm">ID: {item.adminItemId}</p>
                         </div>
                         <p className="text-white font-bold">₺{item.totalPrice?.toFixed(2) || '0.00'}</p>
