@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
+import TopBar from '../../../components/layout/TopBar';
+import useAuth from '../../auth/hooks/useAuth';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
@@ -16,6 +18,7 @@ import { providerRepository } from '../../../data';
 
 const ProvidersPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,7 +79,9 @@ const ProvidersPage = () => {
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.PROVIDERS} />
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 flex flex-col">
+        <TopBar user={user} />
+        <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Providers"
@@ -232,6 +237,7 @@ const ProvidersPage = () => {
             ))}
           </div>
         )}
+        </div>
         </div>
       </div>
     </div>

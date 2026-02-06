@@ -138,7 +138,7 @@ const HomepagePage = () => {
                 {user?.name || user?.fullName || user?.username}
               </p>
             </div>
-            <div className="w-px h-8 bg-[#324d67]"></div>
+            <div className="w-px h-12 bg-[#324d67]"></div>
             <span className="px-4 py-2 bg-[#137fec]/15 text-[#137fec] rounded-lg text-xs font-bold uppercase tracking-wide border border-[#137fec]/30">
               {user?.role}
             </span>
@@ -162,30 +162,6 @@ const HomepagePage = () => {
                 </span>
               </button>
             )}
-
-            {/* Settings Button */}
-            <button
-              onClick={() => navigate(ROUTES.ADMIN_SETTINGS)}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-[#92adc9] bg-[#192633] border border-[#324d67] hover:bg-[#1f3045] hover:border-[#137fec] hover:text-[#137fec] transition-all"
-              title="Settings"
-            >
-              <span className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-base">settings</span>
-                Settings
-              </span>
-            </button>
-
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-red-400 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 hover:border-red-500/50 transition-all"
-              title="Logout"
-            >
-              <span className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-base">logout</span>
-                Logout
-              </span>
-            </button>
           </div>
         </div>
 

@@ -9,12 +9,15 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
+import TopBar from '../../../components/layout/TopBar';
+import useAuth from '../../auth/hooks/useAuth';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import { formatDateTimeToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const LogsPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [logs, setLogs] = useState([]);
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [filterLevel, setFilterLevel] = useState('ALL');
@@ -118,7 +121,9 @@ const LogsPage = () => {
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.LOGS} />
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 flex flex-col">
+        <TopBar user={user} />
+        <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-7xl mx-auto">
           <PageHeader
             title="Application Logs"
@@ -272,6 +277,7 @@ const LogsPage = () => {
               ))}
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>

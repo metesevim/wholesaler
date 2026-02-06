@@ -8,11 +8,14 @@ import React, { useState, useEffect } from 'react';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
+import TopBar from '../../../components/layout/TopBar';
+import useAuth from '../../auth/hooks/useAuth';
 import { categoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import logger from '../../../shared/utils/logger';
 
 const CategoriesPage = () => {
+  const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -262,7 +265,9 @@ const CategoriesPage = () => {
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.CATEGORIES} />
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 flex flex-col">
+        <TopBar user={user} />
+        <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
           <PageHeader
             title="Categories"
@@ -580,6 +585,7 @@ const CategoriesPage = () => {
               })}
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>

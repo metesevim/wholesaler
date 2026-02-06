@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/forms/Button';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
+import TopBar from '../../../components/layout/TopBar';
+import useAuth from '../../auth/hooks/useAuth';
 import RestockModal from '../components/RestockModal';
 import { inventoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
@@ -17,6 +19,7 @@ import logger from '../../../shared/utils/logger';
 
 const InventoryPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -124,7 +127,9 @@ const InventoryPage = () => {
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.INVENTORY} />
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 flex flex-col">
+        <TopBar user={user} />
+        <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Inventory"
@@ -283,6 +288,7 @@ const InventoryPage = () => {
             ))}
           </div>
         )}
+        </div>
         </div>
       </div>
 

@@ -10,6 +10,7 @@ import Button from '../../../components/forms/Button';
 import Input from '../../../components/forms/Input';
 import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
+import TopBar from '../../../components/layout/TopBar';
 import Message from '../../../components/feedback/Message';
 import { ROUTES } from '../../../shared/constants/appConstants';
 
@@ -153,7 +154,9 @@ const AdminSettingsPage = () => {
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.ADMIN_SETTINGS} />
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 flex flex-col">
+        <TopBar user={user} />
+        <div className="flex-1 p-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
           <PageHeader
             title="Admin Account Settings"
@@ -304,6 +307,7 @@ const AdminSettingsPage = () => {
               </form>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
