@@ -2,6 +2,7 @@ import { formatDateToEuropean } from '../utils/dateFormatter';
 
 /**
  * Generate a provider order HTML document (A4-print optimized)
+ * Matches the picking list style
  * @param {Object} order - The provider order object
  * @returns {string} HTML content for the order
  */
@@ -17,20 +18,15 @@ export const generateProviderOrderHTML = (order) => {
   const formattedPrintedDate = `${day}/${month}/${year}`;
 
   let rowsHtml = '';
-  let totalItems = 0;
-  order.items.forEach((item, index) => {
+  order.items.forEach((item) => {
     const categoryName = item.adminItem?.category?.name || 'Uncategorized';
-    totalItems++;
     rowsHtml += `
       <tr>
-        <td class="col-num">${index + 1}</td>
-        <td class="col-code">${escapeHtml(item.productCode || '-')}</td>
+        <td class="col-code">${escapeHtml(item.productCode || item.adminItem?.productCode || '-')}</td>
         <td class="col-name">${escapeHtml(item.itemName)}</td>
         <td class="col-cat">${escapeHtml(categoryName)}</td>
         <td class="col-qty">${escapeHtml(String(item.quantity))}</td>
         <td class="col-unit">${escapeHtml(item.unit)}</td>
-        <td class="col-price">₺${(item.pricePerUnit || 0).toFixed(2)}</td>
-        <td class="col-total">₺${(item.totalPrice || 0).toFixed(2)}</td>
       </tr>
     `;
   });
@@ -44,7 +40,8 @@ export const generateProviderOrderHTML = (order) => {
   <style>
     @page {
       size: A4;
-      margin: 15mm;
+      margin: 12mm;
+      margin-top: 15mm;
     }
 
     * { box-sizing: border-box; }
@@ -56,145 +53,98 @@ export const generateProviderOrderHTML = (order) => {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
                    "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 11px;
-      line-height: 1.4;
+      line-height: 1.35;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
     .sheet {
       width: 100%;
-      max-width: 210mm;
-      margin: 0 auto;
     }
 
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding-bottom: 15px;
-      border-bottom: 3px solid #137fec;
-      margin-bottom: 20px;
+    /* ---------- Header ---------- */
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #111;
+      margin-bottom: 10px;
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-icon {
-      font-size: 32px;
-    }
-
-    .logo-text {
-      font-size: 24px;
+    .title {
+      font-size: 18px;
       font-weight: 800;
-      color: #137fec;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
     }
 
-    .order-info {
+    .orderNo {
       text-align: right;
     }
+    .orderNo .label { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 0.3px; }
+    .orderNo .value { font-size: 14px; font-weight: 800; }
 
-    .order-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #111;
-      margin-bottom: 5px;
-    }
-
-    .order-id {
-      font-size: 14px;
-      color: #555;
-    }
-
-    /* Meta Grid */
+    /* ---------- Meta grid ---------- */
     .meta {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-
-    .meta-box {
-      padding: 15px;
-      background: #f7f7f7;
-      border-radius: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 10px;
       border: 1px solid #e6e6e6;
+      background: #f7f7f7;
+      border-radius: 6px;
+      margin-bottom: 10px;
     }
 
-    .meta-title {
-      font-size: 10px;
+    .metaItem {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .metaItem .k {
+      font-size: 9px;
       color: #666;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      letter-spacing: 0.3px;
       font-weight: 700;
     }
-
-    .meta-content {
-      font-size: 13px;
-      font-weight: 600;
-      color: #111;
-    }
-
-    .meta-sub {
+    .metaItem .v {
       font-size: 11px;
-      color: #555;
-      margin-top: 4px;
+      color: #111;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Summary Bar */
-    .summary-bar {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 20px;
-      background: #137fec;
-      color: white;
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-
-    .summary-item {
-      text-align: center;
-    }
-
-    .summary-label {
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.9;
-    }
-
-    .summary-value {
-      font-size: 16px;
-      font-weight: 800;
-      margin-top: 2px;
-    }
-
-    /* Table */
+    /* ---------- Table ---------- */
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
+      table-layout: fixed;
+      margin-top: 6px;
     }
 
     thead { display: table-header-group; }
 
     th, td {
       border: 1px solid #d9d9d9;
-      padding: 8px 6px;
+      padding: 7px 6px;
       vertical-align: middle;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     th {
       background: #111;
       color: #fff;
       font-size: 9px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.35px;
     }
 
     tbody tr:nth-child(odd) td {
@@ -203,88 +153,92 @@ export const generateProviderOrderHTML = (order) => {
 
     tr { break-inside: avoid; page-break-inside: avoid; }
 
-    .col-num { width: 5%; text-align: center; }
-    .col-code { width: 12%; font-family: monospace; font-size: 10px; }
-    .col-name { width: 28%; font-weight: 600; }
-    .col-cat { width: 15%; }
-    .col-qty { width: 8%; text-align: center; font-weight: 700; }
-    .col-unit { width: 8%; text-align: center; }
-    .col-price { width: 12%; text-align: right; }
-    .col-total { width: 12%; text-align: right; font-weight: 700; }
+    .col-code  { width: 12%; font-family: monospace; font-size: 10px; }
+    .col-name  { width: 30%; font-weight: 600; }
+    .col-cat   { width: 15%; }
+    .col-qty   { width: 10%; text-align: center; font-weight: 800; }
+    .col-unit  { width: 10%; text-align: center; }
+    .col-price { width: 11%; text-align: right; }
+    .col-total { width: 12%; text-align: right; font-weight: 800; }
 
     .total-row td {
       background: #f0f7ff !important;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 12px;
     }
 
-    /* Notes */
+    /* ---------- Notes ---------- */
     .notes {
-      padding: 12px 15px;
+      margin-top: 12px;
+      padding: 10px 12px;
       background: #fffde7;
       border-left: 4px solid #ffc107;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 25px;
+      border-radius: 0 6px 6px 0;
     }
-
     .notes-title {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       text-transform: uppercase;
       color: #666;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
-    /* Footer */
-    .footer {
+    /* ---------- Footer ---------- */
+    .bottom {
+      margin-top: 12px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #e6e6e6;
+      gap: 14px;
+      align-items: start;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
-    .sign-box {
+    .sign {
       border: 1px solid #d9d9d9;
-      border-radius: 8px;
-      padding: 15px;
+      border-radius: 6px;
+      padding: 10px;
+      min-height: 70px;
+      position: relative;
     }
 
-    .sign-title {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #666;
-      margin-bottom: 10px;
-    }
-
-    .sign-line {
-      height: 40px;
-      border-bottom: 1.5px solid #111;
-      margin-bottom: 8px;
-    }
-
-    .sign-date {
-      font-size: 10px;
-      color: #666;
-    }
-
-    .print-info {
-      margin-top: 20px;
-      text-align: center;
+    .sign .label {
       font-size: 9px;
-      color: #888;
-      padding-top: 15px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .sign .line {
+      height: 36px;
+      border-bottom: 1.5px solid #111;
+    }
+
+    .sign .date {
+      margin-top: 6px;
+      font-size: 9px;
+      color: #444;
+    }
+
+    .printInfo {
+      margin-top: 10px;
       border-top: 1px solid #e6e6e6;
+      padding-top: 8px;
+      font-size: 9px;
+      color: #666;
+      text-align: center;
     }
 
     @media screen {
       body { background: #eee; padding: 20px; }
       .sheet {
         background: #fff;
-        padding: 20mm;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        max-width: 210mm;
+        margin: auto;
+        padding: 15mm;
+        box-shadow: 0 2px 10px rgba(0,0,0,.1);
       }
     }
 
@@ -296,67 +250,45 @@ export const generateProviderOrderHTML = (order) => {
 </head>
 <body>
   <div class="sheet">
-    <div class="header">
-      <div class="logo">
-        <span class="logo-icon">🚚</span>
-        <span class="logo-text">Wholesale Hub</span>
-      </div>
-      <div class="order-info">
-        <div class="order-title">Purchase Order</div>
-        <div class="order-id">#${escapeHtml(String(order.id))}</div>
+    <div class="topbar">
+      <div class="title">Wholesale Hub - Purchase Order</div>
+      <div class="orderNo">
+        <div class="label">Order ID</div>
+        <div class="value">#${escapeHtml(String(order.id))}</div>
       </div>
     </div>
 
     <div class="meta">
-      <div class="meta-box">
-        <div class="meta-title">Provider</div>
-        <div class="meta-content">${escapeHtml(order.provider?.name || 'Unknown')}</div>
-        <div class="meta-sub">${escapeHtml(order.provider?.email || '')}</div>
-        ${order.provider?.phone ? `<div class="meta-sub">${escapeHtml(order.provider.phone)}</div>` : ''}
-        ${order.provider?.address ? `<div class="meta-sub">${escapeHtml(order.provider.address)}</div>` : ''}
+      <div class="metaItem">
+        <div class="k">Provider</div>
+        <div class="v">${escapeHtml(order.provider?.name || 'Unknown')}</div>
       </div>
-      <div class="meta-box">
-        <div class="meta-title">Order Details</div>
-        <div class="meta-content">Date: ${escapeHtml(formatDateToEuropean(order.createdAt))}</div>
-        <div class="meta-sub">Status: ${escapeHtml(order.status)}</div>
-        <div class="meta-sub">Printed: ${escapeHtml(formattedPrintedDate)}</div>
+      <div class="metaItem">
+        <div class="k">Email</div>
+        <div class="v">${escapeHtml(order.provider?.email || '-')}</div>
       </div>
-    </div>
-
-    <div class="summary-bar">
-      <div class="summary-item">
-        <div class="summary-label">Total Items</div>
-        <div class="summary-value">${totalItems}</div>
+      <div class="metaItem">
+        <div class="k">Order Date</div>
+        <div class="v">${escapeHtml(formatDateToEuropean(order.createdAt))}</div>
       </div>
-      <div class="summary-item">
-        <div class="summary-label">Order Status</div>
-        <div class="summary-value">${escapeHtml(order.status)}</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Total Amount</div>
-        <div class="summary-value">₺${(order.totalAmount || 0).toFixed(2)}</div>
+      <div class="metaItem">
+        <div class="k">Total Items</div>
+        <div class="v">${order.items.length}</div>
       </div>
     </div>
 
     <table>
       <thead>
         <tr>
-          <th class="col-num">#</th>
           <th class="col-code">Code</th>
           <th class="col-name">Item Name</th>
           <th class="col-cat">Category</th>
           <th class="col-qty">Qty</th>
           <th class="col-unit">Unit</th>
-          <th class="col-price">Price</th>
-          <th class="col-total">Total</th>
         </tr>
       </thead>
       <tbody>
         ${rowsHtml}
-        <tr class="total-row">
-          <td colspan="7" style="text-align: right; padding-right: 15px;">TOTAL AMOUNT:</td>
-          <td class="col-total">₺${(order.totalAmount || 0).toFixed(2)}</td>
-        </tr>
       </tbody>
     </table>
 
@@ -367,22 +299,11 @@ export const generateProviderOrderHTML = (order) => {
     </div>
     ` : ''}
 
-    <div class="footer">
-      <div class="sign-box">
-        <div class="sign-title">Authorized By (Wholesale Hub)</div>
-        <div class="sign-line"></div>
-        <div class="sign-date">Date: ____________________</div>
-      </div>
-      <div class="sign-box">
-        <div class="sign-title">Received By (Provider)</div>
-        <div class="sign-line"></div>
-        <div class="sign-date">Date: ____________________</div>
-      </div>
-    </div>
 
-    <div class="print-info">
+    <div class="printInfo">
       This is an official purchase order from Wholesale Hub.<br>
-      Please confirm receipt and expected delivery date.
+      Please confirm receipt and expected delivery date.<br>
+      Printed: ${escapeHtml(formattedPrintedDate)}
     </div>
   </div>
 </body>
@@ -422,4 +343,3 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-

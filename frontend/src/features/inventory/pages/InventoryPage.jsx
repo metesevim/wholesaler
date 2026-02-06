@@ -11,7 +11,6 @@ import PageHeader from '../../../components/layout/PageHeader';
 import Sidebar from '../../../components/layout/Sidebar';
 import TopBar from '../../../components/layout/TopBar';
 import useAuth from '../../auth/hooks/useAuth';
-import RestockModal from '../components/RestockModal';
 import { inventoryRepository } from '../../../data';
 import { ROUTES } from '../../../shared/constants/appConstants';
 import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
@@ -23,8 +22,6 @@ const InventoryPage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [restockItem, setRestockItem] = useState(null);
-  const [restocking, setRestocking] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [sortMode, setSortMode] = useState('alphabetic'); // 'alphabetic', 'category', 'stock'
@@ -49,36 +46,6 @@ const InventoryPage = () => {
       setError('Failed to load inventory items. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleRestockConfirm = async (restockData) => {
-    setRestocking(true);
-    try {
-      const result = await inventoryRepository.updateItem(restockItem.id, {
-        ...restockItem,
-        quantity: restockData.newTotal
-      });
-
-      if (result.success) {
-        // Update the items list with the new quantity
-        setItems(prev =>
-          prev.map(item =>
-            item.id === restockItem.id
-              ? { ...item, quantity: restockData.newTotal }
-              : item
-          )
-        );
-        setRestockItem(null);
-        logger.info(`Item restocked: ${restockItem.name} + ${restockData.addedQuantity} ${restockData.unit}`);
-      } else {
-        setError(result.error || 'Failed to restock item');
-      }
-    } catch (err) {
-      logger.error('Failed to restock item:', err);
-      setError('Failed to restock item. Please try again.');
-    } finally {
-      setRestocking(false);
     }
   };
 
@@ -278,42 +245,33 @@ const InventoryPage = () => {
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredItems.map(item => (
-              <ItemCard key={item.id} item={item} getStockColor={getStockColor} navigate={navigate} setRestockItem={setRestockItem} />
+              <ItemCard key={item.id} item={item} getStockColor={getStockColor} navigate={navigate} />
             ))}
           </div>
         ) : (
           <div className="space-y-4">
             {filteredItems.map(item => (
-              <ItemRow key={item.id} item={item} getStockColor={getStockColor} navigate={navigate} setRestockItem={setRestockItem} />
+              <ItemRow key={item.id} item={item} getStockColor={getStockColor} navigate={navigate} />
             ))}
           </div>
         )}
         </div>
         </div>
       </div>
-
-      {/* Restock Modal */}
-      {restockItem && (
-        <RestockModal
-          item={restockItem}
-          onConfirm={handleRestockConfirm}
-          onCancel={() => setRestockItem(null)}
-          loading={restocking}
-        />
-      )}
     </div>
   );
 };
 
 // Grid Card Component
-const ItemCard = ({ item, getStockColor, navigate, setRestockItem }) => {
+const ItemCard = ({ item, getStockColor, navigate }) => {
   const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
   const capacityPercentage = Math.min((item.quantity / item.maximumCapacity) * 100, 100);
   const stockColor = getStockColor(capacityPercentage);
 
   return (
     <div
-      className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 overflow-hidden"
+      onClick={() => navigate(`/inventory/${item.id}/edit`)}
+      className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 overflow-hidden cursor-pointer"
     >
       {/* Header Section */}
       <div className="p-4 border-b border-[#324d67] bg-[#0d1117]">
@@ -400,38 +358,21 @@ const ItemCard = ({ item, getStockColor, navigate, setRestockItem }) => {
           </div>
         </div>
       </div>
-
-      {/* Action Buttons */}
-      <div className="p-4 border-t border-[#324d67] bg-[#0d1117] flex gap-2">
-        <Button
-          onClick={() => setRestockItem(item)}
-          variant="primary"
-          size="sm"
-          className="flex-1"
-        >
-          Restock
-        </Button>
-        <Button
-          onClick={() => navigate(`/inventory/${item.id}/edit`)}
-          variant="secondary"
-          size="sm"
-          className="flex-1"
-        >
-          Edit
-        </Button>
-      </div>
     </div>
   );
 };
 
 // List Row Component
-const ItemRow = ({ item, getStockColor, navigate, setRestockItem }) => {
+const ItemRow = ({ item, getStockColor, navigate }) => {
   const isExpired = item.expiryDate && new Date(item.expiryDate) < new Date();
   const capacityPercentage = Math.min((item.quantity / item.maximumCapacity) * 100, 100);
   const stockColor = getStockColor(capacityPercentage);
 
   return (
-    <div className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 p-4">
+    <div
+      onClick={() => navigate(`/inventory/${item.id}/edit`)}
+      className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all duration-300 p-4 cursor-pointer"
+    >
       <div className="flex items-center gap-6">
         {/* Item Info */}
         <div className="flex-1">
@@ -498,25 +439,6 @@ const ItemRow = ({ item, getStockColor, navigate, setRestockItem }) => {
               {item.expiryDate ? formatDateToEuropean(item.expiryDate) : '—'}
             </p>
           </div>
-        </div>
-
-
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-2">
-          <Button
-            onClick={() => setRestockItem(item)}
-            variant="primary"
-            size="sm"
-          >
-            Restock
-          </Button>
-          <Button
-            onClick={() => navigate(`/inventory/${item.id}/edit`)}
-            variant="secondary"
-            size="sm"
-          >
-            Edit
-          </Button>
         </div>
       </div>
     </div>

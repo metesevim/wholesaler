@@ -513,167 +513,251 @@ function generateProviderOrderHTML(order) {
     };
 
     let rowsHtml = '';
-    order.items.forEach((item, index) => {
+    order.items.forEach((item) => {
         const categoryName = item.adminItem?.category?.name || 'Uncategorized';
         rowsHtml += `
             <tr>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; font-family: monospace;">${escapeHtml(item.productCode || '-')}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; font-weight: 600;">${escapeHtml(item.itemName)}</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">${escapeHtml(categoryName)}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: 700;">${escapeHtml(String(item.quantity))}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${escapeHtml(item.unit)}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">₺${(item.pricePerUnit || 0).toFixed(2)}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 700;">₺${(item.totalPrice || 0).toFixed(2)}</td>
+                <td class="col-code">${escapeHtml(item.productCode || '-')}</td>
+                <td class="col-name">${escapeHtml(item.itemName)}</td>
+                <td class="col-cat">${escapeHtml(categoryName)}</td>
+                <td class="col-qty">${escapeHtml(String(item.quantity))}</td>
+                <td class="col-unit">${escapeHtml(item.unit)}</td>
             </tr>
         `;
     });
 
-    return `
-<!DOCTYPE html>
-<html>
+    return `<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Purchase Order #${order.id}</title>
+    <meta charset="UTF-8" />
+    <title>Purchase Order #${order.id} - ${escapeHtml(order.provider?.name || 'Unknown')}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif;
-            color: #333;
-            line-height: 1.5;
+        /* ---------- Base ---------- */
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            color: #111;
+            background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+                         "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .sheet {
+            width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            padding: 40px;
+            padding: 30px;
         }
-        .header {
-            border-bottom: 3px solid #137fec;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            color: #137fec;
-        }
-        .order-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin: 20px 0 10px 0;
-        }
-        .order-meta {
+
+        /* ---------- Header ---------- */
+        .topbar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 30px;
-            padding: 20px;
+            align-items: flex-end;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #111;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .orderNo {
+            text-align: right;
+        }
+        .orderNo .label { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 0.3px; }
+        .orderNo .value { font-size: 14px; font-weight: 800; }
+
+        /* ---------- Meta grid ---------- */
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 12px;
+            border: 1px solid #e6e6e6;
             background: #f7f7f7;
-            border-radius: 8px;
+            border-radius: 6px;
+            margin-bottom: 15px;
         }
-        .meta-item {
-            text-align: center;
+
+        .metaItem {
+            flex: 1;
+            min-width: 120px;
         }
-        .meta-label {
-            font-size: 12px;
+        .metaItem .k {
+            font-size: 9px;
             color: #666;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .meta-value {
-            font-size: 16px;
+            letter-spacing: 0.3px;
             font-weight: 700;
-            margin-top: 4px;
         }
+        .metaItem .v {
+            font-size: 11px;
+            color: #111;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* ---------- Table ---------- */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin-top: 10px;
         }
+
+        th, td {
+            border: 1px solid #d9d9d9;
+            padding: 8px 6px;
+            vertical-align: middle;
+        }
+
         th {
-            background: #137fec;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .total-row {
-            background: #f0f7ff;
+            background: #111;
+            color: #fff;
+            font-size: 9px;
             font-weight: 800;
-            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.35px;
         }
+
+        tbody tr:nth-child(odd) td {
+            background: #fcfcfc;
+        }
+
+        .col-code { width: 15%; font-family: monospace; font-size: 10px; }
+        .col-name { width: 40%; font-weight: 600; }
+        .col-cat  { width: 20%; }
+        .col-qty  { width: 12%; text-align: center; font-weight: 800; }
+        .col-unit { width: 13%; text-align: center; }
+
+        /* ---------- Notes ---------- */
+        .notes {
+            margin-top: 15px;
+            padding: 10px 12px;
+            background: #fffde7;
+            border-left: 4px solid #ffc107;
+            border-radius: 0 6px 6px 0;
+        }
+        .notes-title {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        /* ---------- Footer ---------- */
         .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            font-size: 12px;
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .sign-box {
+            flex: 1;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .sign-title {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .sign-line {
+            height: 35px;
+            border-bottom: 1.5px solid #111;
+            margin-bottom: 6px;
+        }
+
+        .sign-date {
+            font-size: 9px;
+            color: #666;
+        }
+
+        .printInfo {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #e6e6e6;
+            font-size: 9px;
             color: #666;
             text-align: center;
-        }
-        .notes {
-            background: #fffde7;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #ffc107;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">🚚 Wholesale Hub</div>
-        <div class="order-title">Purchase Order #${order.id}</div>
-    </div>
-
-    <div class="order-meta">
-        <div class="meta-item">
-            <div class="meta-label">Provider</div>
-            <div class="meta-value">${escapeHtml(order.provider?.name || 'Unknown')}</div>
+    <div class="sheet">
+        <div class="topbar">
+            <div class="title">🚚 Wholesale Hub - Purchase Order</div>
+            <div class="orderNo">
+                <div class="label">Order ID</div>
+                <div class="value">#${escapeHtml(String(order.id))}</div>
+            </div>
         </div>
-        <div class="meta-item">
-            <div class="meta-label">Order Date</div>
-            <div class="meta-value">${formatDate(order.createdAt)}</div>
-        </div>
-        <div class="meta-item">
-            <div class="meta-label">Total Items</div>
-            <div class="meta-value">${order.items.length}</div>
-        </div>
-        <div class="meta-item">
-            <div class="meta-label">Status</div>
-            <div class="meta-value">${order.status}</div>
-        </div>
-    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 5%;">#</th>
-                <th style="width: 12%;">Code</th>
-                <th style="width: 25%;">Item</th>
-                <th style="width: 15%;">Category</th>
-                <th style="width: 10%;">Qty</th>
-                <th style="width: 8%;">Unit</th>
-                <th style="width: 12%;">Price</th>
-                <th style="width: 13%;">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${rowsHtml}
-            <tr class="total-row">
-                <td colspan="7" style="padding: 12px; border: 1px solid #ddd; text-align: right;">TOTAL AMOUNT:</td>
-                <td style="padding: 12px; border: 1px solid #ddd; text-align: right;">₺${(order.totalAmount || 0).toFixed(2)}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="meta">
+            <div class="metaItem">
+                <div class="k">Provider</div>
+                <div class="v">${escapeHtml(order.provider?.name || 'Unknown')}</div>
+            </div>
+            <div class="metaItem">
+                <div class="k">Email</div>
+                <div class="v">${escapeHtml(order.provider?.email || '-')}</div>
+            </div>
+            <div class="metaItem">
+                <div class="k">Order Date</div>
+                <div class="v">${formatDate(order.createdAt)}</div>
+            </div>
+            <div class="metaItem">
+                <div class="k">Total Items</div>
+                <div class="v">${order.items.length}</div>
+            </div>
+        </div>
 
-    ${order.notes ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(order.notes)}</div>` : ''}
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-code">Code</th>
+                    <th class="col-name">Item Name</th>
+                    <th class="col-cat">Category</th>
+                    <th class="col-qty">Qty</th>
+                    <th class="col-unit">Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHtml}
+            </tbody>
+        </table>
 
-    <div class="footer">
-        <p>This is an automated purchase order from Wholesale Hub.</p>
-        <p>Please confirm receipt of this order by replying to this email.</p>
-        <p>Generated on ${formatDate(new Date())}</p>
+        ${order.notes ? `
+        <div class="notes">
+            <div class="notes-title">Notes</div>
+            <div>${escapeHtml(order.notes)}</div>
+        </div>
+        ` : ''}
+
+
+        <div class="printInfo">
+            This is an official purchase order from Wholesale Hub.<br>
+            Please confirm receipt and expected delivery date by replying to this email.<br>
+            Generated on ${formatDate(new Date())}
+        </div>
     </div>
 </body>
-</html>
-    `;
+</html>`;
 }
 
 // Export the HTML generator for frontend use
