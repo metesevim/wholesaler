@@ -22,6 +22,7 @@ import EditCustomerPage from '../features/customers/pages/EditCustomerPage';
 import ProvidersPage from '../features/providers/pages/ProvidersPage';
 import AddProviderPage from '../features/providers/pages/AddProviderPage';
 import EditProviderPage from '../features/providers/pages/EditProviderPage';
+import ProviderOrdersPage from '../features/providerOrders/pages/ProviderOrdersPage';
 import EmployeesPage from '../features/employees/pages/EmployeesPage';
 import AddEmployeePage from '../features/employees/pages/AddEmployeePage';
 import EditEmployeePage from '../features/employees/pages/EditEmployeePage';
@@ -158,6 +159,16 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <EditProviderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Provider Orders Routes */}
+        <Route
+          path={ROUTES.PROVIDER_ORDERS}
+          element={
+            <ProtectedRoute>
+              <ProviderOrdersPage />
             </ProtectedRoute>
           }
         />

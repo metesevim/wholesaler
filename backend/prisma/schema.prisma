@@ -62,6 +62,67 @@ model Provider {
   // Items sourced from this provider
   items AdminInventoryItem[]
 
+  // Orders to this provider
+  providerOrders ProviderOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============= PROVIDER ORDERS (Restock Orders) =============
+model ProviderOrder {
+  id Int @id @default(autoincrement())
+
+  // Link to provider
+  providerId Int
+  provider Provider @relation(fields: [providerId], references: [id])
+
+  // Order status
+  status ProviderOrderStatus @default(PENDING)
+
+  // Order items
+  items ProviderOrderItem[]
+
+  // Order totals
+  totalAmount Float @default(0)
+  notes String?
+
+  // Email sent status
+  emailSent Boolean @default(false)
+  emailSentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ProviderOrderStatus {
+  PENDING
+  SENT
+  CONFIRMED
+  SHIPPED
+  RECEIVED
+  CANCELLED
+}
+
+model ProviderOrderItem {
+  id Int @id @default(autoincrement())
+
+  // Link to provider order
+  providerOrderId Int
+  providerOrder ProviderOrder @relation(fields: [providerOrderId], references: [id], onDelete: Cascade)
+
+  // Link to admin inventory item
+  adminItemId Int
+  adminItem AdminInventoryItem @relation("AdminItemToProviderOrderItem", fields: [adminItemId], references: [id])
+
+  // Item details
+  itemName String
+  productCode String?
+  unit String
+  quantity Float
+  pricePerUnit Float?
+  totalPrice Float?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -138,6 +199,9 @@ model AdminInventoryItem {
 
   // Reference to order items (to reduce stock)
   orderItems OrderItem[] @relation("AdminItemToOrderItem")
+
+  // Reference to provider order items (for restocking)
+  providerOrderItems ProviderOrderItem[] @relation("AdminItemToProviderOrderItem")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -15,7 +15,7 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
   // Initialize from localStorage or default to expanded
   const [expandedSections, setExpandedSections] = useState(() => {
     const saved = localStorage.getItem('sidebarExpandedSections');
-    return saved ? JSON.parse(saved) : { operations: true, admin: true };
+    return saved ? JSON.parse(saved) : { orders: true, operations: true, admin: true };
   });
 
   // Save to localStorage whenever expandedSections changes
@@ -38,14 +38,25 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
 
   const sections = [
     {
-      id: 'operations',
-      label: 'OPERATIONS',
+      id: 'orders',
+      label: 'ORDERS',
       items: [
         {
           route: ROUTES.ORDERS,
-          label: 'Orders',
+          label: 'Customer Orders',
           icon: 'assignment'
         },
+        {
+          route: ROUTES.PROVIDER_ORDERS,
+          label: 'Provider Orders',
+          icon: 'shopping_cart'
+        }
+      ]
+    },
+    {
+      id: 'operations',
+      label: 'OPERATIONS',
+      items: [
         {
           route: ROUTES.INVENTORY,
           label: 'Inventory',
@@ -87,7 +98,7 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
   ];
 
   return (
-    <div className="w-64 bg-[#0d1117] border-r border-[#324d67] p-6 flex flex-col h-screen sticky top-0 overflow-hidden">
+    <div className="w-64 bg-[#0d1117] border-r border-[#324d67] p-4  flex flex-col h-screen sticky top-0 overflow-hidden">
       {/* Logo Section - Top Center (Fixed) */}
       <div className="flex justify-center mb-8 pb-5 flex-shrink-0 border-b border-[#324d67]">
         <div className="flex items-center gap-2">

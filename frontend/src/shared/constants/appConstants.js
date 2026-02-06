@@ -20,6 +20,7 @@ export const ROUTES = {
   ADD_CUSTOMER: '/customers/add',
   PROVIDERS: '/providers',
   ADD_PROVIDER: '/providers/add',
+  PROVIDER_ORDERS: '/provider-orders',
   ADMIN_SETTINGS: '/admin/settings',
   EMPLOYEES: '/employees',
   ADD_EMPLOYEE: '/employees/add',

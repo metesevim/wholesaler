@@ -7,6 +7,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import providerRoutes from "./routes/providerRoutes.js";
+import providerOrderRoutes from "./routes/providerOrderRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -25,6 +26,7 @@ app.use("/customers", customerRoutes);
 app.use("/inventory", inventoryRoutes);
 app.use("/orders", orderRoutes);
 app.use("/providers", providerRoutes);
+app.use("/provider-orders", providerOrderRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/admin", adminRoutes);
 
