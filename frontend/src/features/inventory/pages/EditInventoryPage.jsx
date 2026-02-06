@@ -85,7 +85,7 @@ const EditInventoryPage = () => {
           providerId: result.data.providerId || '',
           productionDate: result.data.productionDate ? result.data.productionDate.split('T')[0] : '',
           expiryDate: result.data.expiryDate ? result.data.expiryDate.split('T')[0] : '',
-          category: result.data.category || '',
+          category: result.data.categoryId ? String(result.data.categoryId) : '',
         });
       } else {
         setError('Failed to load inventory item');
@@ -105,9 +105,6 @@ const EditInventoryPage = () => {
       newErrors.name = 'Item name is required';
     }
 
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    }
 
     if (!formData.quantity) {
       newErrors.quantity = 'Quantity is required';
@@ -351,7 +348,7 @@ const EditInventoryPage = () => {
             {/* Description - Full Width */}
             <div>
               <label className="block text-white font-semibold mb-2">
-                Description <span className="text-red-500">*</span>
+                Description
               </label>
               <textarea
                 name="description"

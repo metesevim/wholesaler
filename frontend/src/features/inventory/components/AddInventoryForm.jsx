@@ -64,9 +64,6 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       newErrors.name = 'Item name is required';
     }
 
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    }
 
     if (!formData.quantity) {
       newErrors.quantity = 'Quantity is required';
@@ -224,7 +221,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       {/* Description - Full Width */}
       <div>
         <label className="block text-white font-semibold mb-2">
-          Description <span className="text-red-500">*</span>
+          Description
         </label>
         <textarea
           name="description"

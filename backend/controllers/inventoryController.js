@@ -105,6 +105,7 @@ export const getAdminInventoryItemById = async (req, res) => {
             where: { id: parseInt(id) },
             include: {
                 provider: true,
+                category: true,
                 customerItems: {
                     include: {
                         customerInventory: {
@@ -140,11 +141,11 @@ export const updateAdminInventoryItem = async (req, res) => {
         const item = await prisma.adminInventoryItem.update({
             where: { id: parseInt(id) },
             data: {
-                ...(name && { name }),
-                ...(description && { description }),
+                ...(name !== undefined && { name }),
+                ...(description !== undefined && { description }),
                 ...(quantity !== undefined && { quantity }),
-                ...(unit && { unit }),
-                ...(imageUrl && { imageUrl }),
+                ...(unit !== undefined && { unit }),
+                ...(imageUrl !== undefined && { imageUrl }),
                 ...(pricePerUnit !== undefined && { pricePerUnit }),
                 ...(minimumCapacity !== undefined && { minimumCapacity }),
                 ...(maximumCapacity !== undefined && { maximumCapacity }),

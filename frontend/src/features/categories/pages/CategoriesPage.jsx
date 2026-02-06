@@ -470,7 +470,9 @@ const CategoriesPage = () => {
                     <form onSubmit={handleSaveEdit} className="space-y-4">
                       <div className="grid grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-white font-semibold mb-2">Name</label>
+                          <label className="block text-white font-semibold mb-2">
+                            Name <span className="text-red-500">*</span>
+                          </label>
                           <input
                             type="text"
                             value={editFormData.name}
@@ -488,21 +490,6 @@ const CategoriesPage = () => {
                         </div>
 
                         <div>
-                          <label className="block text-white font-semibold mb-2">
-                            Priority (Auto-assigned)
-                          </label>
-                          <input
-                            type="number"
-                            value={index}
-                            disabled
-                            className="w-full h-10 rounded-lg border border-[#324d67] bg-[#0d1117] text-[#92adc9] px-3 cursor-not-allowed opacity-75"
-                          />
-                          <p className="mt-1 text-xs text-[#92adc9]">Drag to reorder</p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-6">
-                        <div>
                           <label className="block text-white font-semibold mb-2">Description</label>
                           <input
                             type="text"
@@ -511,7 +498,7 @@ const CategoriesPage = () => {
                               setEditFormData({ ...editFormData, description: e.target.value });
                               if (errors.description) setErrors({ ...errors, description: '' });
                             }}
-                            placeholder="Enter description (optional)"
+                            placeholder="Enter description"
                             className={`w-full h-10 rounded-lg border border-[#324d67] bg-[#192633] text-white px-3
                               placeholder-[#92adc9] focus:outline-none focus:border-[#137fec] ${
                               errors.description ? 'border-red-500' : ''
@@ -559,13 +546,15 @@ const CategoriesPage = () => {
                         >
                           Edit
                         </Button>
-                        <Button
+                        <button
                           onClick={() => handleDelete(category.id)}
-                          variant="danger"
-                          size="sm"
+                          className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+                          title="Delete category"
                         >
-                          Delete
-                        </Button>
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   )}

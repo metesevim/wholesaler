@@ -19,6 +19,7 @@ const ProvidersPage = () => {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadProviders();
@@ -62,6 +63,16 @@ const ProvidersPage = () => {
     }
   };
 
+  // Filter providers based on search term and sort alphabetically
+  const filteredProviders = providers
+    .filter(provider =>
+      provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (provider.email && provider.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (provider.phone && provider.phone.includes(searchTerm)) ||
+      (provider.city && provider.city.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.PROVIDERS} />
@@ -90,6 +101,31 @@ const ProvidersPage = () => {
           </div>
         )}
 
+        {/* Search Bar */}
+        <div className="mb-6 relative">
+          <input
+            type="text"
+            placeholder="Search providers by name, email, phone or city..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 pl-12
+              placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]"
+          />
+          <svg
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#92adc9]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin">
@@ -110,9 +146,13 @@ const ProvidersPage = () => {
               Add Your First Provider
             </Button>
           </div>
+        ) : filteredProviders.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-[#92adc9] text-lg mb-4">No providers match your search</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {providers.map(provider => (
+            {filteredProviders.map(provider => (
               <div
                 key={provider.id}
                 className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"

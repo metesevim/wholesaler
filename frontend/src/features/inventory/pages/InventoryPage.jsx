@@ -24,6 +24,7 @@ const InventoryPage = () => {
   const [restocking, setRestocking] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [sortMode, setSortMode] = useState('alphabetic'); // 'alphabetic', 'category', 'stock'
 
   useEffect(() => {
     loadItems();
@@ -78,11 +79,34 @@ const InventoryPage = () => {
     }
   };
 
-  // Filter items based on search term
-  const filteredItems = items.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Filter items based on search term and sort by selected mode
+  const filteredItems = items
+    .filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (sortMode === 'alphabetic') {
+        return a.name.localeCompare(b.name);
+      } else if (sortMode === 'category') {
+        const catA = a.category?.name || null;
+        const catB = b.category?.name || null;
+
+        // If both are uncategorized, maintain original order
+        if (!catA && !catB) return 0;
+        // If only a is uncategorized, put it last
+        if (!catA) return 1;
+        // If only b is uncategorized, put it last
+        if (!catB) return -1;
+        // Otherwise sort alphabetically
+        return catA.localeCompare(catB);
+      } else if (sortMode === 'stock') {
+        const capacityA = Math.min((a.quantity / a.maximumCapacity) * 100, 100);
+        const capacityB = Math.min((b.quantity / b.maximumCapacity) * 100, 100);
+        return capacityA - capacityB; // Low stock first
+      }
+      return 0;
+    });
 
   // Helper function to determine color based on capacity percentage
   const getStockColor = (percentage) => {
@@ -106,7 +130,8 @@ const InventoryPage = () => {
           title="Inventory"
           subtitle="Manage your inventory items"
           rightContent={
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              {/* View Mode Buttons */}
               <div className="flex gap-2 border border-[#324d67] rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -138,6 +163,44 @@ const InventoryPage = () => {
                   </svg>
                 </button>
               </div>
+
+              {/* Sort Mode Buttons */}
+              <div className="flex gap-2 border border-[#324d67] rounded-lg p-1">
+                <button
+                  onClick={() => setSortMode('alphabetic')}
+                  className={`px-3 py-2 rounded transition-colors text-sm font-medium ${
+                    sortMode === 'alphabetic'
+                      ? 'bg-[#137fec] text-white'
+                      : 'text-[#92adc9] hover:text-white'
+                  }`}
+                  title="Sort Alphabetically"
+                >
+                  A-Z
+                </button>
+                <button
+                  onClick={() => setSortMode('category')}
+                  className={`px-3 py-2 rounded transition-colors text-sm font-medium ${
+                    sortMode === 'category'
+                      ? 'bg-[#137fec] text-white'
+                      : 'text-[#92adc9] hover:text-white'
+                  }`}
+                  title="Sort by Category"
+                >
+                  Category
+                </button>
+                <button
+                  onClick={() => setSortMode('stock')}
+                  className={`px-3 py-2 rounded transition-colors text-sm font-medium ${
+                    sortMode === 'stock'
+                      ? 'bg-[#137fec] text-white'
+                      : 'text-[#92adc9] hover:text-white'
+                  }`}
+                  title="Sort by Stock Status"
+                >
+                  Stock
+                </button>
+              </div>
+
               <Button
                 onClick={() => navigate(ROUTES.ADD_INVENTORY)}
                 variant="primary"
@@ -270,11 +333,13 @@ const ItemCard = ({ item, getStockColor, navigate, setRestockItem }) => {
             </div>
           )}
         </div>
-        {item.description && (
-          <p className="text-sm text-[#92adc9] line-clamp-2">
-            {item.description}
-          </p>
-        )}
+        <div className="min-h-[1.25rem]">
+          {item.description && (
+            <p className="text-sm text-[#92adc9] line-clamp-2">
+              {item.description}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Main Content */}
