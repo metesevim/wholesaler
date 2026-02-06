@@ -170,84 +170,95 @@ const EmployeesPage = () => {
               {filteredEmployees.map(employee => (
               <div
                 key={employee.id}
-                className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"
+                onClick={() => navigate(`${ROUTES.EMPLOYEES}/${employee.id}/edit`)}
+                className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all cursor-pointer overflow-hidden"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-white">
-                      {employee.fullName}
-                    </h3>
-                    <p className="text-xs text-[#92adc9]">@{employee.username}</p>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    {employee.iban && (
-                      <Button
-                        onClick={() => {
-                          navigator.clipboard.writeText(employee.iban);
-                          alert('IBAN copied to clipboard!');
-                        }}
-                        variant="primary"
-                        size="sm"
-                      >
-                        Copy IBAN
-                      </Button>
-                    )}
-                    <Button
-                      onClick={() => navigate(`${ROUTES.EMPLOYEES}/${employee.id}/edit`)}
-                      variant="secondary"
-                      size="sm"
-                    >
-                      Edit
-                    </Button>
+                {/* Header */}
+                <div className="p-4 bg-[#0d1117] border-b border-[#324d67]">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-[#137fec]/20 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[#137fec]" style={{ fontSize: '24px' }}>
+                          person
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">
+                          {employee.fullName}
+                        </h3>
+                        <p className="text-xs text-[#92adc9]">@{employee.username}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {employee.iban && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(employee.iban);
+                            alert('IBAN copied to clipboard!');
+                          }}
+                          className="w-10 h-10 rounded-lg bg-[#192633] border border-[#324d67] text-[#92adc9] hover:text-white hover:border-[#137fec] transition-all flex items-center justify-center"
+                          title="Copy IBAN"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>content_copy</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-sm">
-                  <div className="border-t border-[#324d67] my-2"></div>
-                  <p className="text-[#92adc9] mb-2">
-                    <span className="font-semibold">Email:</span> {employee.email || 'N/A'}
-                  </p>
-                  <p className="text-[#92adc9] mb-2">
-                    <span className="font-semibold">Phone:</span> {employee.phone || 'No phone'}
-                  </p>
-                  <div className="border-t border-[#324d67] my-2"></div>
-                  {employee.nationalId && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">National ID:</span> {employee.nationalId}
-                    </p>
-                  )}
-                  {employee.address && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">Address:</span> {employee.address}
-                    </p>
-                  )}
-                  <div className="border-t border-[#324d67] my-2"></div>
-                  {employee.iban && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">IBAN:</span> {employee.iban}
-                    </p>
-                  )}
-                  <p className="text-[#92adc9] mb-2">
-                    <span className="font-semibold">Created:</span> {formatDateToEuropean(employee.createdAt)}
-                  </p>
-                </div>
+                {/* Body */}
+                <div className="p-4">
+                  {/* Contact Info */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '18px' }}>mail</span>
+                      <span className="text-sm text-white truncate">{employee.email || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '18px' }}>phone</span>
+                      <span className="text-sm text-white">{employee.phone || 'N/A'}</span>
+                    </div>
+                  </div>
 
+                  {/* Permissions */}
                   {employee.permissions && employee.permissions.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-[#324d67]">
-                      <p className="text-sm text-[#92adc9] font-semibold mb-2">Permissions:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {employee.permissions.map((permission, idx) => (
+                    <div className="pt-4 border-t border-[#324d67]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '16px' }}>security</span>
+                        <span className="text-xs text-[#92adc9] font-semibold uppercase">Permissions</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {employee.permissions.slice(0, 4).map((permission, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 bg-[#137fec]/20 text-[#4a9eff] text-xs font-medium rounded-full"
+                            className="px-2 py-0.5 bg-[#137fec]/10 text-[#4a9eff] text-xs font-medium rounded"
                           >
-                            {permission}
+                            {permission.replace(/_/g, ' ')}
                           </span>
                         ))}
+                        {employee.permissions.length > 4 && (
+                          <span className="px-2 py-0.5 bg-[#324d67] text-[#92adc9] text-xs font-medium rounded">
+                            +{employee.permissions.length - 4} more
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#324d67]">
+                    <div className="flex items-center gap-1 text-xs text-[#92adc9]">
+                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>calendar_today</span>
+                      <span>Added {formatDateToEuropean(employee.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-[#137fec]">
+                      <span>Edit</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</span>
+                    </div>
+                  </div>
                 </div>
+              </div>
               ))}
             </div>
           )}
