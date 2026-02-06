@@ -5,6 +5,16 @@ export const getAllProviders = async (req, res) => {
     try {
         const providers = await prisma.provider.findMany({
             orderBy: { createdAt: "desc" },
+            include: {
+                items: {
+                    select: {
+                        id: true,
+                        name: true,
+                        quantity: true,
+                        unit: true,
+                    }
+                }
+            }
         });
 
         res.json({
@@ -24,6 +34,16 @@ export const getProviderById = async (req, res) => {
 
         const provider = await prisma.provider.findUnique({
             where: { id: parseInt(id) },
+            include: {
+                items: {
+                    select: {
+                        id: true,
+                        name: true,
+                        quantity: true,
+                        unit: true,
+                    }
+                }
+            }
         });
 
         if (!provider) {

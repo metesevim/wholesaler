@@ -20,6 +20,7 @@ const EditProviderPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,6 +50,7 @@ const EditProviderPage = () => {
           country: result.data.country || '',
           iban: result.data.iban || '',
         });
+        setItems(result.data.items || []);
       } else {
         setError('Failed to load provider');
       }
@@ -283,6 +285,46 @@ const EditProviderPage = () => {
               </Button>
             </div>
           </form>
+        </div>
+
+        {/* Connected Items Section */}
+        <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67] mt-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[#137fec]" style={{ fontSize: '28px' }}>inventory_2</span>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Connected Items</h2>
+                <p className="text-sm text-[#92adc9]">{items.length} item{items.length !== 1 ? 's' : ''} from this provider</p>
+              </div>
+            </div>
+          </div>
+
+          {items.length === 0 ? (
+            <div className="text-center py-8 bg-[#0d1117] rounded-lg border border-[#324d67]">
+              <span className="material-symbols-outlined text-[#92adc9] mb-2" style={{ fontSize: '48px' }}>inventory</span>
+              <p className="text-[#92adc9]">No items connected to this provider</p>
+              <p className="text-sm text-[#92adc9] mt-1">Items will appear here when you assign this provider to inventory items</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => navigate(`/inventory/${item.id}/edit`)}
+                  className="bg-[#0d1117] rounded-lg p-4 border border-[#324d67] hover:border-[#137fec] transition-all cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-white font-semibold">{item.name}</h3>
+                    <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '18px' }}>chevron_right</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-[#92adc9]">Stock:</span>
+                    <span className="text-white font-medium">{item.quantity} {item.unit}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         </div>
       </div>

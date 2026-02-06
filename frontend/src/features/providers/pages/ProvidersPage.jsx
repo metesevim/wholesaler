@@ -46,25 +46,6 @@ const ProvidersPage = () => {
     }
   };
 
-  const handleDeleteProvider = async (providerId, providerName) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${providerName}" and all their related data? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
-
-    try {
-      const result = await providerRepository.deleteProvider(providerId);
-      if (result.success) {
-        setProviders(providers.filter(p => p.id !== providerId));
-      } else {
-        setError(result.error || 'Failed to delete provider');
-      }
-    } catch (err) {
-      logger.error('Failed to delete provider:', err);
-      setError('Failed to delete provider. Please try again.');
-    }
-  };
 
   // Filter providers based on search term and sort alphabetically
   const filteredProviders = providers
@@ -156,82 +137,119 @@ const ProvidersPage = () => {
             <p className="text-[#92adc9] text-lg mb-4">No providers match your search</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredProviders.map(provider => (
               <div
                 key={provider.id}
-                className="bg-[#192633] rounded-lg p-6 border border-[#324d67] hover:border-[#137fec] transition-colors"
+                onClick={() => navigate(`${ROUTES.PROVIDERS}/${provider.id}/edit`)}
+                className="bg-[#192633] rounded-lg border border-[#324d67] hover:border-[#137fec] transition-all cursor-pointer overflow-hidden"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-bold text-white flex-1">
-                    {provider.name}
-                  </h3>
-
-                  <div className="flex gap-2">
-                    {provider.iban && (
-                      <Button
-                        onClick={() => {navigator.clipboard.writeText(provider.iban);
-                          alert('IBAN copied to clipboard!');
-                        }}
-                        variant="primary"
-                        size="sm"
-                      >
-                        Copy IBAN
-                      </Button>
-                    )}
-                    <Button
-                      onClick={() => navigate(`${ROUTES.PROVIDERS}/${provider.id}/edit`)}
-                      variant="secondary"
-                      size="sm"
-                    >
-                      Edit
-                    </Button>
-
+                {/* Header */}
+                <div className="p-4 bg-[#0d1117] border-b border-[#324d67]">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-[#137fec]/20 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[#137fec]" style={{ fontSize: '24px' }}>
+                          domain
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">
+                          {provider.name}
+                        </h3>
+                        {provider.email && (
+                          <p className="text-xs text-[#92adc9]">{provider.email}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {provider.iban && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(provider.iban);
+                            alert('IBAN copied to clipboard!');
+                          }}
+                          className="w-10 h-10 rounded-lg bg-[#192633] border border-[#324d67] text-[#92adc9] hover:text-white hover:border-[#137fec] transition-all flex items-center justify-center"
+                          title="Copy IBAN"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>content_copy</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="text-sm">
-                  <div className="border-t border-[#324d67] my-2"></div>
-                  <p className="text-[#92adc9] mb-2">
-                    <span className="font-semibold">Email:</span> {provider.email || 'N/A'}
-                  </p>
-                  <p className="text-[#92adc9] mb-2">
-                    <span className="font-semibold">Phone:</span> {provider.phone || 'N/A'}
-                  </p>
-                  <div className="border-t border-[#324d67] my-2"></div>
-                  {provider.address && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">Address:</span> {provider.address}
-                    </p>
+
+                {/* Body */}
+                <div className="p-4">
+                  {/* Contact Info */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '18px' }}>mail</span>
+                      <span className="text-sm text-white truncate">{provider.email || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '18px' }}>phone</span>
+                      <span className="text-sm text-white">{provider.phone || 'N/A'}</span>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  {(provider.address || provider.city || provider.country) && (
+                    <div className="flex items-start gap-2">
+                      <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '18px' }}>location_on</span>
+                      <span className="text-sm text-[#92adc9]">
+                        {[provider.address, provider.city, provider.country].filter(Boolean).join(', ')}
+                      </span>
+                    </div>
                   )}
-                  {provider.city && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">City:</span> {provider.city}
-                    </p>
+
+                  {/* Items */}
+                  {provider.items && provider.items.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-[#324d67]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '16px' }}>inventory_2</span>
+                        <span className="text-xs text-[#92adc9] font-semibold uppercase">Items ({provider.items.length})</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {provider.items.slice(0, 4).map((item) => (
+                          <span
+                            key={item.id}
+                            className="px-2 py-0.5 bg-[#137fec]/10 text-[#4a9eff] text-xs font-medium rounded"
+                          >
+                            {item.name}
+                          </span>
+                        ))}
+                        {provider.items.length > 4 && (
+                          <span className="px-2 py-0.5 bg-[#324d67] text-[#92adc9] text-xs font-medium rounded">
+                            +{provider.items.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   )}
-                  {provider.country && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">Country:</span> {provider.country}
-                    </p>
-                  )}
-                  <div className="border-t border-[#324d67] my-2"></div>
+
+                  {/* IBAN */}
                   {provider.iban && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">IBAN:</span> {provider.iban}
-                    </p>
+                    <div className="mt-4 pt-4 border-t border-[#324d67]">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[#92adc9]" style={{ fontSize: '16px' }}>account_balance</span>
+                        <span className="text-xs text-[#92adc9] font-mono">{provider.iban}</span>
+                      </div>
+                    </div>
                   )}
-                  {!provider.iban && (
-                    <p className="text-[#92adc9] mb-2">
-                      <span className="font-semibold">IBAN:</span> N/A
-                    </p>
-                  )}
-                  {provider.createdAt && (
-                    <>
-                      <div className="border-t border-[#324d67] my-2"></div>
-                      <p className="text-[#92adc9]">
-                        <span className="font-semibold">Provider since:</span> {formatDateToEuropean(provider.createdAt)}
-                      </p>
-                    </>
-                  )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#324d67]">
+                    <div className="flex items-center gap-1 text-xs text-[#92adc9]">
+                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>calendar_today</span>
+                      <span>Provider since {formatDateToEuropean(provider.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-[#137fec]">
+                      <span>Edit</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

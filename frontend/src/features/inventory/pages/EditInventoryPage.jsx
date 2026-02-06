@@ -383,23 +383,42 @@ const EditInventoryPage = () => {
               {errors.description && <p className="mt-2 text-sm text-red-400">{errors.description}</p>}
             </div>
 
-            {/* Quantity, Price, Low Stock Alert - 3 Columns */}
+            {/* Quantity, Unit, Price - 3 Columns */}
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-white font-semibold mb-2">
                   Quantity <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  placeholder="Enter quantity"
-                  step="0.1"
-                  min="0"
-                  error={errors.quantity}
-                  disabled={submitting}
+                    type="number"
+                    name="quantity"
+                    value={formData.quantity}
+                    onChange={handleInputChange}
+                    placeholder="Enter quantity"
+                    step="0.1"
+                    min="0"
+                    error={errors.quantity}
                 />
+              </div>
+
+              <div>
+                <label className="block text-white font-semibold mb-2">
+                  Unit <span className="text-red-500">*</span>
+                </label>
+                <select
+                    name="unit"
+                    value={formData.unit}
+                    onChange={handleInputChange}
+                    className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+              focus:outline-none focus:border-[#137fec] ${
+                        errors.unit ? 'border-red-500' : ''
+                    }`}
+                >
+                  <option value="piece">Piece</option>
+                  <option value="kg">KG</option>
+                  <option value="liter">Liter</option>
+                </select>
+                {errors.unit && <p className="mt-2 text-xs text-red-400">{errors.unit}</p>}
               </div>
 
               <div>
@@ -407,49 +426,14 @@ const EditInventoryPage = () => {
                   Price <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="Enter price"
-                  step="0.01"
-                  min="0"
-                  error={errors.price}
-                  disabled={submitting}
-                />
-              </div>
-
-              <div>
-                <label className="block text-white font-semibold mb-2">
-                  Min Capacity <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="number"
-                  name="minimumCapacity"
-                  value={formData.minimumCapacity}
-                  onChange={handleInputChange}
-                  placeholder="Minimum stock level"
-                  step="1"
-                  min="0"
-                  error={errors.minimumCapacity}
-                  disabled={submitting}
-                />
-              </div>
-
-              <div>
-                <label className="block text-white font-semibold mb-2">
-                  Max Capacity <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="number"
-                  name="maximumCapacity"
-                  value={formData.maximumCapacity}
-                  onChange={handleInputChange}
-                  placeholder="Maximum stock level"
-                  step="1"
-                  min="1"
-                  error={errors.maximumCapacity}
-                  disabled={submitting}
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    placeholder="Enter price"
+                    step="0.01"
+                    min="0"
+                    error={errors.price}
                 />
               </div>
             </div>
