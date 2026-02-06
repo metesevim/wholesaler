@@ -28,19 +28,16 @@ export const generatePickingListHTML = (order) => {
   sortedItems.forEach((item) => {
     const categoryName = item.adminItem?.category?.name || 'Uncategorized';
     const name = item.itemName || `Item ${item.adminItemId}`;
+    const productCode = item.adminItem?.productCode || '-';
     const qty = item.quantity ?? '';
     const unit = item.unit ?? '';
 
     rowsHtml += `
       <tr>
         <td class="col-check"><span class="box"></span></td>
+        <td class="col-code">${escapeHtml(productCode)}</td>
         <td class="col-name">
           <div class="name">${escapeHtml(name)}</div>
-          ${
-        item.adminItem?.sku
-            ? `<div class="sub">SKU: ${escapeHtml(String(item.adminItem.sku))}</div>`
-            : ''
-    }
         </td>
         <td class="col-cat">${escapeHtml(categoryName)}</td>
         <td class="col-qty">${escapeHtml(String(qty))}</td>
@@ -177,10 +174,11 @@ export const generatePickingListHTML = (order) => {
     tr { break-inside: avoid; page-break-inside: avoid; }
 
     .col-check { width: 10mm; text-align: center; }
-    .col-name  { width: 55%; }
-    .col-cat   { width: 23%; }
-    .col-qty   { width: 12%; text-align: center; font-weight: 800; }
-    .col-unit  { width: 12%; text-align: center; font-weight: 800; }
+    .col-code  { width: 15%; text-align: left; font-family: monospace; font-size: 10px; }
+    .col-name  { width: 40%; }
+    .col-cat   { width: 18%; }
+    .col-qty   { width: 10%; text-align: center; font-weight: 800; }
+    .col-unit  { width: 10%; text-align: center; font-weight: 800; }
 
     .box {
       display: inline-block;
@@ -192,6 +190,7 @@ export const generatePickingListHTML = (order) => {
     }
 
     .name { font-weight: 800; }
+    .product-code { font-weight: 600; color: #555; font-family: monospace; }
     .sub  { margin-top: 2px; font-size: 9px; color: #666; }
 
     /* ---------- Footer (signature + print info) ---------- */
@@ -310,6 +309,7 @@ export const generatePickingListHTML = (order) => {
       <thead>
         <tr>
           <th class="col-check">Pick</th>
+          <th class="col-code">Code</th>
           <th class="col-name">Item</th>
           <th class="col-cat">Category</th>
           <th class="col-qty">Qty</th>

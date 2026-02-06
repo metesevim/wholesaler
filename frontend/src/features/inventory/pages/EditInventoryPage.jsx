@@ -29,6 +29,7 @@ const EditInventoryPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    productCode: '',
     quantity: '',
     price: '',
     minimumCapacity: 20,
@@ -78,6 +79,7 @@ const EditInventoryPage = () => {
         setFormData({
           name: result.data.name || '',
           description: result.data.description || '',
+          productCode: result.data.productCode || '',
           quantity: result.data.quantity || '',
           price: result.data.pricePerUnit || '',
           minimumCapacity: result.data.minimumCapacity || 20,
@@ -184,6 +186,7 @@ const EditInventoryPage = () => {
       const itemData = {
         name: formData.name,
         description: formData.description,
+        productCode: formData.productCode || null,
         quantity: Number(formData.quantity),
         pricePerUnit: parseFloat(formData.price),
         minimumCapacity: Number(formData.minimumCapacity),
@@ -300,7 +303,7 @@ const EditInventoryPage = () => {
 
         <div className="bg-[#192633] rounded-lg p-8 border border-[#324d67]">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Item Name and Provider - 2 Columns */}
+            {/* Item Name and Product Code - 2 Columns */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-white font-semibold mb-2">
@@ -319,30 +322,45 @@ const EditInventoryPage = () => {
 
               <div>
                 <label className="block text-white font-semibold mb-2">
-                  Provider <span className="text-red-500">*</span>
+                  Product Code
                 </label>
-                <select
-                  name="providerId"
-                  value={formData.providerId}
+                <Input
+                  type="text"
+                  name="productCode"
+                  value={formData.productCode}
                   onChange={handleInputChange}
-                  disabled={submitting || loadingProviders}
-                  className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
-                    focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
-                    errors.providerId ? 'border-red-500' : ''
-                  }`}
-                >
-                  <option value="">Select provider</option>
-                  {providers.map(provider => (
-                    <option key={provider.id} value={provider.id}>
-                      {provider.name}
-                    </option>
-                  ))}
-                </select>
-                {loadingProviders && (
-                  <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
-                )}
-                {errors.providerId && <p className="mt-2 text-xs text-red-400">{errors.providerId}</p>}
+                  placeholder="Enter product code"
+                  disabled={submitting}
+                />
               </div>
+            </div>
+
+            {/* Provider - Full Width */}
+            <div>
+              <label className="block text-white font-semibold mb-2">
+                Provider <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="providerId"
+                value={formData.providerId}
+                onChange={handleInputChange}
+                disabled={submitting || loadingProviders}
+                className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+                  focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+                  errors.providerId ? 'border-red-500' : ''
+                }`}
+              >
+                <option value="">Select provider</option>
+                {providers.map(provider => (
+                  <option key={provider.id} value={provider.id}>
+                    {provider.name}
+                  </option>
+                ))}
+              </select>
+              {loadingProviders && (
+                <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+              )}
+              {errors.providerId && <p className="mt-2 text-xs text-red-400">{errors.providerId}</p>}
             </div>
 
             {/* Description - Full Width */}

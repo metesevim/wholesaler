@@ -19,6 +19,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    productCode: '',
     quantity: '',
     unit: 'piece',
     price: '',
@@ -144,6 +145,7 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
       const itemData = {
         name: formData.name,
         description: formData.description,
+        productCode: formData.productCode || null,
         quantity: Number(formData.quantity),
         unit: formData.unit,
         pricePerUnit: parseFloat(formData.price),
@@ -192,30 +194,44 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
 
         <div>
           <label className="block text-white font-semibold mb-2">
-            Provider <span className="text-red-500">*</span>
+            Product Code
           </label>
-          <select
-            name="providerId"
-            value={formData.providerId}
+          <Input
+            type="text"
+            name="productCode"
+            value={formData.productCode}
             onChange={handleInputChange}
-            disabled={loadingProviders}
-            className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
-              focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
-              errors.providerId ? 'border-red-500' : ''
-            }`}
-          >
-            <option value="">Select provider</option>
-            {providers.map(provider => (
-              <option key={provider.id} value={provider.id}>
-                {provider.name}
-              </option>
-            ))}
-          </select>
-          {loadingProviders && (
-            <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
-          )}
-          {errors.providerId && <p className="mt-2 text-xs text-red-400">{errors.providerId}</p>}
+            placeholder="Enter product code"
+          />
         </div>
+      </div>
+
+      {/* Provider - Full Width */}
+      <div>
+        <label className="block text-white font-semibold mb-2">
+          Provider <span className="text-red-500">*</span>
+        </label>
+        <select
+          name="providerId"
+          value={formData.providerId}
+          onChange={handleInputChange}
+          disabled={loadingProviders}
+          className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
+            focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
+            errors.providerId ? 'border-red-500' : ''
+          }`}
+        >
+          <option value="">Select provider</option>
+          {providers.map(provider => (
+            <option key={provider.id} value={provider.id}>
+              {provider.name}
+            </option>
+          ))}
+        </select>
+        {loadingProviders && (
+          <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+        )}
+        {errors.providerId && <p className="mt-2 text-xs text-red-400">{errors.providerId}</p>}
       </div>
 
       {/* Description - Full Width */}

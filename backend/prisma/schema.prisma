@@ -105,6 +105,7 @@ model AdminInventoryItem {
   // Item details
   name String
   description String?
+  productCode String?  // Optional product code/SKU
 
   // Category relationship
   categoryId Int?

@@ -166,7 +166,7 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
       {/* Settings and Logout Buttons - Bottom */}
       <div className="flex flex-col gap-4 mt-auto pt-4 border-t border-[#324d67] flex-shrink-0">
         <button
-          onClick={() => navigate(ROUTES.SETTINGS)}
+          onClick={() => navigate(ROUTES.ADMIN_SETTINGS)}
           className="w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 text-[#92adc9] hover:bg-[#192633] hover:text-white border border-[#324d67] hover:border-[#137fec]"
           title="Settings"
         >

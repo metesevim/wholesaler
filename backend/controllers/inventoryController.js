@@ -7,9 +7,9 @@ import prisma from "../prisma/client.js";
  */
 export const createAdminInventoryItem = async (req, res) => {
     try {
-        const { name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId } = req.body;
+        const { name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId, productCode } = req.body;
 
-        console.log('Create item request received:', { name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId });
+        console.log('Create item request received:', { name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId, productCode });
 
         if (!name) {
             return res.status(400).json({ error: "Item name is required." });
@@ -41,6 +41,7 @@ export const createAdminInventoryItem = async (req, res) => {
                 adminInventoryId: adminInventory.id,
                 name,
                 description,
+                productCode,
                 quantity: quantity || 0,
                 unit: unit || "piece",
                 imageUrl,
@@ -134,15 +135,16 @@ export const getAdminInventoryItemById = async (req, res) => {
 export const updateAdminInventoryItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId } = req.body;
+        const { name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId, productCode } = req.body;
 
-        console.log('Update item request received:', { id, name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId });
+        console.log('Update item request received:', { id, name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId, productCode });
 
         const item = await prisma.adminInventoryItem.update({
             where: { id: parseInt(id) },
             data: {
                 ...(name !== undefined && { name }),
                 ...(description !== undefined && { description }),
+                ...(productCode !== undefined && { productCode }),
                 ...(quantity !== undefined && { quantity }),
                 ...(unit !== undefined && { unit }),
                 ...(imageUrl !== undefined && { imageUrl }),
