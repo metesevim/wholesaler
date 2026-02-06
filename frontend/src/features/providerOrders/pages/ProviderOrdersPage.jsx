@@ -4,10 +4,11 @@
  * Manages provider orders (restock orders) with automatic low stock detection
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../../components/layout/Sidebar';
 import TopBar from '../../../components/layout/TopBar';
 import Button from '../../../components/forms/Button';
+import useAuth from '../../auth/hooks/useAuth';
 import { providerOrderRepository } from '../../../data';
 import { printProviderOrder } from '../../../shared/services/providerOrderService';
 import { ROUTES } from '../../../shared/constants/appConstants';
@@ -15,6 +16,7 @@ import { formatDateToEuropean } from '../../../shared/utils/dateFormatter';
 import logger from '../../../shared/utils/logger';
 
 const ProviderOrdersPage = () => {
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [checkingStock, setCheckingStock] = useState(false);
@@ -22,12 +24,9 @@ const ProviderOrdersPage = () => {
   const [success, setSuccess] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
   const [sendingEmail, setSendingEmail] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadOrders();
-  }, [filterStatus]);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -46,7 +45,11 @@ const ProviderOrdersPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   const handleCheckStock = async () => {
     setCheckingStock(true);
@@ -147,6 +150,18 @@ const ProviderOrdersPage = () => {
     return colors[status] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
   };
 
+  // Filter orders based on search term
+  const filteredOrders = orders.filter(order => {
+    const searchLower = searchTerm.toLowerCase();
+    const providerName = order.provider?.name?.toLowerCase() || '';
+    const orderId = String(order.id);
+    const itemNames = order.items?.map(item => item.itemName?.toLowerCase()).join(' ') || '';
+
+    return providerName.includes(searchLower) ||
+           orderId.includes(searchLower) ||
+           itemNames.includes(searchLower);
+  });
+
   const getStatusIcon = (status) => {
     const icons = {
       PENDING: 'schedule',
@@ -163,7 +178,7 @@ const ProviderOrdersPage = () => {
     <div className="min-h-screen bg-[#101922] flex">
       <Sidebar activeRoute={ROUTES.PROVIDER_ORDERS} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar />
+        <TopBar user={user} />
         <div className="flex-1 p-8 overflow-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
@@ -197,13 +212,35 @@ const ProviderOrdersPage = () => {
             </div>
           )}
 
-          {/* Filter */}
+          {/* Search Bar and Filter */}
           <div className="mb-6 flex gap-4 items-center">
-            <label className="text-[#92adc9] text-sm">Filter by Status:</label>
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                placeholder="Search by provider name or order ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white px-4 pl-12
+                  placeholder-[#92adc9] focus:outline-none focus:border-[#137fec]"
+              />
+              <svg
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#92adc9]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-[#324d67] bg-[#192633] text-white focus:outline-none focus:border-[#137fec]"
+              className="h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3 pr-10 focus:outline-none focus:border-[#137fec]"
             >
               <option value="">All Orders</option>
               <option value="PENDING">Pending</option>
@@ -231,9 +268,16 @@ const ProviderOrdersPage = () => {
                 Click "Check Low Stock" to automatically create orders for items below 50% capacity
               </p>
             </div>
+          ) : filteredOrders.length === 0 ? (
+            <div className="text-center py-12 bg-[#192633] rounded-lg border border-[#324d67]">
+              <span className="material-symbols-outlined text-[#92adc9] mb-3" style={{ fontSize: '48px' }}>
+                search_off
+              </span>
+              <p className="text-[#92adc9]">No orders match your search</p>
+            </div>
           ) : (
             <div className="space-y-4">
-              {orders.map((order) => (
+              {filteredOrders.map((order) => (
                 <div
                   key={order.id}
                   className="bg-[#192633] rounded-lg border border-[#324d67] p-6 hover:border-[#137fec]/50 transition-all"
@@ -282,8 +326,14 @@ const ProviderOrdersPage = () => {
 
                   {/* Order Footer */}
                   <div className="flex justify-between items-center pt-4 border-t border-[#324d67]">
-                    <div className="text-white font-bold text-lg">
-                      Total: ₺{(order.totalAmount || 0).toFixed(2)}
+                    {/* Email Sent Info */}
+                    <div>
+                      {order.emailSent && (
+                        <div className="text-xs text-green-400 flex items-center gap-1">
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span>
+                          Email sent on {formatDateToEuropean(order.emailSentAt)}
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       {/* Print Button */}
@@ -328,7 +378,7 @@ const ProviderOrdersPage = () => {
                         <select
                           value={order.status}
                           onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                          className="px-3 py-2 rounded-lg border border-[#324d67] bg-[#192633] text-white focus:outline-none"
+                          className="h-10 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3 pr-8 focus:outline-none focus:border-[#137fec]"
                         >
                           <option value="PENDING">Pending</option>
                           <option value="SENT">Sent</option>
@@ -351,14 +401,6 @@ const ProviderOrdersPage = () => {
                       )}
                     </div>
                   </div>
-
-                  {/* Email Sent Info */}
-                  {order.emailSent && (
-                    <div className="mt-3 text-xs text-green-400 flex items-center gap-1">
-                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span>
-                      Email sent on {formatDateToEuropean(order.emailSentAt)}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>

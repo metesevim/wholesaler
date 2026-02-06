@@ -33,22 +33,31 @@ const EditEmployeePage = () => {
 
   // Available permissions
   const availablePermissions = [
-    { key: 'VIEW_ORDERS', label: 'View Orders', icon: 'visibility' },
-    { key: 'CREATE_ORDERS', label: 'Create Orders', icon: 'add_circle' },
-    { key: 'EDIT_ORDERS', label: 'Edit Orders', icon: 'edit' },
-    { key: 'DELETE_ORDERS', label: 'Delete Orders', icon: 'delete' },
-    { key: 'VIEW_INVENTORY', label: 'View Inventory', icon: 'visibility' },
-    { key: 'CREATE_INVENTORY', label: 'Create Inventory', icon: 'add_circle' },
-    { key: 'EDIT_INVENTORY', label: 'Edit Inventory', icon: 'edit' },
-    { key: 'DELETE_INVENTORY', label: 'Delete Inventory', icon: 'delete' },
-    { key: 'VIEW_CUSTOMERS', label: 'View Customers', icon: 'visibility' },
-    { key: 'CREATE_CUSTOMERS', label: 'Create Customers', icon: 'add_circle' },
-    { key: 'EDIT_CUSTOMERS', label: 'Edit Customers', icon: 'edit' },
-    { key: 'DELETE_CUSTOMERS', label: 'Delete Customers', icon: 'delete' },
-    { key: 'VIEW_PROVIDERS', label: 'View Providers', icon: 'visibility' },
-    { key: 'CREATE_PROVIDERS', label: 'Create Providers', icon: 'add_circle' },
-    { key: 'EDIT_PROVIDERS', label: 'Edit Providers', icon: 'edit' },
-    { key: 'DELETE_PROVIDERS', label: 'Delete Providers', icon: 'delete' }
+    { key: 'VIEW_CUSTOMER_ORDERS', label: 'View Customer Orders', icon: 'visibility', category: 'CUSTOMER_ORDERS' },
+    { key: 'CREATE_CUSTOMER_ORDERS', label: 'Create Customer Orders', icon: 'add_circle', category: 'CUSTOMER_ORDERS' },
+    { key: 'EDIT_CUSTOMER_ORDERS', label: 'Edit Customer Orders', icon: 'edit', category: 'CUSTOMER_ORDERS' },
+    { key: 'DELETE_CUSTOMER_ORDERS', label: 'Delete Customer Orders', icon: 'delete', category: 'CUSTOMER_ORDERS' },
+    { key: 'VIEW_PROVIDER_ORDERS', label: 'View Provider Orders', icon: 'visibility', category: 'PROVIDER_ORDERS' },
+    { key: 'CREATE_PROVIDER_ORDERS', label: 'Create Provider Orders', icon: 'add_circle', category: 'PROVIDER_ORDERS' },
+    { key: 'EDIT_PROVIDER_ORDERS', label: 'Edit Provider Orders', icon: 'edit', category: 'PROVIDER_ORDERS' },
+    { key: 'DELETE_PROVIDER_ORDERS', label: 'Delete Provider Orders', icon: 'delete', category: 'PROVIDER_ORDERS' },
+    { key: 'SEND_PROVIDER_ORDERS', label: 'Send Provider Orders', icon: 'send', category: 'PROVIDER_ORDERS' },
+    { key: 'VIEW_INVENTORY', label: 'View Inventory', icon: 'visibility', category: 'INVENTORY' },
+    { key: 'CREATE_INVENTORY', label: 'Create Inventory', icon: 'add_circle', category: 'INVENTORY' },
+    { key: 'EDIT_INVENTORY', label: 'Edit Inventory', icon: 'edit', category: 'INVENTORY' },
+    { key: 'DELETE_INVENTORY', label: 'Delete Inventory', icon: 'delete', category: 'INVENTORY' },
+    { key: 'VIEW_CATEGORIES', label: 'View Categories', icon: 'visibility', category: 'CATEGORIES' },
+    { key: 'CREATE_CATEGORIES', label: 'Create Categories', icon: 'add_circle', category: 'CATEGORIES' },
+    { key: 'EDIT_CATEGORIES', label: 'Edit Categories', icon: 'edit', category: 'CATEGORIES' },
+    { key: 'DELETE_CATEGORIES', label: 'Delete Categories', icon: 'delete', category: 'CATEGORIES' },
+    { key: 'VIEW_CUSTOMERS', label: 'View Customers', icon: 'visibility', category: 'CUSTOMERS' },
+    { key: 'CREATE_CUSTOMERS', label: 'Create Customers', icon: 'add_circle', category: 'CUSTOMERS' },
+    { key: 'EDIT_CUSTOMERS', label: 'Edit Customers', icon: 'edit', category: 'CUSTOMERS' },
+    { key: 'DELETE_CUSTOMERS', label: 'Delete Customers', icon: 'delete', category: 'CUSTOMERS' },
+    { key: 'VIEW_PROVIDERS', label: 'View Providers', icon: 'visibility', category: 'PROVIDERS' },
+    { key: 'CREATE_PROVIDERS', label: 'Create Providers', icon: 'add_circle', category: 'PROVIDERS' },
+    { key: 'EDIT_PROVIDERS', label: 'Edit Providers', icon: 'edit', category: 'PROVIDERS' },
+    { key: 'DELETE_PROVIDERS', label: 'Delete Providers', icon: 'delete', category: 'PROVIDERS' }
   ];
 
   useEffect(() => {
@@ -386,25 +395,25 @@ const EditEmployeePage = () => {
                   </h3>
 
                   <div className="space-y-6">
-                    {/* Orders Permissions */}
+                    {/* Customer Orders Permissions */}
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
                           <span className="material-symbols-outlined text-lg">assignment</span>
-                          Orders
+                          Customer Orders
                         </h4>
                         <Switch
                           label="ALL"
                           labelSize="text-xs"
                           labelColor="text-[#92adc9]"
                           checked={availablePermissions
-                            .filter(p => p.key.includes('ORDERS'))
+                            .filter(p => p.category === 'CUSTOMER_ORDERS')
                             .every(p => permissions[p.key])}
                           onChange={() => {
-                            const ordersPerms = availablePermissions.filter(p => p.key.includes('ORDERS'));
-                            const allEnabled = ordersPerms.every(p => permissions[p.key]);
+                            const perms = availablePermissions.filter(p => p.category === 'CUSTOMER_ORDERS');
+                            const allEnabled = perms.every(p => permissions[p.key]);
                             const newPermissions = { ...permissions };
-                            ordersPerms.forEach(p => {
+                            perms.forEach(p => {
                               newPermissions[p.key] = !allEnabled;
                             });
                             setPermissions(newPermissions);
@@ -414,7 +423,48 @@ const EditEmployeePage = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
-                          .filter(p => p.key.includes('ORDERS'))
+                          .filter(p => p.category === 'CUSTOMER_ORDERS')
+                          .map(permission => (
+                            <Switch
+                              key={permission.key}
+                              label={permission.label}
+                              checked={permissions[permission.key] || false}
+                              onChange={() => handlePermissionChange(permission.key)}
+                              disabled={loading}
+                            />
+                          ))}
+                      </div>
+                    </div>
+
+                    {/* Provider Orders Permissions */}
+                    <div className="pt-6 border-t border-[#324d67]">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg">shopping_cart</span>
+                          Provider Orders
+                        </h4>
+                        <Switch
+                          label="ALL"
+                          labelSize="text-xs"
+                          labelColor="text-[#92adc9]"
+                          checked={availablePermissions
+                            .filter(p => p.category === 'PROVIDER_ORDERS')
+                            .every(p => permissions[p.key])}
+                          onChange={() => {
+                            const perms = availablePermissions.filter(p => p.category === 'PROVIDER_ORDERS');
+                            const allEnabled = perms.every(p => permissions[p.key]);
+                            const newPermissions = { ...permissions };
+                            perms.forEach(p => {
+                              newPermissions[p.key] = !allEnabled;
+                            });
+                            setPermissions(newPermissions);
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {availablePermissions
+                          .filter(p => p.category === 'PROVIDER_ORDERS')
                           .map(permission => (
                             <Switch
                               key={permission.key}
@@ -439,13 +489,13 @@ const EditEmployeePage = () => {
                           labelSize="text-xs"
                           labelColor="text-[#92adc9]"
                           checked={availablePermissions
-                            .filter(p => p.key.includes('INVENTORY'))
+                            .filter(p => p.category === 'INVENTORY')
                             .every(p => permissions[p.key])}
                           onChange={() => {
-                            const inventoryPerms = availablePermissions.filter(p => p.key.includes('INVENTORY'));
-                            const allEnabled = inventoryPerms.every(p => permissions[p.key]);
+                            const perms = availablePermissions.filter(p => p.category === 'INVENTORY');
+                            const allEnabled = perms.every(p => permissions[p.key]);
                             const newPermissions = { ...permissions };
-                            inventoryPerms.forEach(p => {
+                            perms.forEach(p => {
                               newPermissions[p.key] = !allEnabled;
                             });
                             setPermissions(newPermissions);
@@ -455,7 +505,48 @@ const EditEmployeePage = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
-                          .filter(p => p.key.includes('INVENTORY'))
+                          .filter(p => p.category === 'INVENTORY')
+                          .map(permission => (
+                            <Switch
+                              key={permission.key}
+                              label={permission.label}
+                              checked={permissions[permission.key] || false}
+                              onChange={() => handlePermissionChange(permission.key)}
+                              disabled={loading}
+                            />
+                          ))}
+                      </div>
+                    </div>
+
+                    {/* Categories Permissions */}
+                    <div className="pt-6 border-t border-[#324d67]">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg">category</span>
+                          Categories
+                        </h4>
+                        <Switch
+                          label="ALL"
+                          labelSize="text-xs"
+                          labelColor="text-[#92adc9]"
+                          checked={availablePermissions
+                            .filter(p => p.category === 'CATEGORIES')
+                            .every(p => permissions[p.key])}
+                          onChange={() => {
+                            const perms = availablePermissions.filter(p => p.category === 'CATEGORIES');
+                            const allEnabled = perms.every(p => permissions[p.key]);
+                            const newPermissions = { ...permissions };
+                            perms.forEach(p => {
+                              newPermissions[p.key] = !allEnabled;
+                            });
+                            setPermissions(newPermissions);
+                          }}
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {availablePermissions
+                          .filter(p => p.category === 'CATEGORIES')
                           .map(permission => (
                             <Switch
                               key={permission.key}
@@ -472,7 +563,7 @@ const EditEmployeePage = () => {
                     <div className="pt-6 border-t border-[#324d67]">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-base font-bold text-[#92adc9] flex items-center gap-2">
-                          <span className="material-symbols-outlined text-lg">people</span>
+                          <span className="material-symbols-outlined text-lg">restaurant</span>
                           Customers
                         </h4>
                         <Switch
@@ -480,13 +571,13 @@ const EditEmployeePage = () => {
                           labelSize="text-xs"
                           labelColor="text-[#92adc9]"
                           checked={availablePermissions
-                            .filter(p => p.key.includes('CUSTOMERS'))
+                            .filter(p => p.category === 'CUSTOMERS')
                             .every(p => permissions[p.key])}
                           onChange={() => {
-                            const customersPerms = availablePermissions.filter(p => p.key.includes('CUSTOMERS'));
-                            const allEnabled = customersPerms.every(p => permissions[p.key]);
+                            const perms = availablePermissions.filter(p => p.category === 'CUSTOMERS');
+                            const allEnabled = perms.every(p => permissions[p.key]);
                             const newPermissions = { ...permissions };
-                            customersPerms.forEach(p => {
+                            perms.forEach(p => {
                               newPermissions[p.key] = !allEnabled;
                             });
                             setPermissions(newPermissions);
@@ -496,7 +587,7 @@ const EditEmployeePage = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
-                          .filter(p => p.key.includes('CUSTOMERS'))
+                          .filter(p => p.category === 'CUSTOMERS')
                           .map(permission => (
                             <Switch
                               key={permission.key}
@@ -521,13 +612,13 @@ const EditEmployeePage = () => {
                           labelSize="text-xs"
                           labelColor="text-[#92adc9]"
                           checked={availablePermissions
-                            .filter(p => p.key.includes('PROVIDERS'))
+                            .filter(p => p.category === 'PROVIDERS')
                             .every(p => permissions[p.key])}
                           onChange={() => {
-                            const providersPerms = availablePermissions.filter(p => p.key.includes('PROVIDERS'));
-                            const allEnabled = providersPerms.every(p => permissions[p.key]);
+                            const perms = availablePermissions.filter(p => p.category === 'PROVIDERS');
+                            const allEnabled = perms.every(p => permissions[p.key]);
                             const newPermissions = { ...permissions };
-                            providersPerms.forEach(p => {
+                            perms.forEach(p => {
                               newPermissions[p.key] = !allEnabled;
                             });
                             setPermissions(newPermissions);
@@ -537,7 +628,7 @@ const EditEmployeePage = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         {availablePermissions
-                          .filter(p => p.key.includes('PROVIDERS'))
+                          .filter(p => p.category === 'PROVIDERS')
                           .map(permission => (
                             <Switch
                               key={permission.key}
