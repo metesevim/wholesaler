@@ -16,6 +16,7 @@ export const ROUTES = {
   ADD_INVENTORY: '/inventory/add',
   EDIT_INVENTORY: '/inventory/:id/edit',
   CATEGORIES: '/categories',
+  UNITS: '/units',
   CUSTOMERS: '/customers',
   ADD_CUSTOMER: '/customers/add',
   PROVIDERS: '/providers',
@@ -38,4 +39,3 @@ export const HTTP_STATUS = {
   NOT_FOUND: 404,
   SERVER_ERROR: 500
 };
-

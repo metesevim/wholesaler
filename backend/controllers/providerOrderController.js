@@ -1,5 +1,6 @@
 import prisma from "../prisma/client.js";
 import nodemailer from "nodemailer";
+import { logAudit } from "../utils/auditLogger.js";
 
 // ============= GET ALL PROVIDER ORDERS =============
 export const getAllProviderOrders = async (req, res) => {
@@ -381,6 +382,17 @@ export const updateProviderOrderStatus = async (req, res) => {
             message: "Provider order status updated successfully.",
             order,
         });
+
+        // Audit trail
+        await logAudit({
+            action: 'STATUS_CHANGE',
+            entityType: 'PROVIDER_ORDER',
+            entityId: order.id,
+            entityName: `Provider Order #${order.id} for ${order.provider?.name || 'Unknown'}`,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { newStatus: status, inventoryUpdated: status === 'RECEIVED' },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -486,6 +498,17 @@ export const deleteProviderOrder = async (req, res) => {
 
         res.json({
             message: "Provider order deleted successfully.",
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'DELETE',
+            entityType: 'PROVIDER_ORDER',
+            entityId: parseInt(id),
+            entityName: `Provider Order #${id}`,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { previousStatus: order.status },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

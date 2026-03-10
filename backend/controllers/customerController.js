@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import { logAudit } from "../utils/auditLogger.js";
 
 // ============= CREATE CUSTOMER =============
 /**
@@ -70,6 +71,17 @@ export const createCustomer = async (req, res) => {
         res.status(201).json({
             message: "Customer created successfully.",
             customer,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'CREATE',
+            entityType: 'CUSTOMER',
+            entityId: customer.id,
+            entityName: customer.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { email, phone, city, country },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -147,6 +159,9 @@ export const updateCustomer = async (req, res) => {
         const { id } = req.params;
         const { name, email, phone, address, city, country, iban } = req.body;
 
+        // Fetch before state for audit
+        const beforeCustomer = await prisma.customer.findUnique({ where: { id: parseInt(id) } });
+
         const customer = await prisma.customer.update({
             where: { id: parseInt(id) },
             data: {
@@ -174,6 +189,24 @@ export const updateCustomer = async (req, res) => {
         res.json({
             message: "Customer updated successfully.",
             customer,
+        });
+
+        // Audit trail
+        const changes = {};
+        if (beforeCustomer) {
+            if (name && name !== beforeCustomer.name) changes.name = { from: beforeCustomer.name, to: name };
+            if (email && email !== beforeCustomer.email) changes.email = { from: beforeCustomer.email, to: email };
+            if (phone && phone !== beforeCustomer.phone) changes.phone = { from: beforeCustomer.phone, to: phone };
+            if (address && address !== beforeCustomer.address) changes.address = { from: beforeCustomer.address, to: address };
+        }
+        await logAudit({
+            action: 'UPDATE',
+            entityType: 'CUSTOMER',
+            entityId: customer.id,
+            entityName: customer.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { changes },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -382,6 +415,17 @@ export const deleteCustomer = async (req, res) => {
         res.json({
             message: "Customer deleted successfully.",
             customer: deletedCustomer,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'DELETE',
+            entityType: 'CUSTOMER',
+            entityId: parseInt(id),
+            entityName: customer.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { email: customer.email },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

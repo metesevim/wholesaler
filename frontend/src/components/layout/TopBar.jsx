@@ -6,8 +6,12 @@
  */
 
 import React from 'react';
+import { ROUTES } from '../../shared/constants/appConstants';
+import { useNavigate } from 'react-router-dom';
 
 const TopBar = ({ user }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-[#0d1117] border-b border-[#324d67] px-8 py-4 flex items-center justify-between sticky top-0 z-50">
       {/* Left Section - User Info */}
@@ -26,6 +30,15 @@ const TopBar = ({ user }) => {
 
       {/* Right Section - Action Buttons */}
       <div className="flex items-center gap-3">
+          <button
+              onClick={() => navigate(ROUTES.LOGS)}
+              className="px-4 py-2.5 rounded-lg text-sm font-semibold text-[#137fec] bg-[#137fec]/10 border border-[#137fec]/30 hover:bg-[#137fec]/20 hover:border-[#137fec]/50 transition-all"
+          >
+              <span className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base">description</span>
+              LOGS
+              </span>
+          </button>
         {/* Copy IBAN Button */}
         {user?.iban && (
           <button

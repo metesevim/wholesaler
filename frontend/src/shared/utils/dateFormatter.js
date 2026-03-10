@@ -63,6 +63,30 @@ export const formatDateTimeToEuropean = (dateInput) => {
   }
 };
 
+/**
+ * Format date to European HH:MM:SS format (only time)
+ * @param {string|Date} dateInput - Date string or Date object
+ * @returns {string} Formatted date string
+ */
+export const formatTimeToEuropean = (dateInput) => {
+  if (!dateInput) return 'N/A';
+
+  try {
+    const date = new Date(dateInput);
+
+    if (isNaN(date.getTime())) return 'N/A';
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    console.error('Error formatting date time:', error);
+    return 'Invalid Date';
+  }
+};
+
 export default {
   formatDateToEuropean,
   formatDateTimeToEuropean

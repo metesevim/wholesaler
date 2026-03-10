@@ -305,3 +305,35 @@ model OrderItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ============= AUDIT TRAIL =============
+model AuditLog {
+  id        Int       @id @default(autoincrement())
+  action    AuditAction
+  entityType AuditEntityType
+  entityId  Int
+  entityName String              // Human-readable name (e.g. "Cheese", "Order #15", "John Doe")
+  userId    Int?
+  username  String
+  details   Json?               // Stores before/after snapshots or summary info
+  createdAt DateTime @default(now())
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  STATUS_CHANGE
+}
+
+enum AuditEntityType {
+  ORDER
+  ITEM
+  CUSTOMER
+  PROVIDER
+  EMPLOYEE
+  CATEGORY
+  PROVIDER_ORDER
+  UNIT
+}
+

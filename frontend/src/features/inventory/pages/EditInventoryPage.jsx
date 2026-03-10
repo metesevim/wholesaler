@@ -24,13 +24,16 @@ const EditInventoryPage = () => {
   const [item, setItem] = useState(null);
   const [providers, setProviders] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
   const [loadingProviders, setLoadingProviders] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingUnits, setLoadingUnits] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     productCode: '',
     quantity: '',
+    unit: '',
     price: '',
     minimumCapacity: 20,
     maximumCapacity: 100,
@@ -48,9 +51,10 @@ const EditInventoryPage = () => {
 
   const loadData = async () => {
     try {
-      const [providersResult, categoriesResult] = await Promise.all([
+      const [providersResult, categoriesResult, unitsResponse] = await Promise.all([
         providerRepository.getAllProviders(),
         categoryRepository.getAllCategories(),
+        fetch('/units'),
       ]);
 
       if (providersResult.success) {
@@ -60,11 +64,17 @@ const EditInventoryPage = () => {
       if (categoriesResult.success) {
         setCategories(categoriesResult.data || []);
       }
+
+      if (unitsResponse.ok) {
+        const unitsData = await unitsResponse.json();
+        setUnits(unitsData.units || []);
+      }
     } catch (error) {
       logger.error('Failed to load data:', error);
     } finally {
       setLoadingProviders(false);
       setLoadingCategories(false);
+      setLoadingUnits(false);
     }
   };
 
@@ -81,6 +91,7 @@ const EditInventoryPage = () => {
           description: result.data.description || '',
           productCode: result.data.productCode || '',
           quantity: result.data.quantity || '',
+          unit: result.data.unit || '',
           price: result.data.pricePerUnit || '',
           minimumCapacity: result.data.minimumCapacity || 20,
           maximumCapacity: result.data.maximumCapacity || 100,
@@ -409,15 +420,22 @@ const EditInventoryPage = () => {
                     name="unit"
                     value={formData.unit}
                     onChange={handleInputChange}
+                    disabled={submitting || loadingUnits}
                     className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
-              focus:outline-none focus:border-[#137fec] ${
+              focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
                         errors.unit ? 'border-red-500' : ''
                     }`}
                 >
-                  <option value="piece">Piece</option>
-                  <option value="kg">KG</option>
-                  <option value="liter">Liter</option>
+                  <option value="">Select unit</option>
+                  {units.map(unit => (
+                    <option key={unit.id} value={unit.name}>
+                      {unit.name}
+                    </option>
+                  ))}
                 </select>
+                {loadingUnits && (
+                  <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+                )}
                 {errors.unit && <p className="mt-2 text-xs text-red-400">{errors.unit}</p>}
               </div>
 

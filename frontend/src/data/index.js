@@ -11,6 +11,7 @@ export { default as categoryRepository } from './repositories/categoryRepository
 export { default as inventoryRepository } from './repositories/inventoryRepository';
 export { default as orderRepository } from './repositories/orderRepository';
 export { default as adminRepository } from './repositories/adminRepository';
+export { default as auditLogRepository } from './repositories/auditLogRepository';
 export { API_ENDPOINTS, API_CONFIG } from './client/apiConfig';
 
 

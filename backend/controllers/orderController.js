@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import { logAudit } from "../utils/auditLogger.js";
 
 //Create an order from customer inventory items
 //Automatically reduces quantities from admin inventory
@@ -122,6 +123,23 @@ export const createOrder = async (req, res) => {
             message: "Order created successfully. Inventory updated.",
             order,
         });
+
+        // Audit trail
+        await logAudit({
+            action: 'CREATE',
+            entityType: 'ORDER',
+            entityId: order.id,
+            entityName: `Order #${order.id} for ${customer.name}`,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: {
+                customerId: customer.id,
+                customerName: customer.name,
+                totalAmount,
+                itemCount: validatedItems.length,
+                items: validatedItems.map(i => ({ name: i.adminItem.name, qty: i.quantity, unit: i.unit })),
+            },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -214,6 +232,18 @@ export const updateOrderStatus = async (req, res) => {
             });
         }
 
+        // Fetch current order for audit trail
+        const currentOrder = await prisma.order.findUnique({
+            where: { id: parseInt(id) },
+            include: { customer: true },
+        });
+
+        if (!currentOrder) {
+            return res.status(404).json({ error: "Order not found." });
+        }
+
+        const previousStatus = currentOrder.status;
+
         const order = await prisma.order.update({
             where: { id: parseInt(id) },
             data: { status },
@@ -226,6 +256,17 @@ export const updateOrderStatus = async (req, res) => {
         res.json({
             message: "Order status updated successfully.",
             order,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'STATUS_CHANGE',
+            entityType: 'ORDER',
+            entityId: order.id,
+            entityName: `Order #${order.id} for ${order.customer?.name || 'Unknown'}`,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { previousStatus, newStatus: status },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -286,6 +327,17 @@ export const cancelOrder = async (req, res) => {
         res.json({
             message: "Order cancelled successfully. Inventory restored.",
             order: updatedOrder,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'STATUS_CHANGE',
+            entityType: 'ORDER',
+            entityId: updatedOrder.id,
+            entityName: `Order #${updatedOrder.id} for ${updatedOrder.customer?.name || 'Unknown'}`,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { previousStatus: order.status, newStatus: 'CANCELLED', inventoryRestored: true },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -603,6 +655,17 @@ export const deleteOrder = async (req, res) => {
                     ? " Inventory restored."
                     : ""),
             order: deletedOrder,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'DELETE',
+            entityType: 'ORDER',
+            entityId: parseInt(id),
+            entityName: `Order #${id} for ${customer.name}`,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { status: order.status, inventoryRestored: order.status === 'PENDING', itemCount: order.items.length },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

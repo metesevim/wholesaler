@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import { logAudit } from "../utils/auditLogger.js";
 
 // ============= CREATE ADMIN INVENTORY ITEM =============
 /**
@@ -62,6 +63,17 @@ export const createAdminInventoryItem = async (req, res) => {
         res.status(201).json({
             message: "Inventory item created successfully.",
             item,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'CREATE',
+            entityType: 'ITEM',
+            entityId: item.id,
+            entityName: item.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { quantity, unit: unit, pricePerUnit, category: item.category?.name, provider: item.provider?.name },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -139,6 +151,12 @@ export const updateAdminInventoryItem = async (req, res) => {
 
         console.log('Update item request received:', { id, name, description, quantity, unit, imageUrl, pricePerUnit, minimumCapacity, maximumCapacity, providerId, productionDate, expiryDate, categoryId, productCode });
 
+        // Fetch current state for audit trail
+        const beforeItem = await prisma.adminInventoryItem.findUnique({
+            where: { id: parseInt(id) },
+            include: { provider: true, category: true },
+        });
+
         const item = await prisma.adminInventoryItem.update({
             where: { id: parseInt(id) },
             data: {
@@ -165,6 +183,35 @@ export const updateAdminInventoryItem = async (req, res) => {
         res.json({
             message: "Inventory item updated successfully.",
             item,
+        });
+
+        // Audit trail
+        const changes = {};
+        if (beforeItem) {
+            if (name !== undefined && name !== beforeItem.name) changes.name = { from: beforeItem.name, to: name };
+            if (quantity !== undefined && quantity !== beforeItem.quantity) changes.quantity = { from: beforeItem.quantity, to: quantity };
+            if (pricePerUnit !== undefined && pricePerUnit !== beforeItem.pricePerUnit) changes.pricePerUnit = { from: beforeItem.pricePerUnit, to: pricePerUnit };
+            if (description !== undefined && description !== beforeItem.description) changes.description = { from: beforeItem.description, to: description };
+            if (unit !== undefined && unit !== beforeItem.unit) changes.unit = { from: beforeItem.unit, to: unit };
+            if (imageUrl !== undefined && imageUrl !== beforeItem.imageUrl) changes.imageUrl = { from: beforeItem.imageUrl, to: imageUrl };
+            if (minimumCapacity !== undefined && minimumCapacity !== beforeItem.minimumCapacity) changes.minimumCapacity = { from: beforeItem.minimumCapacity, to: minimumCapacity };
+            if (maximumCapacity !== undefined && maximumCapacity !== beforeItem.maximumCapacity) changes.maximumCapacity = { from: beforeItem.maximumCapacity, to: maximumCapacity };
+            if (providerId !== undefined && providerId !== beforeItem.providerId) changes.providerId = { from: beforeItem.providerId, to: providerId };
+            if (productionDate !== undefined && productionDate !== beforeItem.productionDate) changes.productionDate = { from: beforeItem.productionDate, to: productionDate };
+            if (expiryDate !== undefined && expiryDate !== beforeItem.expiryDate) changes.expiryDate = { from: beforeItem.expiryDate, to: expiryDate };
+            if (categoryId !== undefined && categoryId !== beforeItem.categoryId) changes.categoryId = { from: beforeItem.categoryId, to: categoryId };
+            if (productCode !== undefined && productCode !== beforeItem.productCode) changes.productCode = { from: beforeItem.productCode, to: productCode };
+
+
+        }
+        await logAudit({
+            action: 'UPDATE',
+            entityType: 'ITEM',
+            entityId: item.id,
+            entityName: item.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { changes },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -194,6 +241,17 @@ export const deleteAdminInventoryItem = async (req, res) => {
         res.json({
             message: "Inventory item deleted successfully.",
             item,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'DELETE',
+            entityType: 'ITEM',
+            entityId: parseInt(id),
+            entityName: item.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { quantity: item.quantity, unit: item.unit },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

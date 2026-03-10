@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import { logAudit } from "../utils/auditLogger.js";
 
 // ============= GET ALL CATEGORIES =============
 export const getAllCategories = async (req, res) => {
@@ -47,6 +48,17 @@ export const createCategory = async (req, res) => {
             message: "Category created successfully.",
             category,
         });
+
+        // Audit trail
+        await logAudit({
+            action: 'CREATE',
+            entityType: 'CATEGORY',
+            entityId: category.id,
+            entityName: category.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { description: category.description, priority: category.priority },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -84,6 +96,17 @@ export const updateCategory = async (req, res) => {
             message: "Category updated successfully.",
             category,
         });
+
+        // Audit trail
+        await logAudit({
+            action: 'UPDATE',
+            entityType: 'CATEGORY',
+            entityId: category.id,
+            entityName: category.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { name, description, priority },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -112,6 +135,17 @@ export const deleteCategory = async (req, res) => {
         res.json({
             message: "Category deleted successfully.",
             category,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'DELETE',
+            entityType: 'CATEGORY',
+            entityId: parseInt(id),
+            entityName: category.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: {},
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

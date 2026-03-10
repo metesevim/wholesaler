@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 // use shared prisma client
 import prisma from "../prisma/client.js";
 import { PERMISSIONS } from "../constants/permissions.js";
+import { logAudit } from "../utils/auditLogger.js";
 
 //Register
 export const register = async (req, res) => {
@@ -92,6 +93,17 @@ export const createEmployee = async (req, res) => {
         // Exclude password from response
         const { password: _, ...userWithoutPassword } = user;
         res.status(201).json({ message: "Employee created.", user: userWithoutPassword });
+
+        // Audit trail
+        await logAudit({
+            action: 'CREATE',
+            entityType: 'EMPLOYEE',
+            entityId: user.id,
+            entityName: user.username,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { role: 'Employee', permissions: finalPermissions },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -156,6 +168,17 @@ export const setPermissions = async (req, res) => {
         });
 
         res.json({ message: "Permissions updated.", user: updated });
+
+        // Audit trail
+        await logAudit({
+            action: 'UPDATE',
+            entityType: 'EMPLOYEE',
+            entityId: typeof targetUserId === 'string' ? parseInt(targetUserId) : targetUserId,
+            entityName: updated.username,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { action: 'permissions_changed', newPermissions: permissions },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -230,6 +253,17 @@ export const updateUser = async (req, res) => {
                 iban: updatedUser.iban,
                 createdAt: updatedUser.createdAt,
             },
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'UPDATE',
+            entityType: 'EMPLOYEE',
+            entityId: updatedUser.id,
+            entityName: updatedUser.username,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { fieldsUpdated: Object.keys(updateData).filter(k => k !== 'password') },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

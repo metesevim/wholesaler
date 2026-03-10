@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import { logAudit } from "../utils/auditLogger.js";
 
 // ============= GET ALL PROVIDERS =============
 export const getAllProviders = async (req, res) => {
@@ -90,6 +91,17 @@ export const createProvider = async (req, res) => {
             message: "Provider created successfully.",
             provider,
         });
+
+        // Audit trail
+        await logAudit({
+            action: 'CREATE',
+            entityType: 'PROVIDER',
+            entityId: provider.id,
+            entityName: provider.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { email, phone, city, country },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -100,6 +112,8 @@ export const updateProvider = async (req, res) => {
     try {
         const { id } = req.params;
         const { name, email, phone, address, city, country, iban } = req.body;
+
+        const beforeProvider = await prisma.provider.findUnique({ where: { id: parseInt(id) } });
 
         const provider = await prisma.provider.update({
             where: { id: parseInt(id) },
@@ -118,6 +132,22 @@ export const updateProvider = async (req, res) => {
             message: "Provider updated successfully.",
             provider,
         });
+
+        // Audit trail
+        const changes = {};
+        if (beforeProvider) {
+            if (name && name !== beforeProvider.name) changes.name = { from: beforeProvider.name, to: name };
+            if (email && email !== beforeProvider.email) changes.email = { from: beforeProvider.email, to: email };
+        }
+        await logAudit({
+            action: 'UPDATE',
+            entityType: 'PROVIDER',
+            entityId: provider.id,
+            entityName: provider.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { changes },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -135,6 +165,17 @@ export const deleteProvider = async (req, res) => {
         res.json({
             message: "Provider deleted successfully.",
             provider,
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'DELETE',
+            entityType: 'PROVIDER',
+            entityId: parseInt(id),
+            entityName: provider.name,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { email: provider.email },
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

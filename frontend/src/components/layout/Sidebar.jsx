@@ -15,7 +15,7 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
   // Initialize from localStorage or default to expanded
   const [expandedSections, setExpandedSections] = useState(() => {
     const saved = localStorage.getItem('sidebarExpandedSections');
-    return saved ? JSON.parse(saved) : { orders: true, operations: true, admin: true };
+    return saved ? JSON.parse(saved) : { orders: false, operations: false, admin: false };
   });
 
   // Save to localStorage whenever expandedSections changes
@@ -68,6 +68,17 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
           icon: 'category'
         },
         {
+          route: ROUTES.UNITS,
+          label: 'Units',
+          icon: 'straighten'
+        }
+        ]
+    },
+    {
+      id: 'admin',
+      label: 'PEOPLE',
+      items: [
+        {
           route: ROUTES.CUSTOMERS,
           label: 'Customers',
           icon: 'restaurant'
@@ -76,13 +87,7 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
           route: ROUTES.PROVIDERS,
           label: 'Providers',
           icon: 'domain'
-        }
-      ]
-    },
-    {
-      id: 'admin',
-      label: 'ADMINISTRATIVE',
-      items: [
+        },
         {
           route: ROUTES.EMPLOYEES,
           label: 'Employees',
@@ -90,8 +95,8 @@ const Sidebar = ({ activeRoute = ROUTES.HOMEPAGE }) => {
         },
         {
           route: ROUTES.LOGS,
-          label: 'Logs',
-          icon: 'description'
+          label: 'Audit Trail',
+          icon: 'history'
         }
       ]
     }

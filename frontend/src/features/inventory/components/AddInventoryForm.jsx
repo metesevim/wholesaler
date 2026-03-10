@@ -14,8 +14,10 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
   const [loading, setLoading] = useState(false);
   const [providers, setProviders] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
   const [loadingProviders, setLoadingProviders] = useState(true);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingUnits, setLoadingUnits] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -32,13 +34,14 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
   });
   const [errors, setErrors] = useState({});
 
-  // Load providers and categories on mount
+  // Load providers, categories, and units on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [providersResult, categoriesResult] = await Promise.all([
+        const [providersResult, categoriesResult, unitsResponse] = await Promise.all([
           providerRepository.getAllProviders(),
           categoryRepository.getAllCategories(),
+          fetch('/units'),
         ]);
 
         if (providersResult.success) {
@@ -48,11 +51,17 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
         if (categoriesResult.success) {
           setCategories(categoriesResult.data || []);
         }
+
+        if (unitsResponse.ok) {
+          const unitsData = await unitsResponse.json();
+          setUnits(unitsData.units || []);
+        }
       } catch (error) {
         logger.error('Failed to load data:', error);
       } finally {
         setLoadingProviders(false);
         setLoadingCategories(false);
+        setLoadingUnits(false);
       }
     };
     loadData();
@@ -279,15 +288,22 @@ const AddInventoryForm = ({ onSuccess, onError }) => {
             name="unit"
             value={formData.unit}
             onChange={handleInputChange}
+            disabled={loadingUnits}
             className={`w-full h-12 rounded-lg border border-[#324d67] bg-[#192633] text-white pl-3
-              focus:outline-none focus:border-[#137fec] ${
+              focus:outline-none focus:border-[#137fec] disabled:opacity-50 ${
               errors.unit ? 'border-red-500' : ''
             }`}
           >
-            <option value="piece">Piece</option>
-            <option value="kg">KG</option>
-            <option value="liter">Liter</option>
+            <option value="">Select unit</option>
+            {units.map(unit => (
+              <option key={unit.id} value={unit.name}>
+                {unit.name}
+              </option>
+            ))}
           </select>
+          {loadingUnits && (
+            <p className="text-xs text-[#92adc9] mt-2">Loading...</p>
+          )}
           {errors.unit && <p className="mt-2 text-xs text-red-400">{errors.unit}</p>}
         </div>
 

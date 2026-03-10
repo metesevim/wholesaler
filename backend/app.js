@@ -12,6 +12,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import unitRoutes from "./routes/unitRoutes.js";
+import auditLogRoutes from "./routes/auditLogRoutes.js";
 import prisma from "./prisma/client.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/provider-orders", providerOrderRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/admin", adminRoutes);
 app.use("/units", unitRoutes);
+app.use("/audit-logs", auditLogRoutes);
 
 // TEST route
 // Health check endpoint
