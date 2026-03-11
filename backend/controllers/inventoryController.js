@@ -73,7 +73,18 @@ export const createAdminInventoryItem = async (req, res) => {
             entityName: item.name,
             userId: req.user?.id,
             username: req.user?.username || 'system',
-            details: { quantity, unit: unit, pricePerUnit, category: item.category?.name, provider: item.provider?.name },
+            details: {
+                productCode: productCode,
+                unit: unit,
+                category: item.category?.name,
+                provider: item.provider?.name,
+                quantity: quantity,
+                pricePerUnit: pricePerUnit,
+                minimumCapacity: minimumCapacity,
+                maximumCapacity: maximumCapacity,
+                productionDate: productionDate,
+                expiryDate: expiryDate
+            }
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

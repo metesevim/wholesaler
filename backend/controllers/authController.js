@@ -51,7 +51,7 @@ export const register = async (req, res) => {
 //Admin creates an Employee account
 export const createEmployee = async (req, res) => {
     try {
-        const { username, password, permissions, iban } = req.body;
+        const { username, password, permissions, iban, email, fullName, phone, nationalId, address } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ error: "username and password are required." });
@@ -61,6 +61,14 @@ export const createEmployee = async (req, res) => {
         const existing = await prisma.user.findUnique({ where: { username } });
         if (existing) {
             return res.status(400).json({ error: "User already exists." });
+        }
+
+        // Check email uniqueness if provided
+        if (email) {
+            const existingEmail = await prisma.user.findUnique({ where: { email } });
+            if (existingEmail) {
+                return res.status(400).json({ error: "Email already in use." });
+            }
         }
 
         // Validate optional permissions array if provided
@@ -86,7 +94,12 @@ export const createEmployee = async (req, res) => {
                 password: hashedPass,
                 role: "Employee",
                 permissions: finalPermissions,
-                iban,
+                iban: iban || null,
+                email: email || null,
+                name: fullName || null,
+                phone: phone || null,
+                nationalId: nationalId || null,
+                address: address || null,
             },
         });
 
@@ -192,15 +205,10 @@ export const setPermissions = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const { userId } = req.params;
-        const { username, password, iban } = req.body;
+        const { username, password, iban, email, fullName, phone, nationalId, address } = req.body;
 
         if (!userId) {
             return res.status(400).json({ error: "User ID is required." });
-        }
-
-        // At least one field must be provided
-        if (!username && !password && !iban) {
-            return res.status(400).json({ error: "At least one field (username, password, or iban) must be provided." });
         }
 
         // Find user
@@ -222,21 +230,27 @@ export const updateUser = async (req, res) => {
             }
         }
 
+        // If email is being updated, check for uniqueness
+        if (email && email !== user.email) {
+            const existingEmail = await prisma.user.findUnique({
+                where: { email },
+            });
+            if (existingEmail) {
+                return res.status(400).json({ error: "Email already in use." });
+            }
+        }
+
         // Prepare update data
         const updateData = {};
 
-        if (username) {
-            updateData.username = username;
-        }
-
-        if (password) {
-            // Hash the new password
-            updateData.password = await bcrypt.hash(password, 10);
-        }
-
-        if (iban) {
-            updateData.iban = iban;
-        }
+        if (username !== undefined) updateData.username = username;
+        if (password) updateData.password = await bcrypt.hash(password, 10);
+        if (iban !== undefined) updateData.iban = iban || null;
+        if (email !== undefined) updateData.email = email || null;
+        if (fullName !== undefined) updateData.name = fullName || null;
+        if (phone !== undefined) updateData.phone = phone || null;
+        if (nationalId !== undefined) updateData.nationalId = nationalId || null;
+        if (address !== undefined) updateData.address = address || null;
 
         // Update user information
         const updatedUser = await prisma.user.update({
@@ -249,8 +263,14 @@ export const updateUser = async (req, res) => {
             user: {
                 id: updatedUser.id,
                 username: updatedUser.username,
+                email: updatedUser.email,
+                name: updatedUser.name,
+                phone: updatedUser.phone,
+                nationalId: updatedUser.nationalId,
+                address: updatedUser.address,
                 role: updatedUser.role,
                 iban: updatedUser.iban,
+                permissions: updatedUser.permissions,
                 createdAt: updatedUser.createdAt,
             },
         });
@@ -337,3 +357,119 @@ export const updateProfile = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+// ============= GET ALL EMPLOYEES =============
+/**
+ * List all users with role Employee (Admin-only)
+ */
+export const getAllEmployees = async (req, res) => {
+    try {
+        const employees = await prisma.user.findMany({
+            where: { role: "Employee" },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                name: true,
+                phone: true,
+                nationalId: true,
+                address: true,
+                role: true,
+                permissions: true,
+                iban: true,
+                createdAt: true,
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
+        res.json({
+            message: "Employees retrieved successfully.",
+            employees,
+            total: employees.length,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// ============= GET EMPLOYEE BY ID =============
+/**
+ * Get a single employee by ID (Admin-only)
+ */
+export const getEmployeeById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const employee = await prisma.user.findUnique({
+            where: { id: parseInt(id) },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                name: true,
+                phone: true,
+                nationalId: true,
+                address: true,
+                role: true,
+                permissions: true,
+                iban: true,
+                createdAt: true,
+            },
+        });
+
+        if (!employee) {
+            return res.status(404).json({ error: "Employee not found." });
+        }
+
+        res.json({
+            message: "Employee retrieved successfully.",
+            employee,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// ============= DELETE EMPLOYEE =============
+/**
+ * Delete an employee account (Admin-only, cannot delete Admin accounts)
+ */
+export const deleteEmployee = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await prisma.user.findUnique({
+            where: { id: parseInt(id) },
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "Employee not found." });
+        }
+
+        if (user.role === "Admin") {
+            return res.status(400).json({ error: "Cannot delete an Admin account." });
+        }
+
+        await prisma.user.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.json({
+            message: "Employee deleted successfully.",
+        });
+
+        // Audit trail
+        await logAudit({
+            action: 'DELETE',
+            entityType: 'EMPLOYEE',
+            entityId: parseInt(id),
+            entityName: user.username,
+            userId: req.user?.id,
+            username: req.user?.username || 'system',
+            details: { email: user.email, name: user.name },
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
